@@ -131,7 +131,7 @@ export default function CheckoutPage() {
     }).catch(() => {});
 
     // Load saved addresses
-    _get('/api/addresses').then((res) => {
+    _get('/api/addresses').then((res: any) => {
       const addrs = res?.addresses || (Array.isArray(res) ? res : []);
       const mapped: SavedAddress[] = addrs.map((a: any, idx: number) => ({
         id: idx + 1,
