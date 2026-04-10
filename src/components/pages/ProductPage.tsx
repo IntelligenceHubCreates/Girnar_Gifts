@@ -38,7 +38,7 @@ export default function ProductPage({ productId }: Props) {
   /* ─── Load real product from backend ────────────────────────────── */
   useEffect(() => {
     if (!productId) return;
-    _get(`/api/product/${productId}`).then((res) => {
+    _get(`/api/product/${productId}`).then((res: any) => {
       const p = res?.product_details || res;
       if (p && p.name) {
         const images = (p.product_image || []).map((img: any) => img.url || img);
