@@ -57,7 +57,7 @@ export default function AccountPage() {
   /* ─── Load real data from backend ─────────────────────────────────── */
  useEffect(() => {
     // Load profile
-    _get('/api/user/profile').then((res) => {
+    _get('/api/user/profile').then((res: any) => {
       if (res) {
         const nameParts = (res.name || '').split(' ');
         const p = {
