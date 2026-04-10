@@ -1,0 +1,113 @@
+.promoGrid {
+  padding: 8px 40px 48px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.promoCard {
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.25s;
+}
+
+.promoCard:hover {
+  transform: scale(1.02);
+}
+
+.promoCard h3 {
+  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.promoCard p {
+  font-size: 13px;
+  margin-bottom: 14px;
+  opacity: 0.85;
+  position: relative;
+  z-index: 1;
+}
+
+.promoBtn {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid currentColor;
+  padding: 7px 18px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 800;
+  width: fit-content;
+  transition: background 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.promoBtn:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.promoEmoji {
+  position: absolute;
+  right: 20px;
+  bottom: 10px;
+  font-size: 80px;
+  opacity: 0.2;
+  transform: rotate(-15deg);
+}
+
+.p1 { background: linear-gradient(135deg, #ff6b5b, #ff8e53); color: #fff; }
+.p2 { background: linear-gradient(135deg, #3ecfb2, #36b89d); color: #fff; }
+.p3 { background: linear-gradient(135deg, #5bbef5, #3a8fd4); color: #fff; }
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .promoGrid {
+    padding: 8px 24px 40px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .promoGrid {
+    padding: 8px 16px 32px;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .promoCard {
+    min-height: 140px;
+    padding: 24px 24px;
+  }
+
+  .promoEmoji {
+    font-size: 60px;
+    right: 16px;
+    bottom: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .promoGrid {
+    padding: 8px 12px 24px;
+  }
+
+  .promoCard {
+    min-height: 130px;
+    padding: 20px 20px;
+  }
+
+  .promoCard h3 {
+    font-size: 18px;
+  }
+}

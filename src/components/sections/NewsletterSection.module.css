@@ -1,0 +1,128 @@
+.newsletter {
+  background: linear-gradient(135deg, var(--coral), #ff8e53);
+  padding: 56px 40px;
+  text-align: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.newsletter::before {
+  content: '🎈🌟✏️🎨🧸📚';
+  font-size: 40px;
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  opacity: 0.12;
+  letter-spacing: 30px;
+  pointer-events: none;
+}
+
+.newsletter h2 {
+  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-size: 38px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.newsletter p {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 28px;
+}
+
+.newsletterForm {
+  display: flex;
+  max-width: 500px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 50px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.newsletterForm input {
+  flex: 1;
+  border: none;
+  padding: 14px 22px;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 14px;
+  outline: none;
+  color: var(--text);
+  min-width: 0;
+}
+
+.newsletterForm button {
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  padding: 14px 26px;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.newsletterForm button:hover {
+  background: #111;
+}
+
+.successMsg {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50px;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  .newsletter {
+    padding: 44px 20px;
+  }
+
+  .newsletter h2 {
+    font-size: 28px;
+  }
+
+  .newsletter p {
+    font-size: 14px;
+  }
+
+  .newsletterForm {
+    flex-direction: column;
+    border-radius: 18px;
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+    gap: 10px;
+  }
+
+  .newsletterForm input {
+    border-radius: 50px;
+    background: #fff;
+    padding: 14px 22px;
+  }
+
+  .newsletterForm button {
+    border-radius: 50px;
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .newsletter {
+    padding: 36px 16px;
+  }
+
+  .newsletter h2 {
+    font-size: 24px;
+  }
+}

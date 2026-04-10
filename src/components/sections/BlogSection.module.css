@@ -1,0 +1,148 @@
+.blogSection {
+  padding: 56px 40px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.sectionTitle {
+  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.viewAll {
+  color: var(--coral);
+  font-weight: 800;
+  font-size: 14px;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.viewAll:hover {
+  opacity: 0.75;
+}
+
+.blogGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.blogCard {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
+  background: #fff;
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.blogCard:hover {
+  transform: translateY(-5px);
+}
+
+.blogThumb {
+  height: 190px;
+  background: var(--soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 70px;
+  position: relative;
+}
+
+.blogDate {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: var(--coral);
+  color: #fff;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.blogBody {
+  padding: 20px 22px 24px;
+}
+
+.blogTag {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--mint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.blogTtl {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 6px 0 10px;
+  line-height: 1.4;
+}
+
+.blogExcerpt {
+  font-size: 13px;
+  color: #777;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.blogRead {
+  color: var(--coral);
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: gap 0.2s;
+}
+
+.blogRead:hover {
+  gap: 8px;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .blogSection {
+    padding: 48px 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .blogSection {
+    padding: 36px 16px;
+  }
+
+  .sectionTitle {
+    font-size: 26px;
+  }
+
+  .blogGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .blogThumb {
+    height: 160px;
+    font-size: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .blogSection {
+    padding: 28px 12px;
+  }
+
+  .blogThumb {
+    height: 140px;
+  }
+}

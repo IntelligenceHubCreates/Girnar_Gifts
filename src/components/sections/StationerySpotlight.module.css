@@ -1,0 +1,226 @@
+.spotlightSection {
+  padding: 0 40px 56px;
+}
+
+.spotlightInner {
+  background: linear-gradient(135deg, var(--navy) 0%, #2d3a6b 100%);
+  border-radius: 32px;
+  padding: 56px 60px;
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlightInner::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 211, 54, 0.15), transparent 70%);
+  right: -80px;
+  top: -80px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.spotlightText {
+  flex: 1;
+  color: #fff;
+  z-index: 1;
+  min-width: 0;
+}
+
+.tag {
+  display: inline-block;
+  background: var(--sun);
+  color: var(--navy);
+  border-radius: 50px;
+  padding: 5px 16px;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.spotlightText h2 {
+  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+
+.spotlightText h2 span {
+  color: var(--sun);
+}
+
+.spotlightText p {
+  opacity: 0.8;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 28px;
+  max-width: 380px;
+}
+
+.spotlightItems {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.spotlightItem {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.spotlightGrid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  z-index: 1;
+}
+
+.spotlightProd {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 20px;
+  text-align: center;
+  color: #fff;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.spotlightProd:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.emoji {
+  font-size: 44px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.sname {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.sprice {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--sun);
+  margin-top: 4px;
+}
+
+.btnPrimary {
+  background: var(--coral);
+  color: #fff;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 20px rgba(255, 107, 91, 0.35);
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(255, 107, 91, 0.45);
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .spotlightSection {
+    padding: 0 24px 48px;
+  }
+
+  .spotlightInner {
+    padding: 40px 40px;
+    gap: 40px;
+  }
+
+  .spotlightText h2 {
+    font-size: 34px;
+  }
+}
+
+@media (max-width: 768px) {
+  .spotlightSection {
+    padding: 0 16px 40px;
+  }
+
+  .spotlightInner {
+    flex-direction: column;
+    padding: 36px 28px;
+    gap: 32px;
+    border-radius: 24px;
+  }
+
+  .spotlightText h2 {
+    font-size: 30px;
+  }
+
+  .spotlightText p {
+    max-width: 100%;
+    font-size: 15px;
+  }
+
+  .spotlightGrid {
+    width: 100%;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .spotlightSection {
+    padding: 0 12px 32px;
+  }
+
+  .spotlightInner {
+    padding: 28px 20px;
+    border-radius: 20px;
+  }
+
+  .spotlightText h2 {
+    font-size: 26px;
+  }
+
+  .spotlightGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .spotlightProd {
+    padding: 14px 12px;
+  }
+
+  .emoji {
+    font-size: 34px;
+  }
+
+  .spotlightItems {
+    gap: 10px;
+  }
+
+  .spotlightItem {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}

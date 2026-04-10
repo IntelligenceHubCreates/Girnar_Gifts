@@ -1,0 +1,22 @@
+.threeCol {
+  padding: 0 40px 56px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .threeCol {
+    padding: 0 24px 48px;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .threeCol {
+    padding: 0 16px 32px;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

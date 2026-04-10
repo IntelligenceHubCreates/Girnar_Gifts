@@ -1,0 +1,103 @@
+.miniSection {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+
+.miniSectionTitle {
+  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.seeAll {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--coral);
+  transition: opacity 0.2s;
+}
+
+.seeAll:hover {
+  opacity: 0.75;
+}
+
+.miniProduct {
+  display: flex;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--soft);
+  align-items: center;
+}
+
+.miniProduct:last-child {
+  border-bottom: none;
+}
+
+.miniThumb {
+  width: 62px;
+  height: 62px;
+  background: var(--soft);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.miniInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.miniName {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.miniStars {
+  color: var(--sun);
+  font-size: 11px;
+}
+
+.miniPrice {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--coral);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.miniOriginal {
+  color: #bbb;
+  font-size: 12px;
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 480px) {
+  .miniSection {
+    padding: 18px;
+  }
+
+  .miniThumb {
+    width: 52px;
+    height: 52px;
+    font-size: 26px;
+  }
+}

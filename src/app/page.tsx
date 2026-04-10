@@ -1,0 +1,39 @@
+import TopBar from '@/components/layout/TopBar';
+import Header from '@/components/layout/Header';
+import NavBar from '@/components/layout/NavBar';
+import Footer from '@/components/layout/Footer';
+import HeroSection from '@/components/sections/HeroSection';
+import TrustBar from '@/components/sections/TrustBar';
+import CategoriesSection from '@/components/sections/CategoriesSection';
+import FeaturedProducts from '@/components/sections/FeaturedProducts';
+import PromoGrid from '@/components/sections/PromoGrid';
+import StationerySpotlight from '@/components/sections/StationerySpotlight';
+import ThreeColumnSection from '@/components/sections/ThreeColumnSection';
+import TestimonialsSection from '@/components/sections/TestimonialsSection';
+import BlogSection from '@/components/sections/BlogSection';
+import BrandsSection from '@/components/sections/BrandsSection';
+import NewsletterSection from '@/components/sections/NewsletterSection';
+
+export default function HomePage() {
+  return (
+    <>
+      <TopBar />
+      <Header />
+      <NavBar />
+      <main>
+        <HeroSection />
+        <TrustBar />
+        <CategoriesSection />
+        <FeaturedProducts />
+        <PromoGrid />
+        <StationerySpotlight />
+        <ThreeColumnSection />
+        <TestimonialsSection />
+        <BlogSection />
+        <BrandsSection />
+        <NewsletterSection />
+      </main>
+      <Footer />
+    </>
+  );
+}
