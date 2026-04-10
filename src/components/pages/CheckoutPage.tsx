@@ -222,7 +222,7 @@ export default function CheckoutPage() {
       shipping_address: selectedAddrObj
         ? `${selectedAddrObj.fullName}, ${selectedAddrObj.line}, ${selectedAddrObj.city}, ${selectedAddrObj.state} - ${selectedAddrObj.pincode}`
         : `${address.fullName}, ${address.addressLine1}, ${address.city}, ${address.state} - ${address.pincode}`,
-    }).then((res) => {
+    }).then((res: any) => {
       const id = res?.order?.id || res?.id || orderId;
       setOrderId(String(id));
     }).catch(() => {
