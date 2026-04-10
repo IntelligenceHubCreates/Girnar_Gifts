@@ -77,7 +77,7 @@ export default function CartPage() {
   /* ─── Load cart from backend ─────────────────────────────────────────── */
   useEffect(() => {
     _get('/api/cart')
-      .then((res) => {
+      .then((res: any) => {
         const cartItems: CartItem[] = (res?.cart_items || []).map((ci: any, idx: number) => ({
           id: ci.product?.id ?? idx,
           backendId: ci.id,
