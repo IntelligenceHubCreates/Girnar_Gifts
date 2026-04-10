@@ -33,7 +33,7 @@ export default function LoginPage() {
     setApiError('');
     setLoading(true);
     try {
-      const response = await _post('/api/user/login', {
+      const response: any = await _post('/api/user/login', {
         email: form.email,
         password: form.password,
       });
