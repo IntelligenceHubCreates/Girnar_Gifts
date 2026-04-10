@@ -115,7 +115,7 @@ export default function CheckoutPage() {
   /* Load real cart + saved addresses from backend */
   useEffect(() => {
     // Load cart
-    _get('/api/cart').then((res) => {
+    _get('/api/cart').then((res: any) => {
       const items = (res?.cart_items || []).map((ci: any, idx: number) => ({
         id: ci.product?.id ?? idx,
         backendItemId: ci.id,
