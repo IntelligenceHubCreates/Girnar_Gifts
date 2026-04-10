@@ -181,7 +181,7 @@ export default function CheckoutPage() {
         postal_code: address.pincode,
         country: 'India',
         is_default: false,
-      }).then((res) => {
+      }).then((res: any) => {
         setBackendAddressId(res?.address?.id || res?.id || null);
       }).catch(() => {});
     }
