@@ -73,7 +73,7 @@ export default function AccountPage() {
       }
     }).catch(() => {});
     // Load orders
-    _get('/api/orders').then((res) => {
+    _get('/api/orders').then((res: any) => {
       const raw = Array.isArray(res) ? res : (res?.orders || []);
       if (raw.length > 0) {
         const mapped = raw.map((o: any) => ({
