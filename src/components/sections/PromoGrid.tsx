@@ -1,22 +1,69 @@
+'use client';
+
 import Link from 'next/link';
 import styles from './PromoGrid.module.css';
 
 const PROMOS = [
-  { cls: styles.p1, title: 'Barbie World 🩷', sub: 'Save up to 45% on all dolls & accessories', emoji: '🪆' },
-  { cls: styles.p2, title: 'Teddy Bears 🧸', sub: 'Soft plushies starting from ₹299', emoji: '🐻' },
-  { cls: styles.p3, title: 'Back to School 🎒', sub: 'Premium stationery for every student', emoji: '✏️' },
+  {
+    title:   'Toys & Games',
+    desc:    'Fun, learning & activity toys for every age',
+    href:    '/toys',
+    bg:      '#FDECEA',
+    titleClr:'#E8453C',
+    sparkle: '#F4A72B',
+    img:     '/images/banners/gamepad.png',
+    imgAlt:  'Game controller',
+  },
+  {
+    title:   'Back to School',
+    desc:    'Premium stationery, bags & bottles for every student',
+    href:    '/stationery',
+    bg:      '#E8F6F0',
+    titleClr:'#1A7A52',
+    sparkle: '#3ECFB2',
+    img:     '/images/banners/backpack.png',
+    imgAlt:  'School backpack',
+  },
+  {
+    title:   'Gift Sets',
+    desc:    'Curated gift sets starting from ₹299',
+    href:    '/gifts',
+    bg:      '#EDE8F8',
+    titleClr:'#5A3DB8',
+    sparkle: '#8B6FE8',
+    img:     '/images/banners/giftbox.png',
+    imgAlt:  'Gift box',
+  },
 ];
 
 export default function PromoGrid() {
   return (
     <div className={styles.promoGrid}>
       {PROMOS.map((promo) => (
-        <div key={promo.title} className={`${styles.promoCard} ${promo.cls}`}>
-          <h3>{promo.title}</h3>
-          <p>{promo.sub}</p>
-          <Link href="#" className={styles.promoBtn}>Shop Now →</Link>
-          <div className={styles.promoEmoji}>{promo.emoji}</div>
-        </div>
+        <Link key={promo.href} href={promo.href} className={styles.promoCard}
+          style={{ background: promo.bg }}>
+
+          {/* sparkle dots */}
+          <span className={styles.sparkleA} style={{ color: promo.sparkle }}>✦</span>
+          <span className={styles.sparkleB} style={{ color: promo.sparkle }}>✦</span>
+          <span className={styles.sparkleC} style={{ color: promo.sparkle }}>✦</span>
+
+          {/* left text */}
+          <div className={styles.promoContent}>
+            <h3 className={styles.promoTitle} style={{ color: promo.titleClr }}>
+              {promo.title}
+            </h3>
+            <p className={styles.promoDesc}>{promo.desc}</p>
+            <span className={styles.promoBtn}>
+              Shop Now <span className={styles.promoArrow}>→</span>
+            </span>
+          </div>
+
+          {/* right image */}
+          <div className={styles.promoImgWrap}>
+            <img src={promo.img} alt={promo.imgAlt} className={styles.promoImg} />
+          </div>
+        </Link>
       ))}
     </div>
   );

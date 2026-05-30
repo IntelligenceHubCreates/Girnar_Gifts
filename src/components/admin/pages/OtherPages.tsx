@@ -1,79 +1,117 @@
 'use client'
 
+import { useState } from 'react'
 import FilterTabs from '../ui/FilterTabs'
+import { useAdminFetch } from '@/hooks/useAdminFetch'
+import {
+  fetchAdminCustomers, deleteCustomer,
+  fetchCategories, createCategory, updateCategory, deleteCategory,
+  fetchCoupons, createCoupon, updateCoupon, deleteCoupon,
+  fetchAdminReviews, approveReview, deleteReview,
+  type ApiCustomer, type ApiCategory, type ApiCoupon, type ApiReview,
+} from '@/lib/adminApi'
 
-/* ─── CUSTOMERS ─────────────────────────────────────────────────── */
-const CUSTOMERS = [
-  { name:'Priya Sharma',  phone:'+91 98765 43210', email:'priya.sharma@gmail.com',   city:'Hyderabad',  orders:12, spent:'₹14,240', joined:'Jan 2025', tag:'tag-vip',     emoji:'👩',  bg:'var(--coral-light)' },
-  { name:'Rahul Mehta',   phone:'+91 91234 56789', email:'rahulmehta@outlook.com',   city:'Vijayawada', orders:5,  spent:'₹3,897',  joined:'Mar 2025', tag:'tag-regular', emoji:'👨',  bg:'var(--sky-light)' },
-  { name:'Ananya Reddy',  phone:'+91 90000 11223', email:'ananya.r@gmail.com',        city:'Guntur',     orders:8,  spent:'₹7,500',  joined:'Nov 2024', tag:'tag-vip',     emoji:'👩‍💼', bg:'var(--lilac-light)' },
-  { name:'Arjun Nair',    phone:'+91 88765 44321', email:'arjun.nair@yahoo.in',       city:'Chennai',    orders:1,  spent:'₹3,845',  joined:'12 Mar 2026', tag:'tag-new', emoji:'🧑',  bg:'var(--sun-light)' },
-  { name:'Sneha Iyer',    phone:'+91 87654 32109', email:'sneha.iyer@gmail.com',      city:'Bengaluru',  orders:3,  spent:'₹2,100',  joined:'Feb 2026', tag:'tag-regular', emoji:'👩',  bg:'var(--peach-light)' },
-]
+const AVATAR_BG = ['var(--coral-light)', 'var(--sky-light)', 'var(--lilac-light)', 'var(--sun-light)', 'var(--peach-light)', 'var(--mint-light)']
+const EMOJI     = ['👩', '👨', '👩‍💼', '🧑', '👩', '🧔']
+
+// ─── CUSTOMERS ───────────────────────────────────────────────────
 
 export function CustomersPage() {
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
+  const [segment, setSegment] = useState('')
+  const LIMIT = 15
+
+  const { data, loading, error, refetch } = useAdminFetch(
+    () => fetchAdminCustomers({ skip: page * LIMIT, limit: LIMIT, search: search || undefined, segment: segment || undefined }),
+    [page, search, segment]
+  )
+
+  const customers = data?.data ?? []
+  const totalCount = data?.totalCount ?? 0
+  const totalPages = Math.ceil(totalCount / LIMIT)
+
+  function segmentTag(c: ApiCustomer) {
+    if (c.total_orders >= 10) return { cls: 'tag-vip', label: '⭐ VIP' }
+    if (c.total_orders === 0) return { cls: 'tag-new', label: 'New' }
+    return { cls: 'tag-regular', label: 'Regular' }
+  }
+
   return (
     <div>
       <div className="page-header">
         <div className="ph-left">
           <div className="ph-title">Customers</div>
-          <div className="ph-sub">3,412 registered customers</div>
+          <div className="ph-sub">{loading ? 'Loading…' : `${totalCount.toLocaleString()} registered customers`}</div>
         </div>
         <div className="ph-actions">
           <button className="btn btn-outline">📥 Export</button>
-          <button className="btn btn-primary">➕ Add Customer</button>
+          <button className="btn btn-ghost btn-sm" onClick={refetch}>↻</button>
         </div>
       </div>
       <div className="card">
         <div className="card-head">
-          <FilterTabs tabs={['All','⭐ VIP','Regular','New']} />
-          <div className="tb-search" style={{ width:190 }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color:'var(--muted)', flexShrink:0 }}>
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          <FilterTabs tabs={['All', '⭐ VIP', 'Regular', 'New']} active={segment || 'All'}
+            onChange={(t) => { setSegment(t === 'All' ? '' : t); setPage(0) }} />
+          <div className="tb-search" style={{ width: 200 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--muted)', flexShrink: 0 }}>
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
             </svg>
-            <input type="text" placeholder="Search customers…"/>
+            <input type="text" placeholder="Search customers…" value={search} onChange={(e) => { setSearch(e.target.value); setPage(0) }} />
           </div>
         </div>
+
+        {error && <div style={{ padding: 16, color: 'var(--coral)' }}>⚠️ {error}</div>}
+
         <div className="table-wrap">
           <table>
             <thead><tr><th>Customer</th><th>Email</th><th>City</th><th>Orders</th><th>Total Spent</th><th>Joined</th><th>Segment</th><th>Actions</th></tr></thead>
             <tbody>
-              {CUSTOMERS.map(c => (
-                <tr key={c.name}>
-                  <td>
-                    <div style={{ display:'flex', alignItems:'center', gap:9 }}>
-                      <div className="rc-av" style={{ background: c.bg }}>{c.emoji}</div>
-                      <div>
-                        <div style={{ fontWeight:800 }}>{c.name}</div>
-                        <div className="td-muted">{c.phone}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="td-muted">{c.email}</td>
-                  <td>{c.city}</td>
-                  <td style={{ fontWeight:800 }}>{c.orders}</td>
-                  <td style={{ fontWeight:900, color:'var(--coral)' }}>{c.spent}</td>
-                  <td className="td-muted">{c.joined}</td>
-                  <td><span className={`tag ${c.tag}`}>{c.tag === 'tag-vip' ? '⭐ VIP' : c.tag === 'tag-new' ? 'New' : 'Regular'}</span></td>
-                  <td>
-                    <div style={{ display:'flex', gap:5 }}>
-                      <button className="btn btn-ghost btn-xs btn-icon">👁</button>
-                      <button className="btn btn-ghost btn-xs btn-icon">✉️</button>
-                      <button className="btn btn-ghost btn-xs btn-icon">✏️</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {loading
+                ? Array.from({ length: 8 }).map((_, i) => <tr key={i}>{Array.from({ length: 8 }).map((_, j) => <td key={j}><div style={{ height: 12, background: 'var(--soft-2)', borderRadius: 4 }} /></td>)}</tr>)
+                : customers.map((c, idx) => {
+                    const seg = segmentTag(c)
+                    return (
+                      <tr key={c.id}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                            <div className="rc-av" style={{ background: AVATAR_BG[idx % AVATAR_BG.length] }}>{EMOJI[idx % EMOJI.length]}</div>
+                            <div>
+                              <div style={{ fontWeight: 800 }}>{c.name}</div>
+                              <div className="td-muted">{c.phone}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="td-muted">{c.email}</td>
+                        <td>{c.city}</td>
+                        <td style={{ fontWeight: 800 }}>{c.total_orders}</td>
+                        <td style={{ fontWeight: 900, color: 'var(--coral)' }}>₹{c.total_spent.toLocaleString()}</td>
+                        <td className="td-muted">{new Date(c.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                        <td><span className={`tag ${seg.cls}`}>{seg.label}</span></td>
+                        <td>
+                          <div style={{ display: 'flex', gap: 5 }}>
+                            <button className="btn btn-ghost btn-xs btn-icon">👁</button>
+                            <button className="btn btn-danger btn-xs btn-icon" onClick={async () => {
+                              if (confirm(`Delete customer "${c.name}"?`)) {
+                                try { await deleteCustomer(c.id); refetch() } catch (err: any) { alert(err.message) }
+                              }
+                            }}>🗑</button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
             </tbody>
           </table>
         </div>
-        <div className="card-footer" style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <span style={{ fontSize:'.75rem', fontWeight:700, color:'var(--muted)' }}>Showing 5 of 3,412 customers</span>
-          <div style={{ display:'flex', gap:4 }}>
-            <button className="btn btn-ghost btn-sm">← Prev</button>
-            <button className="btn btn-primary btn-sm">1</button>
-            <button className="btn btn-ghost btn-sm">2</button>
-            <button className="btn btn-ghost btn-sm">Next →</button>
+        <div className="card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '.75rem', fontWeight: 700, color: 'var(--muted)' }}>Showing {customers.length} of {totalCount}</span>
+          <div style={{ display: 'flex', gap: 4 }}>
+            <button className="btn btn-ghost btn-sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>← Prev</button>
+            {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => (
+              <button key={i} className={`btn btn-sm ${page === i ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setPage(i)}>{i + 1}</button>
+            ))}
+            <button className="btn btn-ghost btn-sm" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>Next →</button>
           </div>
         </div>
       </div>
@@ -81,204 +119,336 @@ export function CustomersPage() {
   )
 }
 
-/* ─── CATEGORIES ─────────────────────────────────────────────────── */
-const CATS = [
-  { bg:'linear-gradient(135deg,#FFF3D4,#FFE099)', emoji:'🧸', name:'Soft Toys',    count:'120+ items', pill:'pill-green', status:'Active', products:124, orders:334, rev:'₹89K',  bar:72 },
-  { bg:'linear-gradient(135deg,#FFE4E1,#FFBDB6)', emoji:'✏️', name:'Stationery',   count:'200+ items', pill:'pill-green', status:'Active', products:208, orders:512, rev:'₹1.2L', bar:88 },
-  { bg:'linear-gradient(135deg,#E1F7F2,#AAEEDD)', emoji:'🎨', name:'Arts & Crafts',count:'85+ items',  pill:'pill-green', status:'Active', products:87,  orders:238, rev:'₹56K',  bar:55 },
-  { bg:'linear-gradient(135deg,#EAE0FF,#C7A4F5)', emoji:'🎮', name:'Board Games',  count:'60+ items',  pill:'pill-green', status:'Active', products:62,  orders:180, rev:'₹44K',  bar:48 },
-  { bg:'linear-gradient(135deg,#E0F3FF,#AACFF5)', emoji:'📚', name:'Books',        count:'300+ items', pill:'pill-green', status:'Active', products:312, orders:410, rev:'₹78K',  bar:64 },
-  { bg:'linear-gradient(135deg,#FFF0E0,#FFCC99)', emoji:'🚗', name:'Vehicles',     count:'75+ items',  pill:'pill-yellow',status:'Draft',  products:76,  orders:95,  rev:'₹32K',  bar:38 },
-]
+// ─── CATEGORIES ──────────────────────────────────────────────────
+
+function CategoryForm({ category, onClose, onSaved, allCats }: {
+  category?: ApiCategory | null; onClose: () => void; onSaved: () => void; allCats: ApiCategory[]
+}) {
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const isEdit = !!category
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setSaving(true); setError(null)
+    const fd = e.currentTarget
+    const data = {
+      name:        (fd.elements.namedItem('name') as HTMLInputElement).value,
+      slug:        (fd.elements.namedItem('slug') as HTMLInputElement).value,
+      emoji:       (fd.elements.namedItem('emoji') as HTMLInputElement).value || undefined,
+      description: (fd.elements.namedItem('desc') as HTMLInputElement).value || undefined,
+      parent_id:   (fd.elements.namedItem('parent') as HTMLSelectElement).value || undefined,
+      sort_order:  parseInt((fd.elements.namedItem('sort') as HTMLInputElement).value) || 0,
+    }
+    try {
+      if (isEdit) await updateCategory(category!.id, data)
+      else        await createCategory(data)
+      onSaved(); onClose()
+    } catch (err: any) { setError(err.message) } finally { setSaving(false) }
+  }
+
+  return (
+    <div className="drawer-overlay" onClick={onClose}>
+      <div className="drawer" onClick={(e) => e.stopPropagation()}>
+        <div className="drawer-head">
+          <div className="drawer-title">{isEdit ? '✏️ Edit Category' : '➕ Add Category'}</div>
+          <button className="drawer-close" onClick={onClose}>✕</button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="drawer-body">
+            {error && <div style={{ background: '#FFF0F0', border: '1px solid var(--coral)', borderRadius: 8, padding: '10px 14px', color: 'var(--coral)', fontSize: '.82rem', marginBottom: 16 }}>⚠️ {error}</div>}
+            <div className="form-group"><label className="form-label">Category Name *</label><input name="name" className="form-input" required defaultValue={category?.name} placeholder="e.g. Soft Toys" /></div>
+            <div className="form-group"><label className="form-label">Slug *</label><input name="slug" className="form-input" required defaultValue={category?.slug} placeholder="e.g. soft-toys" /></div>
+            <div className="form-grid form-grid-2">
+              <div className="form-group"><label className="form-label">Emoji</label><input name="emoji" className="form-input" defaultValue={category?.emoji ?? ''} placeholder="🧸" /></div>
+              <div className="form-group"><label className="form-label">Sort Order</label><input name="sort" type="number" className="form-input" defaultValue={category?.sort_order ?? 0} /></div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Parent Category</label>
+              <select name="parent" className="form-select" defaultValue={category?.parent_id ?? ''}>
+                <option value="">— None (root category) —</option>
+                {allCats.filter((c) => !c.parent_id).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label className="form-label">Description</label><input name="desc" className="form-input" defaultValue={category?.description ?? ''} placeholder="Short description…" /></div>
+          </div>
+          <div className="drawer-footer">
+            <button type="button" className="btn btn-outline" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? '⏳ Saving…' : isEdit ? '💾 Update' : '➕ Add'}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
 
 export function CategoriesPage() {
+  const [editCat, setEditCat] = useState<ApiCategory | null | undefined>(undefined)
+  const { data: categories, loading, error, refetch } = useAdminFetch(fetchCategories, [])
+
+  function flatRender(cats: ApiCategory[], depth = 0): React.ReactNode[] {
+    return cats.flatMap((c) => [
+      <tr key={c.id}>
+        <td>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: depth * 20 }}>
+            <span style={{ fontSize: 20 }}>{c.emoji ?? '📁'}</span>
+            <div>
+              <div style={{ fontWeight: 800 }}>{c.name}</div>
+              <div className="td-muted">{c.slug}</div>
+            </div>
+          </div>
+        </td>
+        <td>{c.parent_id ? '↳ Sub' : '📂 Root'}</td>
+        <td>{c.sort_order}</td>
+        <td><span className={`pill ${c.is_active ? 'pill-green' : 'pill-red'}`}>{c.is_active ? 'Active' : 'Inactive'}</span></td>
+        <td>{c.description ?? '—'}</td>
+        <td>
+          <div style={{ display: 'flex', gap: 5 }}>
+            <button className="btn btn-ghost btn-xs btn-icon" onClick={() => setEditCat(c)}>✏️</button>
+            <button className="btn btn-danger btn-xs btn-icon" onClick={async () => {
+              if (confirm(`Delete category "${c.name}"?`)) {
+                try { await deleteCategory(c.id); refetch() } catch (err: any) { alert(err.message) }
+              }
+            }}>🗑</button>
+          </div>
+        </td>
+      </tr>,
+      ...(c.children?.length ? flatRender(c.children, depth + 1) : []),
+    ])
+  }
+
+  const allFlat = categories ? categories.flatMap((c) => [c, ...(c.children ?? [])]) : []
+
   return (
     <div>
       <div className="page-header">
         <div className="ph-left">
           <div className="ph-title">Categories</div>
-          <div className="ph-sub">6 active categories · 840 total products</div>
+          <div className="ph-sub">{loading ? 'Loading…' : `${allFlat.length} categories`}</div>
         </div>
         <div className="ph-actions">
-          <button className="btn btn-outline">⬇ Reorder</button>
-          <button className="btn btn-primary">➕ Add Category</button>
+          <button className="btn btn-ghost btn-sm" onClick={refetch}>↻</button>
+          <button className="btn btn-primary" onClick={() => setEditCat(null)}>➕ Add Category</button>
         </div>
       </div>
-      <div className="cat-grid">
-        {CATS.map(c => (
-          <div key={c.name} className="cat-card">
-            <div className="cat-banner" style={{ background: c.bg }}>
-              <div className="cat-emoji">{c.emoji}</div>
-              <div className="cat-banner-text">
-                <div className="cat-banner-name">{c.name}</div>
-                <div className="cat-banner-count">{c.count}</div>
+      <div className="card">
+        {error && <div style={{ padding: 16, color: 'var(--coral)' }}>⚠️ {error}</div>}
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Name / Slug</th><th>Type</th><th>Sort</th><th>Status</th><th>Description</th><th>Actions</th></tr></thead>
+            <tbody>
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => <tr key={i}>{Array.from({ length: 6 }).map((_, j) => <td key={j}><div style={{ height: 12, background: 'var(--soft-2)', borderRadius: 4 }} /></td>)}</tr>)
+                : categories ? flatRender(categories) : null}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {editCat !== undefined && (
+        <CategoryForm category={editCat} allCats={allFlat} onClose={() => setEditCat(undefined)} onSaved={refetch} />
+      )}
+    </div>
+  )
+}
+
+// ─── COUPONS ──────────────────────────────────────────────────────
+
+function CouponForm({ coupon, onClose, onSaved }: { coupon?: ApiCoupon | null; onClose: () => void; onSaved: () => void }) {
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const isEdit = !!coupon
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setSaving(true); setError(null)
+    const fd = e.currentTarget
+    const data = {
+      code:           ((fd.elements.namedItem('code') as HTMLInputElement).value).toUpperCase(),
+      discount_type:  (fd.elements.namedItem('type') as HTMLSelectElement).value as 'percentage' | 'flat',
+      discount_value: parseFloat((fd.elements.namedItem('value') as HTMLInputElement).value),
+      min_order:      parseFloat((fd.elements.namedItem('min') as HTMLInputElement).value) || 0,
+      max_uses:       parseInt((fd.elements.namedItem('maxUses') as HTMLInputElement).value) || 100,
+      is_active:      (fd.elements.namedItem('active') as HTMLInputElement).checked,
+      expires_at:     (fd.elements.namedItem('expires') as HTMLInputElement).value || null,
+    }
+    try {
+      if (isEdit) await updateCoupon(coupon!.id, data)
+      else        await createCoupon(data)
+      onSaved(); onClose()
+    } catch (err: any) { setError(err.message) } finally { setSaving(false) }
+  }
+
+  return (
+    <div className="drawer-overlay" onClick={onClose}>
+      <div className="drawer" onClick={(e) => e.stopPropagation()}>
+        <div className="drawer-head">
+          <div className="drawer-title">{isEdit ? '✏️ Edit Coupon' : '🏷️ New Coupon'}</div>
+          <button className="drawer-close" onClick={onClose}>✕</button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="drawer-body">
+            {error && <div style={{ background: '#FFF0F0', border: '1px solid var(--coral)', borderRadius: 8, padding: '10px 14px', color: 'var(--coral)', fontSize: '.82rem', marginBottom: 16 }}>⚠️ {error}</div>}
+            <div className="form-group"><label className="form-label">Coupon Code *</label><input name="code" className="form-input" required defaultValue={coupon?.code} placeholder="SAVE20" style={{ textTransform: 'uppercase' }} /></div>
+            <div className="form-grid form-grid-2">
+              <div className="form-group">
+                <label className="form-label">Discount Type *</label>
+                <select name="type" className="form-select" defaultValue={coupon?.discount_type ?? 'percentage'}>
+                  <option value="percentage">Percentage (%)</option>
+                  <option value="flat">Flat Amount (₹)</option>
+                </select>
               </div>
-              <span className={`pill ${c.pill}`}>{c.status}</span>
+              <div className="form-group"><label className="form-label">Discount Value *</label><input name="value" type="number" min={1} className="form-input" required defaultValue={coupon?.discount_value} placeholder="20" /></div>
+              <div className="form-group"><label className="form-label">Min Order (₹)</label><input name="min" type="number" min={0} className="form-input" defaultValue={coupon?.min_order ?? 0} placeholder="500" /></div>
+              <div className="form-group"><label className="form-label">Max Uses</label><input name="maxUses" type="number" min={1} className="form-input" defaultValue={coupon?.max_uses ?? 100} placeholder="100" /></div>
+              <div className="form-group span-2"><label className="form-label">Expiry Date</label><input name="expires" type="date" className="form-input" defaultValue={coupon?.expires_at ? coupon.expires_at.split('T')[0] : ''} /></div>
             </div>
-            <div className="cat-card-body">
-              <div className="cat-meta-row">
-                <div className="cat-stat"><div className="cs-val">{c.products}</div><div className="cs-lbl">Products</div></div>
-                <div className="cat-stat"><div className="cs-val">{c.orders}</div><div className="cs-lbl">Orders</div></div>
-                <div className="cat-stat"><div className="cs-val">{c.rev}</div><div className="cs-lbl">Revenue</div></div>
-              </div>
-              <div className="cat-bar-track"><div className="cat-bar-fill" style={{ width:`${c.bar}%` }} /></div>
-              <div style={{ fontSize:'.66rem', fontWeight:700, color:'var(--muted)', marginTop:5 }}>{c.bar}% of category target reached</div>
-              <div className="cat-actions">
-                <button className="btn btn-outline btn-sm">✏️ Edit</button>
-                {c.status === 'Draft'
-                  ? <button className="btn btn-primary btn-sm">▶ Publish</button>
-                  : <button className="btn btn-ghost btn-sm">👁 View</button>
-                }
-              </div>
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input name="active" type="checkbox" defaultChecked={coupon?.is_active ?? true} style={{ width: 16, height: 16 }} />
+              <label className="form-label" style={{ margin: 0 }}>Active</label>
             </div>
           </div>
-        ))}
+          <div className="drawer-footer">
+            <button type="button" className="btn btn-outline" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? '⏳ Saving…' : isEdit ? '💾 Update' : '🏷️ Create'}</button>
+          </div>
+        </form>
       </div>
     </div>
   )
 }
 
-/* ─── COUPONS ─────────────────────────────────────────────────────── */
-const COUPONS = [
-  { code:'HOLI20',       desc:'Holi special — 20% off everything',          stripe:'#FF6B5B', discount:'20% OFF',  expiry:'31 Mar 2026',  minOrder:'₹299',  uses:248,  maxUses:500,  status:'Active',  pill:'pill-green' },
-  { code:'FIRSTBUY10',   desc:'₹100 off for first-time buyers',              stripe:'#3ECFB2', discount:'₹100 OFF', expiry:'No expiry',    minOrder:'₹499',  uses:1100, maxUses:null, status:'Active',  pill:'pill-green' },
-  { code:'STATIONERY15', desc:'15% off all stationery products',             stripe:'#5BBEF5', discount:'15% OFF',  expiry:'30 Apr 2026',  minOrder:'₹199',  uses:89,   maxUses:300,  status:'Active',  pill:'pill-green' },
-  { code:'FREESHIP',     desc:'Free shipping — any order',                   stripe:'#C7A4F5', discount:'FREE SHIP',expiry:'28 Feb 2026',  minOrder:'₹1',    uses:420,  maxUses:1000, status:'Expired', pill:'pill-red'  },
-]
-
 export function CouponsPage() {
+  const [editCoupon, setEditCoupon] = useState<ApiCoupon | null | undefined>(undefined)
+  const { data: coupons, loading, error, refetch } = useAdminFetch(fetchCoupons, [])
+
   return (
     <div>
       <div className="page-header">
         <div className="ph-left">
           <div className="ph-title">Coupons</div>
-          <div className="ph-sub">12 active promo codes · ₹38.4K discount given this month</div>
+          <div className="ph-sub">{loading ? 'Loading…' : `${(coupons ?? []).length} promo codes`}</div>
         </div>
         <div className="ph-actions">
-          <button className="btn btn-outline">📥 Export</button>
-          <button className="btn btn-primary">➕ Create Coupon</button>
+          <button className="btn btn-ghost btn-sm" onClick={refetch}>↻</button>
+          <button className="btn btn-primary" onClick={() => setEditCoupon(null)}>🏷️ New Coupon</button>
         </div>
       </div>
 
-      <div className="coupons-stats">
-        {[
-          { icon:'🏷️', bg:'var(--coral-light)', val:'12',    label:'Active Coupons' },
-          { icon:'🔢', bg:'var(--mint-light)',  val:'1,248', label:'Times Used' },
-          { icon:'💸', bg:'var(--sun-light)',   val:'₹38.4K',label:'Total Discount Given' },
-          { icon:'📈', bg:'var(--sky-light)',   val:'18.3%', label:'Conversion Lift' },
-        ].map(s => (
-          <div key={s.label} className="coupon-stat">
-            <div className="cs-icon" style={{ background: s.bg }}>{s.icon}</div>
-            <div className="cs-info"><div className="cs-n">{s.val}</div><div className="cs-l">{s.label}</div></div>
-          </div>
-        ))}
+      {error && <div className="card" style={{ padding: 16, color: 'var(--coral)' }}>⚠️ {error}</div>}
+
+      <div className="card">
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Min Order</th><th>Uses</th><th>Expires</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {loading
+                ? Array.from({ length: 5 }).map((_, i) => <tr key={i}>{Array.from({ length: 8 }).map((_, j) => <td key={j}><div style={{ height: 12, background: 'var(--soft-2)', borderRadius: 4 }} /></td>)}</tr>)
+                : (coupons ?? []).map((c) => (
+                    <tr key={c.id}>
+                      <td><span style={{ fontFamily: 'monospace', fontWeight: 900, fontSize: '.85rem', background: 'var(--soft-2)', padding: '3px 8px', borderRadius: 5 }}>{c.code}</span></td>
+                      <td>{c.discount_type === 'percentage' ? '%' : '₹'}</td>
+                      <td style={{ fontWeight: 800 }}>{c.discount_type === 'percentage' ? `${c.discount_value}%` : `₹${c.discount_value}`}</td>
+                      <td>₹{c.min_order}</td>
+                      <td>{c.used_count} / {c.max_uses}</td>
+                      <td className="td-muted">{c.expires_at ? new Date(c.expires_at).toLocaleDateString('en-IN') : 'Never'}</td>
+                      <td><span className={`pill ${c.is_active ? 'pill-green' : 'pill-red'}`}>{c.is_active ? 'Active' : 'Inactive'}</span></td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 5 }}>
+                          <button className="btn btn-ghost btn-xs btn-icon" onClick={() => setEditCoupon(c)}>✏️</button>
+                          <button className="btn btn-danger btn-xs btn-icon" onClick={async () => {
+                            if (confirm(`Delete coupon "${c.code}"?`)) {
+                              try { await deleteCoupon(c.id); refetch() } catch (err: any) { alert(err.message) }
+                            }
+                          }}>🗑</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div className="coupons-list">
-        {COUPONS.map(c => (
-          <div key={c.code} className="coupon-card">
-            <div className="coupon-stripe" style={{ background: c.stripe }} />
-            <div className="coupon-inner">
-              <div className="coupon-top">
-                <div>
-                  <div className="coupon-code">{c.code}</div>
-                  <div className="coupon-desc">{c.desc}</div>
-                </div>
-                <span className={`pill ${c.pill}`}>{c.status}</span>
-              </div>
-              <div className="coupon-meta">
-                <div className="cm-item"><em>Discount:</em> {c.discount}</div>
-                <div className="cm-item"><em>Expires:</em> {c.expiry}</div>
-                <div className="cm-item"><em>Min order:</em> {c.minOrder}</div>
-              </div>
-              <div className="coupon-footer">
-                <div className="coupon-progress-wrap">
-                  <div className="coupon-progress-fill" style={{ width:`${c.maxUses ? Math.round(c.uses/c.maxUses*100) : 100}%`, background: c.stripe }} />
-                </div>
-                <span className="coupon-progress-label">{c.uses}{c.maxUses ? ` / ${c.maxUses}` : ''} uses</span>
-                <div style={{ display:'flex', gap:6, marginLeft:'auto' }}>
-                  <button className="btn btn-outline btn-xs">✏️</button>
-                  <button className="btn btn-danger btn-xs">🗑</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {editCoupon !== undefined && (
+        <CouponForm coupon={editCoupon} onClose={() => setEditCoupon(undefined)} onSaved={refetch} />
+      )}
     </div>
   )
 }
 
-/* ─── REVIEWS ─────────────────────────────────────────────────────── */
-const REVIEWS = [
-  { name:'Priya Sharma', product:'🎨 Color Wonder Kit · Verified Purchase',   emoji:'👩',  bg:'var(--coral-light)', stars:'⭐⭐⭐⭐⭐', date:'12 Mar 2026', pill:'pill-green',  status:'Approved',       border:'var(--border)', text:'My daughter absolutely loves the art kit from Little Loot. The quality is outstanding and the packaging is so adorable.' },
-  { name:'Rahul Mehta',  product:'📚 Stationery Bundle · Verified Purchase',  emoji:'👨',  bg:'var(--sky-light)',   stars:'⭐⭐⭐⭐',  date:'10 Mar 2026', pill:'pill-yellow', status:'Needs Response', border:'var(--sun)',    text:'Great stationery selection! My son needed a full kit for school and Little Loot had everything. Only thing — the pencil box was slightly dented.' },
-  { name:'Ananya Reddy', product:'🐻 Teddy Bear XL · Verified Purchase',      emoji:'👩‍💼', bg:'var(--lilac-light)', stars:'⭐⭐⭐⭐⭐', date:'08 Mar 2026', pill:'pill-green',  status:'Approved',       border:'var(--border)', text:'The teddy bear I ordered for my niece\'s birthday was so soft and premium! Beautifully packaged. Would 100% recommend!' },
-  { name:'Kiran Patil',  product:'🚲 Balance Bicycle · Verified Purchase',    emoji:'🧑',  bg:'var(--peach-light)', stars:'⭐⭐⭐',    date:'05 Mar 2026', pill:'pill-red',    status:'Flagged',        border:'#FFCFC9',       text:'Bicycle looks good but one of the wheels had a slight wobble. Expected better quality control at this price point.' },
-]
+// ─── REVIEWS ──────────────────────────────────────────────────────
 
 export function ReviewsPage() {
+  const [showPending, setShowPending] = useState(false)
+  const { data, loading, error, refetch } = useAdminFetch(
+    () => fetchAdminReviews({ approved: showPending ? false : undefined }),
+    [showPending]
+  )
+  const reviews = data?.data ?? []
+
   return (
     <div>
       <div className="page-header">
         <div className="ph-left">
-          <div className="ph-title">Product Reviews</div>
-          <div className="ph-sub">Moderate and respond to customer reviews</div>
+          <div className="ph-title">Reviews</div>
+          <div className="ph-sub">{loading ? 'Loading…' : `${data?.totalCount ?? 0} reviews`}</div>
         </div>
-        <div className="ph-actions"><button className="btn btn-outline">📥 Export</button></div>
-      </div>
-
-      <div className="reviews-summary">
-        <div className="card">
-          <div className="card-body" style={{ textAlign:'center' }}>
-            <div className="rb-num">4.6</div>
-            <div className="rb-stars">⭐⭐⭐⭐⭐</div>
-            <div className="rb-count">Based on 1,248 reviews</div>
-          </div>
-        </div>
-        <div className="card">
-          <div className="rating-bars">
-            {[{label:'5★',pct:72},{label:'4★',pct:18},{label:'3★',pct:6},{label:'2★',pct:2},{label:'1★',pct:2}].map(r => (
-              <div key={r.label} className="rb-row">
-                <span className="rb-label">{r.label}</span>
-                <div className="rb-track"><div className="rb-fill" style={{ width:`${r.pct}%` }} /></div>
-                <span className="rb-pct">{r.pct}%</span>
-              </div>
-            ))}
-          </div>
+        <div className="ph-actions">
+          <button className={`btn ${showPending ? 'btn-primary' : 'btn-outline'}`} onClick={() => setShowPending(!showPending)}>
+            {showPending ? 'Show All' : '⏳ Pending Only'}
+          </button>
+          <button className="btn btn-ghost btn-sm" onClick={refetch}>↻</button>
         </div>
       </div>
 
-      <div className="reviews-filters">
-        <FilterTabs tabs={['All Reviews','⭐⭐⭐⭐⭐ 5 Star','⭐⭐⭐⭐ 4 Star','⚠️ Needs Response','🚩 Flagged (3)']} />
-      </div>
+      {error && <div className="card" style={{ padding: 16, color: 'var(--coral)' }}>⚠️ {error}</div>}
 
-      <div className="reviews-list">
-        {REVIEWS.map(r => (
-          <div key={r.name + r.date} className="review-card" style={{ borderColor: r.border, background: r.status === 'Needs Response' ? 'var(--sun-light)' : '' }}>
-            <div className="rc-head">
-              <div className="rc-av" style={{ background: r.bg }}>{r.emoji}</div>
-              <div className="rc-meta" style={{ flex:1 }}>
-                <div className="rc-name">{r.name}</div>
-                <div className="rc-product">{r.product}</div>
-              </div>
-              <div style={{ textAlign:'right' }}>
-                <div className="rc-stars">{r.stars}</div>
-                <div className="rc-date">{r.date}</div>
-              </div>
-              <span className={`pill ${r.pill}`} style={{ marginLeft:10 }}>{r.status}</span>
-            </div>
-            <div className="rc-text">&ldquo;{r.text}&rdquo;</div>
-            <div className="rc-actions">
-              <button className={`btn ${r.status === 'Needs Response' ? 'btn-primary' : 'btn-outline'} btn-xs`}>💬 Reply</button>
-              <button className="btn btn-ghost btn-xs">📌 Pin</button>
-              {r.status === 'Flagged'
-                ? <><button className="btn btn-ghost btn-xs">✅ Approve</button><button className="btn btn-danger btn-xs">🗑 Remove</button></>
-                : <button className="btn btn-danger btn-xs">🚩 Flag</button>
-              }
-            </div>
-          </div>
-        ))}
+      <div className="card">
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Customer</th><th>Product</th><th>Rating</th><th>Comment</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => <tr key={i}>{Array.from({ length: 7 }).map((_, j) => <td key={j}><div style={{ height: 12, background: 'var(--soft-2)', borderRadius: 4 }} /></td>)}</tr>)
+                : reviews.map((r, idx) => (
+                    <tr key={r.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div className="rc-av" style={{ background: AVATAR_BG[idx % AVATAR_BG.length] }}>{EMOJI[idx % EMOJI.length]}</div>
+                          <div style={{ fontWeight: 700 }}>{r.customer_name}</div>
+                        </div>
+                      </td>
+                      <td style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.product_name}</td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 2 }}>
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i} style={{ color: i < r.rating ? '#F59E0B' : 'var(--border)' }}>★</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.comment}>{r.comment}</td>
+                      <td className="td-muted">{new Date(r.created_at).toLocaleDateString('en-IN')}</td>
+                      <td><span className={`pill ${r.is_approved ? 'pill-green' : 'pill-yellow'}`}>{r.is_approved ? 'Approved' : 'Pending'}</span></td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 5 }}>
+                          {!r.is_approved && (
+                            <button className="btn btn-ghost btn-xs" onClick={async () => {
+                              try { await approveReview(r.id); refetch() } catch (err: any) { alert(err.message) }
+                            }}>✅ Approve</button>
+                          )}
+                          <button className="btn btn-danger btn-xs btn-icon" onClick={async () => {
+                            if (confirm('Delete this review?')) {
+                              try { await deleteReview(r.id); refetch() } catch (err: any) { alert(err.message) }
+                            }
+                          }}>🗑</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

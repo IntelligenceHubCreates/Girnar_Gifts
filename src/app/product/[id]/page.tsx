@@ -11,11 +11,9 @@ interface Props {
 export default function ProductDetailPage({ params }: Props) {
   return (
     <>
-      <TopBar />
       <Header />
-      <NavBar />
       <main>
-        <ProductPage productId={Number(params.id)} />
+        <ProductPage productId={params.id} />
       </main>
       <Footer />
     </>

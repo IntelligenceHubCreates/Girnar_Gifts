@@ -4,12 +4,20 @@ interface Config {
   params?: Record<string, string | number | boolean>;
   signal?: AbortSignal;
   data?: unknown;
+  token?: string;
 }
 
 export const _get = (url: string, config?: Config) => {
   if (config?.params) {
     url = `${url}?` + new URLSearchParams(config.params as Record<string, string>);
   }
+  const headers: Record<string, string> = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+};
+if (config?.token) {
+  headers['Authorization'] = `Bearer ${config.token}`;
+}
   const opts: RequestInit = {
     method: 'GET',
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
@@ -23,6 +31,13 @@ export const _post = (url: string, body: unknown, config?: Config) => {
   if (config?.params) {
     url = `${url}?` + new URLSearchParams(config.params as Record<string, string>);
   }
+  const headers: Record<string, string> = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+};
+if (config?.token) {
+  headers['Authorization'] = `Bearer ${config.token}`;
+}
   const opts: RequestInit = {
     method: 'POST',
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
@@ -37,6 +52,13 @@ export const _put = (url: string, body: unknown, config?: Config) => {
   if (config?.params) {
     url = `${url}?` + new URLSearchParams(config.params as Record<string, string>);
   }
+  const headers: Record<string, string> = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+};
+if (config?.token) {
+  headers['Authorization'] = `Bearer ${config.token}`;
+}
   return fetch(url, {
     method: 'PUT',
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
@@ -49,6 +71,13 @@ export const _delete = (url: string, config?: Config) => {
   if (config?.params) {
     url = `${url}?` + new URLSearchParams(config.params as Record<string, string>);
   }
+  const headers: Record<string, string> = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+};
+if (config?.token) {
+  headers['Authorization'] = `Bearer ${config.token}`;
+}
   const opts: RequestInit = {
     method: 'DELETE',
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },

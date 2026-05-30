@@ -4,9 +4,11 @@ import { PageId, PAGE_META } from '@/lib/adminData'
 
 interface TopbarProps {
   activePage: PageId
+  /** optional live subtitle override (e.g. "847 orders") */
+  subtitle?: string
 }
 
-export default function Topbar({ activePage }: TopbarProps) {
+export default function Topbar({ activePage, subtitle }: TopbarProps) {
   const meta = PAGE_META[activePage]
   return (
     <div className="topbar">
@@ -14,7 +16,7 @@ export default function Topbar({ activePage }: TopbarProps) {
         <div className="tb-title">
           {meta.title} <span>{meta.section}</span>
         </div>
-        <div className="tb-sub">{meta.sub}</div>
+        <div className="tb-sub">{subtitle ?? meta.sub}</div>
       </div>
 
       <div className="tb-search">

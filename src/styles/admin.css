@@ -548,3 +548,68 @@ tbody tr:hover { background: #FAFAF8; }
 .drawer-close:hover { background: var(--coral-light); border-color: var(--coral); color: var(--coral); }
 .drawer-body { padding: 20px; max-height: 70vh; overflow-y: auto; }
 .drawer-foot { padding: 14px 20px; border-top: 1.5px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+/* ─── APPEND THIS TO THE BOTTOM OF admin.css ─────────────────────────────── */
+
+/* Settings nav (used in SettingsPage) */
+.settings-nav {
+  background: var(--card);
+  border-radius: var(--r);
+  border: 1.5px solid var(--border);
+  padding: 10px;
+  height: fit-content;
+  position: sticky;
+  top: 80px;
+}
+
+.sn-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--text-2);
+  transition: all .14s;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.sn-item:hover { background: var(--soft); color: var(--text); }
+.sn-item.active { background: var(--coral-light); color: var(--coral); font-weight: 800; }
+
+/* Drawer footer alias */
+.drawer-footer {
+  padding: 14px 20px;
+  border-top: 1.5px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* Inline drawer (used in product/order forms — no .open class needed) */
+.drawer-overlay {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 37, 64, .45);
+  z-index: 900;
+  backdrop-filter: blur(2px);
+  align-items: center;
+  justify-content: center;
+  animation: fade-in .18s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Shimmer keyframe (for skeleton loaders) */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}

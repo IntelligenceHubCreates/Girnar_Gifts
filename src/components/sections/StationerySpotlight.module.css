@@ -3,161 +3,269 @@
 }
 
 .spotlightInner {
-  background: linear-gradient(135deg, var(--navy) 0%, #2d3a6b 100%);
+  background: linear-gradient(135deg, #1a2344 0%, #1e2d5a 50%, #1a2855 100%);
   border-radius: 32px;
-  padding: 56px 60px;
+  padding: 52px 56px;
   display: flex;
   align-items: center;
-  gap: 60px;
+  gap: 56px;
   position: relative;
   overflow: hidden;
 }
 
+/* subtle radial glow top-right */
 .spotlightInner::before {
   content: '';
   position: absolute;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(255, 211, 54, 0.15), transparent 70%);
-  right: -80px;
-  top: -80px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255, 211, 54, 0.08), transparent 65%);
+  right: -100px;
+  top: -120px;
   border-radius: 50%;
   pointer-events: none;
 }
 
+/* ── Left column ───────────────────────────────── */
 .spotlightText {
-  flex: 1;
+  flex: 0 0 auto;
+  width: 380px;
   color: #fff;
   z-index: 1;
-  min-width: 0;
 }
 
 .tag {
-  display: inline-block;
-  background: var(--sun);
-  color: var(--navy);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--sun, #ffd336);
+  color: #1a2344;
   border-radius: 50px;
-  padding: 5px 16px;
-  font-size: 12px;
+  padding: 5px 14px;
+  font-size: 11px;
   font-weight: 800;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 1px;
 }
 
 .spotlightText h2 {
   font-family: var(--font-baloo), 'Baloo 2', cursive;
-  font-size: 42px;
+  font-size: 44px;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.12;
   margin-bottom: 14px;
+  color: #fff;
 }
 
 .spotlightText h2 span {
-  color: var(--sun);
+  color: var(--sun, #ffd336);
 }
 
 .spotlightText p {
-  opacity: 0.8;
-  font-size: 16px;
-  line-height: 1.6;
-  margin-bottom: 28px;
-  max-width: 380px;
+  opacity: 0.75;
+  font-size: 15px;
+  line-height: 1.65;
+  margin-bottom: 24px;
+  max-width: 340px;
 }
 
+/* ── Category filter pills ──────────────────────── */
 .spotlightItems {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .spotlightItem {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 8px 14px;
   font-size: 13px;
   font-weight: 700;
   color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.spotlightGrid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  z-index: 1;
-}
-
-.spotlightProd {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
-  padding: 20px;
-  text-align: center;
-  color: #fff;
-  transition: background 0.2s;
+  text-decoration: none;
+  transition: background 0.18s, border-color 0.18s;
   cursor: pointer;
 }
 
-.spotlightProd:hover {
-  background: rgba(255, 255, 255, 0.15);
+.spotlightItem:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.32);
+  color: #fff;
 }
 
-.emoji {
-  font-size: 44px;
-  display: block;
-  margin-bottom: 8px;
+.tagIcon {
+  font-size: 14px;
+  line-height: 1;
 }
 
-.sname {
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.sprice {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--sun);
-  margin-top: 4px;
-}
-
+/* ── CTA button ─────────────────────────────────── */
 .btnPrimary {
-  background: var(--coral);
+  display: inline-block;
+  background: var(--coral, #ff6b5b);
   color: #fff;
   border: none;
-  padding: 14px 32px;
+  padding: 14px 30px;
   border-radius: 50px;
   font-family: var(--font-nunito), 'Nunito', sans-serif;
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 6px 20px rgba(255, 107, 91, 0.35);
+  box-shadow: 0 6px 22px rgba(255, 107, 91, 0.38);
 }
 
 .btnPrimary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(255, 107, 91, 0.45);
+  box-shadow: 0 10px 30px rgba(255, 107, 91, 0.48);
+  color: #fff;
 }
 
-/* ── Responsive ─────────────────────────────────────── */
+/* ── Right product grid ─────────────────────────── */
+.spotlightGrid {
+   flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  z-index: 1;
+}
+
+.spotlightProd {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 18px 16px 14px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: background 0.2s, transform 0.2s, border-color 0.2s;
+}
+
+.spotlightProd:hover {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-3px);
+}
+
+/* image area */
+.imgWrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.prodImg {
+  object-fit: contain;
+}
+
+/* bottom row: name+price left, cart button right */
+.cardBottom {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.imgLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+  flex: 1;
+}
+
+.cardInfo:hover .sname {
+  color: var(--sun, #ffd336);
+}
+
+.sname {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.sprice {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--sun, #ffd336);
+}
+
+.soriginal {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: line-through;
+}
+
+/* ── Responsive ─────────────────────────────────── */
+@media (max-width: 1100px) {
+  .spotlightText {
+    width: 320px;
+  }
+
+  .spotlightText h2 {
+    font-size: 36px;
+  }
+}
+
 @media (max-width: 1024px) {
   .spotlightSection {
     padding: 0 24px 48px;
   }
 
   .spotlightInner {
-    padding: 40px 40px;
-    gap: 40px;
+    padding: 40px 36px;
+    gap: 36px;
+  }
+
+  .spotlightText {
+    width: 300px;
   }
 
   .spotlightText h2 {
-    font-size: 34px;
+    font-size: 32px;
+  }
+
+  .imgWrapper {
+    width: 90px;
+    height: 90px;
   }
 }
 
@@ -169,8 +277,12 @@
   .spotlightInner {
     flex-direction: column;
     padding: 36px 28px;
-    gap: 32px;
+    gap: 28px;
     border-radius: 24px;
+  }
+
+  .spotlightText {
+    width: 100%;
   }
 
   .spotlightText h2 {
@@ -208,19 +320,212 @@
   }
 
   .spotlightProd {
-    padding: 14px 12px;
+    padding: 16px 12px 14px;
   }
 
-  .emoji {
-    font-size: 34px;
+  .imgWrapper {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 8px;
+  }
+
+  .sname {
+    font-size: 12px;
+  }
+
+  .sprice {
+    font-size: 13px;
   }
 
   .spotlightItems {
-    gap: 10px;
+    gap: 8px;
   }
 
   .spotlightItem {
     font-size: 12px;
-    padding: 8px 12px;
+    padding: 7px 11px;
   }
+}
+
+/* ── Skeleton states ─────────────────────────────────────────────── */
+.skeletonProd {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 22px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeletonImg {
+  width: 90px;
+  height: 90px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.skeletonName {
+  width: 80%;
+  height: 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.skeletonPrice {
+  width: 50%;
+  height: 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* ── Error state ─────────────────────────────────────────────────── */
+.errorState {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  padding: 32px 0;
+}
+
+.retryBtn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.retryBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Emoji fallback ──────────────────────────────────────────────── */
+.prodEmoji {
+  font-size: 52px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Out of stock overlay ────────────────────────────────────────── */
+.outOfStock {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.52);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Struck-through original price ──────────────────────────────── */
+.soriginal {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: line-through;
+  margin-top: -2px;
+}
+
+/* ── Wishlist button (top-right of card) ─────────────────────────── */
+.wishBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: transform 0.15s, background 0.15s;
+  padding: 0;
+  line-height: 1;
+}
+
+.wishBtn:hover:not(:disabled) {
+  transform: scale(1.15);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.wishlisted {
+  background: rgba(255, 60, 60, 0.25);
+}
+
+.wishPending {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ── Cart button — small circle, bottom-right of card ───────────── */
+.cartBtn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.15s;
+  padding: 0;
+  line-height: 1;
+}
+
+.cartBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.08);
+}
+
+.cartBtnAdded {
+  background: rgba(62, 207, 178, 0.25) !important;
+  color: #3ecfb2 !important;
+}
+
+.cartBtnError {
+  background: rgba(255, 107, 91, 0.25) !important;
+  color: var(--coral, #ff6b5b) !important;
+}
+
+.cartBtnLoading {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.cartBtnDisabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }

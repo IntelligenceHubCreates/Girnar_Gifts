@@ -7,15 +7,32 @@ import { signIn } from 'next-auth/react';
 import { _post } from '@/shared/fetchwrapper';
 import styles from './LoginPage.module.css';
 
+const GoogleLogo = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" fillRule="evenodd">
+      <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4" />
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853" />
+      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05" />
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335" />
+    </g>
+  </svg>
+);
+
 export default function LoginPage() {
   const router = useRouter();
   const [showPw, setShowPw] = useState(false);
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [toast, setToast] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+
+  const showToast = (type: 'success' | 'error', msg: string) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -48,11 +65,8 @@ export default function LoginPage() {
       if (result?.error) {
         setApiError('Login failed. Please try again.');
       } else {
-        setToast(true);
-        setTimeout(() => {
-          setToast(false);
-          router.push('/');
-        }, 1500);
+        showToast('success', '✅ Logged in successfully!');
+        setTimeout(() => router.push('/'), 1500);
       }
     } catch (err: any) {
       setApiError(err?.message || err || 'Invalid email or password');
@@ -61,7 +75,16 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogle = () => signIn('google', { callbackUrl: '/' });
+  const handleGoogle = async () => {
+  try {
+    setGoogleLoading(true);
+    // ✅ Sign out first to clear any existing session/cookie
+    await signIn('google', { callbackUrl: '/' });
+  } catch {
+    showToast('error', 'Google sign-in failed. Please try again.');
+    setGoogleLoading(false);
+  }
+};
 
   const set = (field: string) => (ev: React.ChangeEvent<HTMLInputElement>) => {
     setForm(f => ({ ...f, [field]: ev.target.value }));
@@ -69,15 +92,16 @@ export default function LoginPage() {
     if (apiError) setApiError('');
   };
 
+  const anyLoading = loading || googleLoading;
+
   return (
     <div className={styles.page}>
-      {/* ── Left decorative panel ── */}
       <div className={styles.leftPanel}>
         <div className={styles.brandMark}>
           🌟 Little<span className={styles.brandDot}>Loot</span>
         </div>
         <div className={styles.illustGrid}>
-          {['🚀','🦕','🎨','🧸','🔮','🎭'].map((e, i) => (
+          {['🚀', '🦕', '🎨', '🧸', '🔮', '🎭'].map((e, i) => (
             <div key={i} className={styles.illustCard}>{e}</div>
           ))}
         </div>
@@ -85,7 +109,6 @@ export default function LoginPage() {
         <p className={styles.panelSub}>Your little one's wishlist is waiting.</p>
       </div>
 
-      {/* ── Right form panel ── */}
       <div className={styles.rightPanel}>
         <div className={styles.formBox}>
           <h1 className={styles.formHeading}>Sign In</h1>
@@ -93,9 +116,8 @@ export default function LoginPage() {
             New here? <Link href="/signup">Create an account →</Link>
           </p>
 
-          {apiError && <div className={styles.errorMsg} style={{ marginBottom: 12 }}>{apiError}</div>}
+          {apiError && <div className={styles.errorBanner}>{apiError}</div>}
 
-          {/* Email */}
           <div className={styles.field}>
             <label className={styles.label} htmlFor="login-email">Email Address</label>
             <div className={styles.inputWrap}>
@@ -107,12 +129,12 @@ export default function LoginPage() {
                 placeholder="you@example.com"
                 value={form.email}
                 onChange={set('email')}
+                onKeyDown={e => e.key === 'Enter' && handleSubmit()}
               />
             </div>
             {errors.email && <span className={styles.errorMsg}>{errors.email}</span>}
           </div>
 
-          {/* Password */}
           <div className={styles.field}>
             <label className={styles.label} htmlFor="login-pw">Password</label>
             <div className={styles.inputWrap}>
@@ -124,6 +146,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={form.password}
                 onChange={set('password')}
+                onKeyDown={e => e.key === 'Enter' && handleSubmit()}
               />
               <button
                 type="button"
@@ -137,35 +160,48 @@ export default function LoginPage() {
             {errors.password && <span className={styles.errorMsg}>{errors.password}</span>}
           </div>
 
-          {/* Remember / Forgot */}
           <div className={styles.fieldRow}>
             <label className={styles.checkLabel}>
               <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
               Remember me
             </label>
-            <Link href="#" className={styles.forgotLink}>Forgot Password?</Link>
+            <Link href="/forgot-password" className={styles.forgotLink}>Forgot Password?</Link>
           </div>
 
-          <button type="button" className={styles.submitBtn} onClick={handleSubmit} disabled={loading}>
-            <span>{loading ? 'Signing In…' : 'Sign In'}</span> {!loading && <span>→</span>}
+          <button
+            type="button"
+            className={styles.submitBtn}
+            onClick={handleSubmit}
+            disabled={anyLoading}
+          >
+            <span>{loading ? 'Signing In…' : 'Sign In'}</span>
+            {!loading && <span>→</span>}
           </button>
 
           <div className={styles.divider}>or continue with</div>
 
-          <div className={styles.socialRow}>
-            <button type="button" className={styles.socialBtn} onClick={handleGoogle}>
-              <span className={styles.socialIcon}>🌐</span> Google
-            </button>
-            <button type="button" className={styles.socialBtn}>
-              <span className={styles.socialIcon}>📘</span> Facebook
-            </button>
-          </div>
+          <button
+            type="button"
+            className={styles.googleBtn}
+            onClick={handleGoogle}
+            disabled={anyLoading}
+            aria-label="Sign in with Google"
+          >
+            {googleLoading ? <span className={styles.spinner} /> : <GoogleLogo />}
+            <span>{googleLoading ? 'Connecting to Google…' : 'Continue with Google'}</span>
+          </button>
         </div>
       </div>
 
       {toast && (
-        <div className={styles.toast}>✅ Logged in successfully!</div>
+        <div className={`${styles.toast} ${toast.type === 'error' ? styles.toastError : ''}`}>
+          {toast.msg}
+        </div>
       )}
     </div>
   );
+}
+
+function signOut(arg0: { redirect: boolean; }) {
+  throw new Error('Function not implemented.');
 }

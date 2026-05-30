@@ -1,0 +1,8 @@
+.pageBackground {
+  background: linear-gradient(
+    160deg,
+    #FDF8F3 0%,
+    #FEF0E4 45%,
+    #FDE8D4 100%
+  );
+}

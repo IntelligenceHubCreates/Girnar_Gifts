@@ -9,13 +9,9 @@ export const metadata = { title: 'Sign In — Little Loot' };
 export default function Login() {
   return (
     <>
-      <TopBar />
-      <Header />
-      <NavBar />
       <main>
         <LoginPage />
       </main>
-      <Footer />
     </>
   );
 }

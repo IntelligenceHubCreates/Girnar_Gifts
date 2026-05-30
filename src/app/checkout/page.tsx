@@ -7,9 +7,7 @@ import CheckoutPage from '@/components/pages/CheckoutPage';
 export default function Checkout() {
   return (
     <>
-      <TopBar />
       <Header />
-      <NavBar />
       <main>
         <CheckoutPage />
       </main>

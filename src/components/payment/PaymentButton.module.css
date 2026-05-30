@@ -1,0 +1,60 @@
+.btn {
+  width: 100%;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #FF6B5B, #ff8a7e);
+  color: #fff;
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255, 107, 91, 0.4);
+  transition: transform 0.22s, box-shadow 0.22s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: 0.3px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(255, 107, 91, 0.5);
+}
+
+.btn:active:not(:disabled) { transform: translateY(0); }
+
+.btnLoading {
+  opacity: 0.85;
+  cursor: wait;
+}
+
+.btnDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 600px) {
+  .btn { padding: 14px 24px; font-size: 15px; border-radius: 14px; }
+}
+
+@media (max-width: 400px) {
+  .btn { padding: 13px 20px; font-size: 14px; }
+}

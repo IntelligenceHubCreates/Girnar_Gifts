@@ -1,3 +1,4 @@
+/* ── Product Card ───────────────────────────────────── */
 .productCard {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -6,6 +7,8 @@
   transition: transform 0.25s, box-shadow 0.25s;
   position: relative;
   cursor: pointer;
+  min-width: 0; /* prevent overflow in flex/grid children */
+  will-change: transform; /* promote to own layer, avoids layout shift */
 }
 
 .productCard:hover {
@@ -13,6 +16,7 @@
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14);
 }
 
+/* ── Image area ─────────────────────────────────────── */
 .productImg {
   height: 200px;
   display: flex;
@@ -29,12 +33,14 @@
   inset: 0;
   background: rgba(255, 255, 255, 0);
   transition: background 0.25s;
+  pointer-events: none; /* let clicks pass through to buttons underneath */
 }
 
 .productCard:hover .productImg::after {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
 }
 
+/* ── Badges ─────────────────────────────────────────── */
 .productBadges {
   position: absolute;
   top: 12px;
@@ -55,9 +61,10 @@
 }
 
 .badgeSale { background: var(--coral); color: #fff; }
-.badgeNew { background: var(--mint); color: #fff; }
-.badgeHot { background: var(--sun); color: var(--navy); }
+.badgeNew  { background: var(--mint);  color: #fff; }
+.badgeHot  { background: var(--sun);   color: var(--navy); }
 
+/* ── Wishlist button ────────────────────────────────── */
 .productWish {
   position: absolute;
   top: 12px;
@@ -74,13 +81,21 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, transform 0.15s;
   z-index: 1;
 }
 
-.productCard:hover .productWish,
-.wishlisted {
+.productCard:hover .productWish {
   opacity: 1;
+}
+
+/* FIX: .wishlisted must override the default opacity: 0 */
+.productWish.wishlisted {
+  opacity: 1 !important;
+}
+
+.productWish:active {
+  transform: scale(0.88);
 }
 
 /* Always show on touch devices */
@@ -90,6 +105,7 @@
   }
 }
 
+/* ── Product info ───────────────────────────────────── */
 .productInfo {
   padding: 16px 18px 20px;
 }
@@ -107,6 +123,10 @@
   font-weight: 800;
   color: var(--navy);
   margin: 4px 0 8px;
+  /* Prevent very long names from breaking layout */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .stars {
@@ -119,6 +139,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 10px;
+  flex-wrap: wrap; /* prevents overflow on tiny screens */
 }
 
 .priceNow {
@@ -133,6 +154,7 @@
   text-decoration: line-through;
 }
 
+/* ── Add to Cart button ─────────────────────────────── */
 .productAdd {
   display: block;
   width: 100%;
@@ -146,12 +168,41 @@
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s, transform 0.15s, opacity 0.2s;
+  /* Prevent text from shifting layout during state changes */
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.productAdd:hover {
+.productAdd:hover:not(:disabled) {
   background: var(--coral);
   transform: translateY(-1px);
+}
+
+/* FIX: Missing class that was referenced in the TSX */
+.productAddDone {
+  background: var(--mint, #3dba8a);
+}
+
+.productAddDone:hover:not(:disabled) {
+  background: var(--mint, #3dba8a);
+  transform: none;
+}
+
+/* FIX: Loading & disabled states */
+.productAdd:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Subtle pulse while loading */
+.productAdd:disabled:not(.productAddDone) {
+  animation: cartPulse 1s ease-in-out infinite;
+}
+
+@keyframes cartPulse {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 0.45; }
 }
 
 /* ── Responsive ─────────────────────────────────────── */
@@ -188,5 +239,11 @@
     padding: 9px;
     font-size: 12px;
     margin-top: 10px;
+  }
+
+  /* Disable hover lift on mobile to avoid sticky hover states */
+  .productCard:hover {
+    transform: none;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
   }
 }

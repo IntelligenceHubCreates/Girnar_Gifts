@@ -7,5 +7,15 @@ const nextConfig = {
       { protocol: 'https', hostname: '**' },
     ],
   },
+  async rewrites() {
+    return process.env.USE_BACKEND_REWRITES === 'true'
+      ? [
+          {
+            source: '/api/product/:path*',
+            destination: `${process.env.BACKEND_URL ?? 'http://localhost:8000'}/api/product/:path*`,
+          },
+        ]
+      : [];
+  },
 };
 module.exports = nextConfig;

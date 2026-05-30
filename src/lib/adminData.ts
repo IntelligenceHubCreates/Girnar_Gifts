@@ -1,4 +1,5 @@
-// ─── Navigation ──────────────────────────────────────────────────────────────
+// ─── Navigation ───────────────────────────────────────────────────────────────
+
 export type PageId =
   | 'dashboard' | 'orders' | 'products' | 'customers'
   | 'categories' | 'coupons' | 'reviews' | 'blog'
@@ -16,7 +17,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     title: 'Main',
     items: [
       { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-      { id: 'orders',    icon: '📦', label: 'Orders',    badge: 14 },
+      { id: 'orders',    icon: '📦', label: 'Orders' },
       { id: 'products',  icon: '🧸', label: 'Products' },
       { id: 'customers', icon: '👤', label: 'Customers' },
     ],
@@ -26,7 +27,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { id: 'categories', icon: '🗂️', label: 'Categories' },
       { id: 'coupons',    icon: '🏷️', label: 'Coupons' },
-      { id: 'reviews',    icon: '⭐',  label: 'Reviews', badge: 3 },
+      { id: 'reviews',    icon: '⭐',  label: 'Reviews' },
       { id: 'blog',       icon: '✏️', label: 'Blog' },
     ],
   },
@@ -40,14 +41,14 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
 ]
 
 export const PAGE_META: Record<PageId, { title: string; section: string; sub: string }> = {
-  dashboard:  { title: 'Dashboard',  section: 'Overview',     sub: 'Welcome back, Varsha 👋' },
-  orders:     { title: 'Orders',     section: 'Management',   sub: '847 total · ₹2.34L this month' },
-  products:   { title: 'Products',   section: 'Catalog',      sub: '840 products · 6 categories' },
-  customers:  { title: 'Customers',  section: 'Database',     sub: '3,412 registered customers' },
-  categories: { title: 'Categories', section: 'Manager',      sub: '6 active categories' },
-  coupons:    { title: 'Coupons',    section: 'Discounts',    sub: '12 active promo codes' },
-  reviews:    { title: 'Reviews',    section: 'Moderation',   sub: '4.6 avg rating · 1,248 reviews' },
-  blog:       { title: 'Blog',       section: 'Manager',      sub: '3 published · 2 drafts · 12.4K total views' },
-  analytics:  { title: 'Analytics',  section: 'Reports',      sub: 'Traffic, conversions & sales insights — last 30 days' },
+  dashboard:  { title: 'Dashboard',  section: 'Overview',      sub: 'Welcome back, Varsha 👋' },
+  orders:     { title: 'Orders',     section: 'Management',    sub: 'All customer orders' },
+  products:   { title: 'Products',   section: 'Catalog',       sub: 'Manage your product listing' },
+  customers:  { title: 'Customers',  section: 'Database',      sub: 'Registered customer profiles' },
+  categories: { title: 'Categories', section: 'Manager',       sub: 'Organise product categories' },
+  coupons:    { title: 'Coupons',    section: 'Discounts',     sub: 'Promo codes and discount rules' },
+  reviews:    { title: 'Reviews',    section: 'Moderation',    sub: 'Customer ratings and feedback' },
+  blog:       { title: 'Blog',       section: 'Manager',       sub: 'Published posts and drafts' },
+  analytics:  { title: 'Analytics',  section: 'Reports',       sub: 'Traffic, conversions & sales' },
   settings:   { title: 'Settings',   section: 'Configuration', sub: 'Store preferences & integrations' },
 }

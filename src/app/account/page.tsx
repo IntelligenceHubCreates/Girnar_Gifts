@@ -9,9 +9,7 @@ export const metadata = { title: 'My Account — Little Loot' };
 export default function Account() {
   return (
     <>
-      <TopBar />
       <Header />
-      <NavBar />
       <main>
         <AccountPage />
       </main>

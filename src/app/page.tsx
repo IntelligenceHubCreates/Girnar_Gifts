@@ -13,16 +13,16 @@ import TestimonialsSection from '@/components/sections/TestimonialsSection';
 import BlogSection from '@/components/sections/BlogSection';
 import BrandsSection from '@/components/sections/BrandsSection';
 import NewsletterSection from '@/components/sections/NewsletterSection';
+import styles from './HomePage.module.css';
 
 export default function HomePage() {
   return (
     <>
-      <TopBar />
+      
       <Header />
-      <NavBar />
-      <main>
+      
+      <main className={styles.pageBackground}>
         <HeroSection />
-        <TrustBar />
         <CategoriesSection />
         <FeaturedProducts />
         <PromoGrid />
@@ -30,7 +30,6 @@ export default function HomePage() {
         <ThreeColumnSection />
         <TestimonialsSection />
         <BlogSection />
-        <BrandsSection />
         <NewsletterSection />
       </main>
       <Footer />

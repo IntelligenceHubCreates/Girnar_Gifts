@@ -9,9 +9,7 @@ export const metadata = { title: 'Create Account — Little Loot' };
 export default function Signup() {
   return (
     <>
-      <TopBar />
       <Header />
-      <NavBar />
       <main>
         <SignupPage />
       </main>

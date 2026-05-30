@@ -55,19 +55,7 @@ export interface TrustItem {
   sub: string;
 }
 
-// ─── Data ────────────────────────────────────────────────────────────────────
-
-export const NAV_LINKS = [
-  { label: 'Home', href: '/', active: true },
-  { label: 'Toys', href: '/toys' },
-  { label: 'Stationery', href: '/stationery' },
-  { label: 'Arts & Crafts', href: '/arts-crafts' },
-  { label: 'Books', href: '/books' },
-  { label: 'Games', href: '/games' },
-  { label: 'Baby & Toddler', href: '/baby-toddler' },
-  { label: 'Brands', href: '/brands' },
-  { label: 'Blog', href: '/blog' },
-];
+// ─── Data ───
 
 export const TRUST_ITEMS: TrustItem[] = [
   { icon: '🚚', title: 'Free Shipping', sub: 'On orders over ₹499' },

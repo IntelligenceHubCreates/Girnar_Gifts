@@ -1,117 +1,221 @@
+/* ── Section ─────────────────────────────────────────────────────────────── */
 .testimonialSection {
   background: linear-gradient(135deg, #fffbf0, #fff0ec);
-  padding: 64px 40px;
+  padding: 64px 40px 56px;
   text-align: center;
+  overflow: hidden;
 }
 
+@media (max-width: 1280px) { .testimonialSection { padding: 56px 32px 48px; } }
+@media (max-width: 1024px) { .testimonialSection { padding: 52px 24px 44px; } }
+@media (max-width: 768px)  { .testimonialSection { padding: 40px 16px 36px; } }
+@media (max-width: 480px)  { .testimonialSection { padding: 32px 14px 30px; } }
+@media (max-width: 360px)  { .testimonialSection { padding: 28px 12px 26px; } }
+
+/* ── Title ───────────────────────────────────────────────────────────────── */
 .testiTitle {
   font-family: var(--font-baloo), 'Baloo 2', cursive;
   font-size: 34px;
   font-weight: 800;
   color: var(--navy);
-  margin-bottom: 36px;
+  margin-bottom: 40px;
+  line-height: 1.2;
 }
 
-.testiCards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  max-width: 1100px;
+@media (max-width: 1024px) { .testiTitle { font-size: 30px; margin-bottom: 36px; } }
+@media (max-width: 768px)  { .testiTitle { font-size: 26px; margin-bottom: 28px; } }
+@media (max-width: 480px)  { .testiTitle { font-size: 22px; margin-bottom: 22px; } }
+@media (max-width: 360px)  { .testiTitle { font-size: 20px; margin-bottom: 18px; } }
+
+/* ── Carousel wrapper ────────────────────────────────────────────────────── */
+.carouselWrap {
+  position: relative;
+  max-width: 780px;
   margin: 0 auto;
+  overflow: hidden;
+  border-radius: 24px;
+  outline: none;
 }
 
+@media (max-width: 768px) { .carouselWrap { border-radius: 20px; } }
+
+/* ── Sliding track ───────────────────────────────────────────────────────── */
+.track {
+  display: flex;
+  transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.track:active { cursor: grabbing; }
+
+.trackDragging {
+  transition: none;
+}
+
+/* ── Each slide ──────────────────────────────────────────────────────────── */
+.slide {
+  flex: 0 0 100%;
+  width: 100%;
+  padding: 4px 8px 8px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) { .slide { padding: 4px 4px 8px; } }
+
+/* ── Card ────────────────────────────────────────────────────────────────── */
 .testiCard {
   background: #fff;
-  border-radius: var(--radius);
-  padding: 28px;
+  border-radius: 22px;
+  padding: 36px 40px 32px;
   text-align: left;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
-  transition: transform 0.2s;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.09);
+  border: 1.5px solid rgba(255,107,91,0.08);
+  display: flex;
+  flex-direction: column;
 }
 
-.testiCard:hover {
-  transform: translateY(-4px);
-}
+@media (max-width: 1024px) { .testiCard { padding: 30px 32px 28px; } }
+@media (max-width: 768px)  { .testiCard { padding: 26px 28px 24px; border-radius: 18px; } }
+@media (max-width: 480px)  { .testiCard { padding: 22px 22px 20px; border-radius: 16px; } }
+@media (max-width: 360px)  { .testiCard { padding: 18px 18px 16px; border-radius: 14px; } }
 
+/* ── Quote mark ──────────────────────────────────────────────────────────── */
 .testiQuote {
-  font-size: 48px;
-  color: var(--coral);
-  line-height: 0.8;
+  font-size: 56px;
+  color: var(--coral, #FF6B5B);
+  line-height: 0.7;
   font-family: Georgia, serif;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+  opacity: 0.9;
 }
 
+@media (max-width: 768px) { .testiQuote { font-size: 48px; } }
+@media (max-width: 480px) { .testiQuote { font-size: 40px; margin-bottom: 8px; } }
+@media (max-width: 360px) { .testiQuote { font-size: 34px; } }
+
+/* ── Quote text ──────────────────────────────────────────────────────────── */
 .testiText {
-  font-size: 14px;
-  line-height: 1.7;
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-size: 15px;
+  line-height: 1.8;
   color: #555;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
+  flex: 1;
 }
 
+@media (max-width: 768px) { .testiText { font-size: 14px; margin-bottom: 20px; line-height: 1.75; } }
+@media (max-width: 480px) { .testiText { font-size: 13px; margin-bottom: 16px; line-height: 1.7;  } }
+@media (max-width: 360px) { .testiText { font-size: 12.5px; } }
+
+/* ── Author row ──────────────────────────────────────────────────────────── */
 .testiAuthor {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1.5px solid #f0ece5;
 }
 
+@media (max-width: 480px) { .testiAuthor { gap: 12px; padding-top: 16px; } }
+@media (max-width: 360px) { .testiAuthor { gap: 10px; padding-top: 12px; } }
+
 .testiAvatar {
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: var(--soft);
+  background: var(--soft, #faf8f5);
+  border: 2.5px solid rgba(255,107,91,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 24px;
   flex-shrink: 0;
 }
 
+@media (max-width: 480px) { .testiAvatar { width: 44px; height: 44px; font-size: 21px; } }
+@media (max-width: 360px) { .testiAvatar { width: 38px; height: 38px; font-size: 18px; } }
+
 .testiName {
-  font-size: 14px;
+  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-size: 15px;
   font-weight: 800;
   color: var(--navy);
+  line-height: 1.2;
 }
+
+@media (max-width: 480px) { .testiName { font-size: 14px; } }
+@media (max-width: 360px) { .testiName { font-size: 13px; } }
 
 .testiSub {
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
   font-size: 12px;
   color: #999;
+  margin-top: 2px;
+  font-weight: 600;
 }
+
+@media (max-width: 360px) { .testiSub { font-size: 11px; } }
 
 .testiStars {
-  color: var(--sun);
+  color: var(--sun, #FFD336);
   font-size: 13px;
-  margin-top: 2px;
+  margin-top: 4px;
+  letter-spacing: 2px;
 }
 
-/* ── Responsive ─────────────────────────────────────── */
-@media (max-width: 1024px) {
-  .testimonialSection {
-    padding: 52px 24px;
-  }
+/* ── Dots ────────────────────────────────────────────────────────────────── */
+.dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 20px;
 }
 
-@media (max-width: 768px) {
-  .testimonialSection {
-    padding: 40px 16px;
-  }
+.dotWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  .testiTitle {
-    font-size: 26px;
-    margin-bottom: 24px;
-  }
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d8d0c8;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.25s, width 0.25s, border-radius 0.25s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
 
-  .testiCards {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
+.dot:hover { background: rgba(255,107,91,0.45); }
+
+.dotActive {
+  background: var(--coral, #FF6B5B) !important;
+  width: 18px;
+  border-radius: 3px;
 }
 
 @media (max-width: 480px) {
-  .testiCard {
-    padding: 20px;
-  }
+  .dots { gap: 5px; margin-top: 14px; }
+  .dot  { width: 5px; height: 5px; }
+  .dotActive { width: 13px; border-radius: 2.5px; }
+}
 
-  .testiQuote {
-    font-size: 36px;
-  }
+@media (max-width: 360px) {
+  .dots { gap: 4px; margin-top: 12px; }
+  .dot  { width: 4px; height: 4px; }
+  .dotActive { width: 11px; border-radius: 2px; }
 }

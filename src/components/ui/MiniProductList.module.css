@@ -1,58 +1,102 @@
+/* ══════════════════════════════════════════════════════
+   MiniProductList — fully responsive
+   ══════════════════════════════════════════════════════ */
+
 .miniSection {
   background: #fff;
-  border-radius: var(--radius);
-  padding: 24px;
+  border-radius: var(--radius, 20px);
+  padding: 22px 20px 8px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
 }
 
+/* ── Header ──────────────────────────────────────────── */
 .miniSectionTitle {
-  font-family: var(--font-baloo), 'Baloo 2', cursive;
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--navy);
-  margin-bottom: 18px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--soft);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--soft, #f5f0ea);
+}
+
+.titleLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.titleIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #fff4f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.titleText {
+  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--navy, #1a2540);
+  line-height: 1;
 }
 
 .seeAll {
   font-size: 12px;
   font-weight: 700;
-  color: var(--coral);
+  color: var(--coral, #ff6b5b);
+  text-decoration: none;
+  white-space: nowrap;
   transition: opacity 0.2s;
 }
+.seeAll:hover { opacity: 0.75; }
 
-.seeAll:hover {
-  opacity: 0.75;
-}
-
+/* ── Product row ─────────────────────────────────────── */
 .miniProduct {
   display: flex;
   gap: 14px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--soft);
+  padding: 10px 6px;
+  border-bottom: 1px solid var(--soft, #f5f0ea);
   align-items: center;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 10px;
+  transition: background 0.15s;
 }
+.miniProduct:hover      { background: #faf7f3; }
+.miniProduct:last-child { border-bottom: none; }
 
-.miniProduct:last-child {
-  border-bottom: none;
-}
-
+/* ── Thumbnail ───────────────────────────────────────── */
 .miniThumb {
   width: 62px;
   height: 62px;
-  background: var(--soft);
+  background: var(--soft, #f5f0ea);
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
+.miniThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+  display: block;
+}
+
+.miniThumbEmoji {
+  font-size: 30px;
+  line-height: 1;
+}
+
+/* ── Info ────────────────────────────────────────────── */
 .miniInfo {
   flex: 1;
   min-width: 0;
@@ -60,44 +104,187 @@
 
 .miniName {
   font-size: 13px;
-  font-weight: 800;
-  color: var(--navy);
+  font-weight: 700;
+  color: var(--navy, #1a2540);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.miniStars {
-  color: var(--sun);
-  font-size: 11px;
+  margin-bottom: 4px;
+  line-height: 1.3;
 }
 
 .miniPrice {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--coral);
-  margin-top: 2px;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
 }
 
-.miniOriginal {
-  color: #bbb;
-  font-size: 12px;
-  text-decoration: line-through;
-  font-weight: 400;
+.miniNow {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--coral, #ff6b5b);
 }
 
-/* ── Responsive ─────────────────────────────────────── */
-@media (max-width: 480px) {
+.miniOriginal {
+  font-size: 11px;
+  font-weight: 400;
+  color: #bbb;
+  text-decoration: line-through;
+}
+
+/* ── Chevron ─────────────────────────────────────────── */
+.miniArrow {
+  font-size: 20px;
+  color: #d0d0d0;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+.miniProduct:hover .miniArrow {
+  color: var(--coral, #ff6b5b);
+  transform: translateX(3px);
+}
+
+/* ── Empty state ─────────────────────────────────────── */
+.empty {
+  font-size: 13px;
+  color: #bbb;
+  padding: 24px 0;
+  text-align: center;
+}
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════ */
+
+/* ── Large tablet (inside 2-col grid) ───────────────── */
+@media (max-width: 1024px) {
   .miniSection {
-    padding: 18px;
+    padding: 20px 18px 8px;
+  }
+
+  .titleText {
+    font-size: 18px;
+  }
+
+  .miniThumb {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+/* ── Tablet: still in 2-col grid, tighter rows ───────── */
+@media (max-width: 768px) {
+  .miniSection {
+    padding: 18px 16px 8px;
+  }
+
+  .miniSectionTitle {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+
+  .titleIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+
+  .titleText {
+    font-size: 17px;
+  }
+
+  .miniProduct {
+    gap: 12px;
+    padding: 9px 4px;
+  }
+
+  .miniThumb {
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+  }
+
+  .miniThumbImg   { border-radius: 12px; }
+  .miniName       { font-size: 12px; }
+  .miniNow        { font-size: 13px; }
+  .miniArrow      { font-size: 18px; }
+}
+
+/* ── Mobile: full width single column ────────────────── */
+@media (max-width: 600px) {
+  .miniSection {
+    padding: 16px 14px 6px;
+    border-radius: 16px;
+  }
+
+  .miniSectionTitle {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+
+  .titleLeft    { gap: 8px; }
+
+  .titleIcon {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+
+  .titleText {
+    font-size: 16px;
+  }
+
+  .seeAll {
+    font-size: 11px;
+  }
+
+  .miniProduct {
+    gap: 12px;
+    padding: 8px 4px;
+  }
+
+  /* Bigger thumbnails on mobile — easier to tap */
+  .miniThumb {
+    width: 58px;
+    height: 58px;
+    border-radius: 12px;
+  }
+
+  .miniThumbImg   { border-radius: 12px; }
+  .miniThumbEmoji { font-size: 26px; }
+
+  .miniName {
+    font-size: 13px;
+    /* Allow 2 lines on mobile instead of truncating */
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .miniNow   { font-size: 13px; }
+  .miniArrow { font-size: 17px; }
+}
+
+/* ── Very small phones ───────────────────────────────── */
+@media (max-width: 380px) {
+  .miniSection {
+    padding: 14px 12px 4px;
+    border-radius: 14px;
   }
 
   .miniThumb {
     width: 52px;
     height: 52px;
-    font-size: 26px;
   }
+
+  .titleText  { font-size: 15px; }
+  .miniName   { font-size: 12px; }
+  .miniNow    { font-size: 12px; }
 }

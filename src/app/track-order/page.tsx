@@ -7,9 +7,7 @@ import TrackOrderPage from '@/components/pages/TrackOrderPage';
 export default function TrackOrder() {
   return (
     <>
-      <TopBar />
       <Header />
-      <NavBar />
       <main>
         <TrackOrderPage />
       </main>

@@ -18,9 +18,11 @@ export default function Drawer({ open, onClose, title, children, footer, width =
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
 
+  if (!open) return null
+
   return (
     <div
-      className={`drawer-overlay${open ? ' open' : ''}`}
+      className="drawer-overlay open"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div className="drawer" style={{ width, maxWidth: '95vw' }}>
