@@ -7,6 +7,12 @@ const nextConfig = {
       { protocol: 'https', hostname: '**' },
     ],
   },
+    experimental: {
+    // ... your existing experimental options ...
+    serverActions: {
+      bodySizeLimit: '200mb',
+    },
+  },
   async rewrites() {
     return process.env.USE_BACKEND_REWRITES === 'true'
       ? [

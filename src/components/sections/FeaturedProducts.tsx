@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { _get, _post } from '@/shared/fetchwrapper';
@@ -12,19 +12,21 @@ import { useCart } from '@/context/CartContext';
 const PLACEHOLDER = '/images/placeholder-product.png';
 
 const BADGE_BG: Record<string, string> = {
-  sale: '#FF6B5B',
-  new:  '#3ECFB2',
-  hot:  '#FFD336',
+  sale:       '#F4621A',
+  new:        '#3ECFB2',
+  hot:        '#FFD336',
+  bestseller: '#3ECFB2',
 };
 const BADGE_TEXT: Record<string, string> = {
-  sale: '#fff',
-  new:  '#fff',
-  hot:  '#1A2540',
+  sale:       '#fff',
+  new:        '#fff',
+  hot:        '#1A2540',
+  bestseller: '#fff',
 };
 
 // ─── Normalise raw API response to UiProduct ─────────────────────
 function normalise(p: any): UiProduct {
-  const price = Number(p.original_price ?? p.price ?? 0);
+  const price          = Number(p.original_price ?? p.price ?? 0);
   const amountDiscount = Number(p.amount_discount ?? 0);
   const pctDiscount    = Number(p.percentage_discount ?? 0);
 
@@ -43,37 +45,51 @@ function normalise(p: any): UiProduct {
       ).filter(Boolean)
     : [];
 
-  const badges: { label: string; type: 'sale' | 'new' | 'hot' }[] = Array.isArray(p.badges)
+  const badges: { label: string; type: string }[] = Array.isArray(p.badges)
     ? p.badges
     : pctDiscount > 0
-    ? [{ label: `${pctDiscount}% OFF`, type: 'sale' as const }]
+    ? [{ label: `${pctDiscount}% OFF`, type: 'sale' }]
     : amountDiscount > 0
-    ? [{ label: `Save ₹${amountDiscount}`, type: 'sale' as const }]
+    ? [{ label: `Save ₹${amountDiscount}`, type: 'sale' }]
     : [];
 
   const stockCount = Number(p.count ?? p.stock ?? p.quantity ?? 0);
 
+  // Extract color swatches if present
+  const colors: string[] =
+  Array.isArray(p.color_variants) && p.color_variants.length > 0
+    ? p.color_variants
+        .map((variant: any) => variant.hex)
+        .filter(Boolean)
+    : p.color_hex
+    ? [p.color_hex]
+    : [];
+    console.log('RAW PRODUCT', p);
+
   return {
-    id:            String(p.id   ?? ''),
-    name:          String(p.name ?? ''),
-    price:         sellingPrice > 0 ? sellingPrice : price,
-    originalPrice: price,
+    id:              String(p.id   ?? ''),
+    name:            String(p.name ?? ''),
+    price:           sellingPrice > 0 ? sellingPrice : price,
+    originalPrice:   price,
     images,
-    brand:         String(p.brand ?? p.brand_name ?? ''),
-    category:      String(p.category ?? ''),
-    subcategory:   String(p.sub_category_name ?? p.sub_category_slug ?? p.subcategory ?? p.category ?? ''),
+    brand:           String(p.brand ?? p.brand_name ?? ''),
+    category:        String(p.category ?? ''),
+    subcategory:     String(p.sub_category_name ?? p.sub_category_slug ?? p.subcategory ?? p.category ?? ''),
     subcategorySlug: String(p.sub_category_slug ?? p.subcategory_slug ?? ''),
-    ageRange:      String(p.age_range  ?? p.ageRange ?? ''),
-    stars:         Math.min(5, Math.max(0, Number(p.stars ?? p.rating ?? 0))),
-    reviews:       Number(p.reviews ?? p.review_count ?? p.reviewCount ?? 0),
-    inStock:       stockCount > 0,
+    ageRange:        String(p.age_range ?? p.ageRange ?? ''),
+    stars:           Math.min(5, Math.max(0, Number(p.stars ?? p.rating ?? 0))),
+    reviews:         Number(p.reviews ?? p.review_count ?? p.reviewCount ?? 0),
+    inStock:         stockCount > 0,
     stockCount,
     badges,
-    bgGradient:    Boolean(p.bg_gradient ?? p.bgGradient),
-    description:   String(p.description ?? ''),
-    emoji:         String(p.emoji ?? ''),
-    discountPct:   pctDiscount,
-  };
+    bgGradient:      Boolean(p.bg_gradient ?? p.bgGradient),
+    description:     String(p.description ?? ''),
+    emoji:           String(p.emoji ?? ''),
+    discountPct:     pctDiscount,
+    colors:         colors,
+    colorVariants:  p.color_variants ?? [],
+  } as UiProduct & { colors: string[] };
+  
 }
 
 const fmt = (n: number) =>
@@ -96,7 +112,7 @@ function ProductImg({ src, alt, className }: { src: string; alt: string; classNa
 
 // ─── Card ─────────────────────────────────────────────────────────
 interface CardProps {
-  product:     UiProduct;
+  product:     UiProduct & { colors?: string[] };
   wishlisted:  boolean;
   wishPending: boolean;
   cartState:   'idle' | 'loading' | 'added' | 'error';
@@ -109,22 +125,22 @@ function FeaturedCard({
   product, wishlisted, wishPending, cartState,
   onWishlist, onAddToCart, onQuickView,
 }: CardProps) {
-  const stars  = Math.min(5, Math.max(0, Math.round(product.stars)));
+  const stars   = Math.min(5, Math.max(0, Math.round(product.stars)));
   const hasSave = product.originalPrice > product.price && product.originalPrice > 0;
-  const saving  = hasSave ? product.originalPrice - product.price : 0;
   const hasImg  = product.images.length > 0;
+  const colors  = (product as any).colors ?? [];
 
   const addIcon =
     cartState === 'loading' ? '⏳'
     : cartState === 'added'   ? '✓'
     : cartState === 'error'   ? '✗'
     : !product.inStock        ? '✉'
-    : '🛒';
+    : '+';
 
   return (
     <article className={styles.card}>
 
-      {/* ── Image ── */}
+      {/* ── Image area ── */}
       <Link href={`/product/${product.id}`} className={styles.cardImgLink} aria-label={product.name}>
         <div
           className={styles.cardImg}
@@ -136,27 +152,45 @@ function FeaturedCard({
             <div className={styles.cardEmojiThumb} aria-hidden="true">{product.emoji || '🎁'}</div>
           )}
           {!product.inStock && <div className={styles.outOfStock}>Out of Stock</div>}
+
+          {/* Badges — top left */}
           {product.badges.length > 0 && (
             <div className={styles.badges}>
               {product.badges.map((b) => (
-                <span key={b.label} className={styles.badge}
-                  style={{ background: BADGE_BG[b.type] ?? '#ccc', color: BADGE_TEXT[b.type] ?? '#000' }}>
+                <span
+                  key={b.label}
+                  className={styles.badge}
+                  style={{
+                    background: BADGE_BG[b.type] ?? '#F4621A',
+                    color:      BADGE_TEXT[b.type] ?? '#fff',
+                  }}
+                >
                   {b.label}
                 </span>
               ))}
             </div>
           )}
+
+          {/* Quick-view overlay */}
           <div className={styles.cardOverlay} onClick={(e) => { e.preventDefault(); onQuickView(); }}>
             <span className={styles.quickView}>Quick View</span>
           </div>
         </div>
       </Link>
 
-      {/* ── Wishlist heart ── */}
+      {/* ── Wishlist heart — top right ── */}
       <button
-        className={[styles.wishBtn, wishlisted ? styles.wishlisted : '', wishPending ? styles.wishPending : ''].filter(Boolean).join(' ')}
-        onClick={onWishlist} disabled={wishPending} type="button"
-        aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'} aria-pressed={wishlisted}>
+        className={[
+          styles.wishBtn,
+          wishlisted  ? styles.wishlisted  : '',
+          wishPending ? styles.wishPending  : '',
+        ].filter(Boolean).join(' ')}
+        onClick={onWishlist}
+        disabled={wishPending}
+        type="button"
+        aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+        aria-pressed={wishlisted}
+      >
         {wishPending ? '⏳' : wishlisted ? '❤️' : '🤍'}
       </button>
 
@@ -167,30 +201,52 @@ function FeaturedCard({
         <Link href={`/product/${product.id}`} className={styles.cardNameLink}>
           <h3 className={styles.cardName}>{product.name}</h3>
         </Link>
+        
 
         {/* Category */}
         <div className={styles.cardMeta}>
           <span className={styles.cardCat}>{product.subcategory || product.category}</span>
-          {product.ageRange && <span className={styles.cardAge}>👶 {product.ageRange}</span>}
+          {product.ageRange && <span className={styles.cardAge}>· {product.ageRange}</span>}
         </div>
 
         {/* Stars */}
         <div className={styles.cardStars} aria-label={`${stars} out of 5 stars`}>
-          {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
+          <span>{'★'.repeat(stars)}{'☆'.repeat(5 - stars)}</span>
           <span className={styles.cardReviews}>({product.reviews})</span>
         </div>
 
-        {/* Price + round + button */}
+        {/* Color swatches — shown only when colors exist */}
+        {colors.length > 0 && (
+          <div className={styles.colorSwatches}>
+            {colors.slice(0, 5).map((color: string, index: number) => (
+              <span
+                key={index}
+                className={styles.swatch}
+                style={{ backgroundColor: color }}
+                title={color}
+              />
+            ))}
+
+            {colors.length > 5 && (
+              <span className={styles.moreColors}>
+                +{colors.length - 5}
+              </span>
+            )}
+  </div>
+        )}
+
+        {/* Price + ADD button */}
         <div className={styles.cardBottom}>
           <div className={styles.cardPrice}>
             <span className={styles.priceNow}>₹{fmt(product.price)}</span>
             {hasSave && (
               <div className={styles.priceRow}>
                 <span className={styles.priceWas}>₹{fmt(product.originalPrice)}</span>
-                <span className={styles.priceSave}>Save ₹{fmt(saving)}</span>
+                <span className={styles.priceOff}>{product.discountPct}% OFF</span>
               </div>
             )}
           </div>
+          
 
           <button
             className={[
@@ -208,6 +264,8 @@ function FeaturedCard({
             {addIcon}
           </button>
         </div>
+
+        
 
       </div>
     </article>
@@ -234,19 +292,21 @@ type CartState = 'idle' | 'loading' | 'added' | 'error';
 
 // ─── Section ──────────────────────────────────────────────────────
 export default function FeaturedProducts() {
-  const [products,    setProducts]    = useState<UiProduct[]>([]);
+  const [products,    setProducts]    = useState<(UiProduct & { colors?: string[] })[]>([]);
   const [loading,     setLoading]     = useState(true);
   const [fetchError,  setFetchError]  = useState(false);
   const [wishlist,    setWishlist]    = useState<Set<string>>(new Set());
   const [wishPending, setWishPending] = useState<Set<string>>(new Set());
   const [cartStates,  setCartStates]  = useState<Record<string, CartState>>({});
+  const [activeDot,   setActiveDot]   = useState(0);
+  const gridRef = useRef<HTMLDivElement>(null);
   const { dispatch } = useCart();
 
-  const [quickViewProduct,  setQuickViewProduct]  = useState<UiProduct | null>(null);
+  const [quickViewProduct, setQuickViewProduct] = useState<(UiProduct & { colors?: string[] }) | null>(null);
   const [qvActiveImg, setQvActiveImg] = useState(0);
   const [qvQty,       setQvQty]       = useState(1);
 
-  function openQuickView(product: UiProduct) {
+  function openQuickView(product: UiProduct & { colors?: string[] }) {
     setQuickViewProduct(product); setQvActiveImg(0); setQvQty(1);
     document.body.style.overflow = 'hidden';
   }
@@ -255,7 +315,7 @@ export default function FeaturedProducts() {
     document.body.style.overflow = '';
   }
 
-  // ── Fetch featured products ────────────────────────────────────
+  // ── Fetch featured products ───────────────────────────────────
   useEffect(() => {
     setLoading(true); setFetchError(false);
     _get('/api/product/featured')
@@ -272,18 +332,43 @@ export default function FeaturedProducts() {
       .finally(() => setLoading(false));
   }, []);
 
-  // ── Fetch wishlist ─────────────────────────────────────────────
+  // ── Fetch wishlist ────────────────────────────────────────────
   useEffect(() => {
     _get('/api/favorite')
       .then((res) => {
         const items: any[] = Array.isArray(res) ? res : Array.isArray((res as any)?.data) ? (res as any).data : [];
-        const ids = items.map((i) => typeof i === 'string' ? i : String(i.product_id ?? i.productId ?? i.id ?? '')).filter(Boolean);
+        const ids = items
+          .map((i) => typeof i === 'string' ? i : String(i.product_id ?? i.productId ?? i.id ?? ''))
+          .filter(Boolean);
         setWishlist(new Set(ids));
       })
       .catch(() => {});
   }, []);
 
-  // ── Wishlist toggle ─────────────────────────────────────────────
+  // ── Scroll dot tracking ───────────────────────────────────────
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const onScroll = () => {
+      const total = grid.scrollWidth - grid.clientWidth;
+      if (total <= 0) return;
+      const pct = grid.scrollLeft / total;
+      const dots = Math.ceil(products.length / 4) || 1;
+      setActiveDot(Math.round(pct * (dots - 1)));
+    };
+    grid.addEventListener('scroll', onScroll, { passive: true });
+    return () => grid.removeEventListener('scroll', onScroll);
+  }, [products.length]);
+
+  const scrollToDot = (idx: number) => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const total = grid.scrollWidth - grid.clientWidth;
+    const dots  = Math.ceil(products.length / 4) || 1;
+    grid.scrollTo({ left: (idx / (dots - 1)) * total, behavior: 'smooth' });
+  };
+
+  // ── Wishlist toggle ───────────────────────────────────────────
   const toggleWishlist = useCallback(async (id: string) => {
     if (wishPending.has(id)) return;
     const already = wishlist.has(id);
@@ -298,8 +383,8 @@ export default function FeaturedProducts() {
     }
   }, [wishlist, wishPending]);
 
-  // ── Add to cart ─────────────────────────────────────────────────
-  const addToCart = useCallback(async (product: UiProduct) => {
+  // ── Add to cart ───────────────────────────────────────────────
+  const addToCart = useCallback(async (product: UiProduct & { colors?: string[] }) => {
     if (cartStates[product.id] === 'loading') return;
     setCartStates((prev) => ({ ...prev, [product.id]: 'loading' }));
     dispatch({
@@ -322,32 +407,41 @@ export default function FeaturedProducts() {
     }
   }, [cartStates]);
 
-  // ── Render ─────────────────────────────────────────────────────
+  const dotCount = Math.max(1, Math.ceil(products.length / 4));
+
+  // ── Render ───────────────────────────────────────────────────
   return (
     <section className={styles.productsSection}>
 
+      {/* Header */}
       <div className={styles.sectionHeader}>
         <div className={styles.sectionHeadLeft}>
-          <div className={styles.sectionEyebrow}>⭐ Featured Products</div>
-          <h2 className={styles.sectionTitle}>Handpicked Favorites</h2>
-          <p className={styles.sectionSub}>Explore our most loved picks.</p>
+          <h2 className={styles.sectionTitle}>Featured Products</h2>
+          <span className={styles.titleUnderline} />
         </div>
-        <Link href="/products" className={styles.viewAll}>View All →</Link>
+        <Link href="/products" className={styles.viewAll}>
+          View All &nbsp;→
+        </Link>
       </div>
 
+      {/* Error */}
       {!loading && fetchError && (
         <div className={styles.errorBanner}>
           ⚠️ Could not load featured products.{' '}
-          <button onClick={() => window.location.reload()} className={styles.retryBtn} type="button">Retry</button>
+          <button onClick={() => window.location.reload()} className={styles.retryBtn} type="button">
+            Retry
+          </button>
         </div>
       )}
 
-      <div className={styles.productsGrid}>
+      {/* Product grid */}
+      <div className={styles.productsGrid} ref={gridRef}>
         {loading
           ? Array.from({ length: 8 }, (_, i) => <SkeletonCard key={i} />)
           : products.map((product) => (
               <FeaturedCard
-                key={product.id} product={product}
+                key={product.id}
+                product={product}
                 wishlisted={wishlist.has(product.id)}
                 wishPending={wishPending.has(product.id)}
                 cartState={cartStates[product.id] ?? 'idle'}
@@ -358,27 +452,56 @@ export default function FeaturedProducts() {
             ))}
       </div>
 
-      {/* ── Quick View Modal ── */}
+      {/* Scroll indicator dots */}
+      {!loading && dotCount > 1 && (
+        <div className={styles.scrollDots}>
+          {Array.from({ length: dotCount }, (_, i) => (
+            <button
+              key={i}
+              type="button"
+              className={[styles.dot, i === activeDot ? styles.dotActive : ''].filter(Boolean).join(' ')}
+              onClick={() => scrollToDot(i)}
+              aria-label={`Go to page ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Quick View Modal */}
       {quickViewProduct && (
-        <div className={styles.qvOverlay} onClick={closeQuickView}
-          role="dialog" aria-modal="true" aria-label={`Quick view: ${quickViewProduct.name}`}>
+        <div
+          className={styles.qvOverlay}
+          onClick={closeQuickView}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Quick view: ${quickViewProduct.name}`}
+        >
           <div className={styles.qvModal} onClick={(e) => e.stopPropagation()}>
             <button className={styles.qvClose} onClick={closeQuickView} type="button" aria-label="Close">✕</button>
             <div className={styles.qvGrid}>
+
               {/* Left — Images */}
               <div className={styles.qvImgCol}>
                 <div className={styles.qvMainImg}>
                   {quickViewProduct.images[qvActiveImg] ? (
-                    <Image src={quickViewProduct.images[qvActiveImg]} alt={quickViewProduct.name}
-                      fill sizes="(max-width: 768px) 100vw, 45vw" className={styles.qvMainImgTag} />
+                    <Image
+                      src={quickViewProduct.images[qvActiveImg]}
+                      alt={quickViewProduct.name}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 45vw"
+                      className={styles.qvMainImgTag}
+                    />
                   ) : (
                     <div className={styles.qvEmojiThumb}>{quickViewProduct.emoji || '🎁'}</div>
                   )}
                   {quickViewProduct.badges.length > 0 && (
                     <div className={styles.qvBadges}>
                       {quickViewProduct.badges.map((b) => (
-                        <span key={b.label} className={styles.qvBadge}
-                          style={{ background: BADGE_BG[b.type] ?? '#ccc', color: BADGE_TEXT[b.type] ?? '#000' }}>
+                        <span
+                          key={b.label}
+                          className={styles.qvBadge}
+                          style={{ background: BADGE_BG[b.type] ?? '#F4621A', color: BADGE_TEXT[b.type] ?? '#fff' }}
+                        >
                           {b.label}
                         </span>
                       ))}
@@ -388,9 +511,12 @@ export default function FeaturedProducts() {
                 {quickViewProduct.images.length > 1 && (
                   <div className={styles.qvThumbs}>
                     {quickViewProduct.images.map((img, i) => (
-                      <button key={i} type="button"
+                      <button
+                        key={i}
+                        type="button"
                         className={`${styles.qvThumb} ${i === qvActiveImg ? styles.qvThumbActive : ''}`}
-                        onClick={() => setQvActiveImg(i)}>
+                        onClick={() => setQvActiveImg(i)}
+                      >
                         <Image src={img} alt={`View ${i + 1}`} fill sizes="56px" className={styles.qvThumbImg} />
                       </button>
                     ))}
@@ -420,32 +546,50 @@ export default function FeaturedProducts() {
                 <div className={quickViewProduct.inStock ? styles.qvInStock : styles.qvOutStock}>
                   {quickViewProduct.inStock ? '✅ In Stock' : '❌ Out of Stock'}
                 </div>
-                {quickViewProduct.description && <p className={styles.qvDesc}>{quickViewProduct.description}</p>}
+                {quickViewProduct.description && (
+                  <p className={styles.qvDesc}>{quickViewProduct.description}</p>
+                )}
                 <div className={styles.qvActions}>
                   <div className={styles.qvQty}>
-                    <button type="button" className={styles.qvQtyBtn}
-                      onClick={() => setQvQty((q) => Math.max(1, q - 1))} disabled={qvQty <= 1}>−</button>
+                    <button
+                      type="button"
+                      className={styles.qvQtyBtn}
+                      onClick={() => setQvQty((q) => Math.max(1, q - 1))}
+                      disabled={qvQty <= 1}
+                    >−</button>
                     <span className={styles.qvQtyNum}>{qvQty}</span>
-                    <button type="button" className={styles.qvQtyBtn}
-                      onClick={() => setQvQty((q) => q + 1)} disabled={!quickViewProduct.inStock}>+</button>
+                    <button
+                      type="button"
+                      className={styles.qvQtyBtn}
+                      onClick={() => setQvQty((q) => q + 1)}
+                      disabled={!quickViewProduct.inStock}
+                    >+</button>
                   </div>
-                  <button type="button"
+                  <button
+                    type="button"
                     className={`${styles.qvAddBtn} ${
                       cartStates[quickViewProduct.id] === 'added'   ? styles.qvAddBtnAdded   :
                       cartStates[quickViewProduct.id] === 'error'   ? styles.qvAddBtnError   :
-                      cartStates[quickViewProduct.id] === 'loading' ? styles.qvAddBtnLoading : ''}`}
+                      cartStates[quickViewProduct.id] === 'loading' ? styles.qvAddBtnLoading : ''
+                    }`}
                     disabled={!quickViewProduct.inStock || cartStates[quickViewProduct.id] === 'loading'}
-                    onClick={() => addToCart(quickViewProduct)}>
+                    onClick={() => addToCart(quickViewProduct)}
+                  >
                     {cartStates[quickViewProduct.id] === 'loading' ? 'Adding…'
                      : cartStates[quickViewProduct.id] === 'added'   ? '✓ Added to Cart!'
                      : cartStates[quickViewProduct.id] === 'error'   ? '✗ Try Again'
                      : '🛒 Add to Cart'}
                   </button>
                 </div>
-                <Link href={`/product/${quickViewProduct.id}`} className={styles.qvFullLink} onClick={closeQuickView}>
+                <Link
+                  href={`/product/${quickViewProduct.id}`}
+                  className={styles.qvFullLink}
+                  onClick={closeQuickView}
+                >
                   View Full Details →
                 </Link>
               </div>
+
             </div>
           </div>
         </div>

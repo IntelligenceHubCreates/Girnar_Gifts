@@ -204,6 +204,63 @@ export default function HeroSection() {
             Safe, certified, and delivered to your doorstep with love.
           </motion.p>
 
+          <div className={styles.rightColmobile}>
+            {/* Background Decorations */}
+  <div className={styles.heroDecor}>
+    <div className={styles.paperPlane}>
+      <svg viewBox="0 0 80 60">
+        <path
+          d="M4 30L76 4L48 56L36 36L4 30Z"
+          fill="#BFD1FF"
+        />
+        <path
+          d="M36 36L76 4"
+          stroke="#8EA9F8"
+          strokeWidth="2"
+        />
+      </svg>
+    </div>
+
+    <svg
+      className={styles.flightPath}
+      viewBox="0 0 120 120"
+      fill="none"
+    >
+      <path
+        d="M100 10C40 20 50 90 10 110"
+        stroke="#B9B9B9"
+        strokeWidth="2"
+        strokeDasharray="6 6"
+        strokeLinecap="round"
+      />
+    </svg>
+
+    <div className={styles.star}>⭐</div>
+
+    <span className={`${styles.dot} ${styles.dot1}`} />
+    <span className={`${styles.dot} ${styles.dot2}`} />
+    <span className={`${styles.dot} ${styles.dot3}`} />
+    <span className={`${styles.dot} ${styles.dot4}`} />
+    <span className={`${styles.dot} ${styles.dot5}`} />
+
+    <div className={styles.blobShape1} />
+    <div className={styles.blobShape2} />
+  </div>
+          <motion.div
+            className={styles.charWrap}
+            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            animate={{ opacity: 1, scale: 1,    y: 0  }}
+            transition={{ duration: 0.72, delay: 0.08, ease: 'easeOut' } as Transition}
+          >
+            <img
+              src="/boy.png"
+              alt="Little Loot mascot"
+              draggable={false}
+              className={styles.charImg}
+            />
+          </motion.div>
+        </div>
+
           <motion.div className={styles.ctaRow} {...up(0.18)}>
             <motion.button
               className={styles.btnPrimary}

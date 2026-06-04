@@ -25,10 +25,10 @@ export default function HomePage() {
         <HeroSection />
         <CategoriesSection />
         <FeaturedProducts />
+        <TestimonialsSection />
         <PromoGrid />
         <StationerySpotlight />
         <ThreeColumnSection />
-        <TestimonialsSection />
         <BlogSection />
         <NewsletterSection />
       </main>

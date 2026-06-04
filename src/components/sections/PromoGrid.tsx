@@ -11,7 +11,8 @@ const PROMOS = [
     bg:      '#FDECEA',
     titleClr:'#E8453C',
     sparkle: '#F4A72B',
-    img:     '/images/banners/gamepad.png',
+    txtclr:  '#E8453C',
+    img:     '/game.png',
     imgAlt:  'Game controller',
   },
   {
@@ -21,7 +22,8 @@ const PROMOS = [
     bg:      '#E8F6F0',
     titleClr:'#1A7A52',
     sparkle: '#3ECFB2',
-    img:     '/images/banners/backpack.png',
+    txtclr: '#1A7A52',
+    img:     '/bag.png',
     imgAlt:  'School backpack',
   },
   {
@@ -31,7 +33,8 @@ const PROMOS = [
     bg:      '#EDE8F8',
     titleClr:'#5A3DB8',
     sparkle: '#8B6FE8',
-    img:     '/images/banners/giftbox.png',
+    txtclr:  '#5A3DB8',
+    img:     '/gift.png',
     imgAlt:  'Gift box',
   },
 ];
@@ -54,7 +57,7 @@ export default function PromoGrid() {
               {promo.title}
             </h3>
             <p className={styles.promoDesc}>{promo.desc}</p>
-            <span className={styles.promoBtn}>
+            <span className={styles.promoBtn} style={{ color: promo.txtclr }}>
               Shop Now <span className={styles.promoArrow}>→</span>
             </span>
           </div>

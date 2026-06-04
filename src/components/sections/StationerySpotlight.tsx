@@ -1,324 +1,288 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { _get, _post } from '@/shared/fetchwrapper';
+import { _get } from '@/shared/fetchwrapper';
 import type { UiProduct } from '@/types/product';
-import { useCart } from '@/context/CartContext';
 import styles from './StationerySpotlight.module.css';
 
-// ─── Constants ────────────────────────────────────────────────────
 const PLACEHOLDER = '/images/placeholder-product.png';
 
-const SPOTLIGHT_TAGS = [
-  { icon: '✏️', label: 'Pencils',        slug: 'pencils'        },
-  { icon: '🖊️', label: 'Pens & Markers', slug: 'pens-markers'   },
-  { icon: '📓', label: 'Notebooks',      slug: 'notebooks'      },
-  { icon: '✂️', label: 'Craft Supplies', slug: 'craft-supplies'  },
-  { icon: '🗂️', label: 'Organizers',     slug: 'organizers'     },
+const FEATURE_ITEMS = [
+  { label: 'Boosts Creativity' },
+  { label: 'Improves Focus'    },
+  { label: 'Builds Confidence' },
+  { label: 'Safe & Non-Toxic'  },
 ];
 
-type CartState = 'idle' | 'loading' | 'added' | 'error';
+// Confetti pieces — shape, color, position, rotation, size
+const CONFETTI = [
+  // Stars
+  { type: 'star',   color: '#F97316', top: '12%',  left: '8%',  size: 18, rotate: 20,  opacity: 0.9 },
+  { type: 'star',   color: '#fbbf24', top: '70%',  left: '5%',  size: 13, rotate: -15, opacity: 0.85 },
+  { type: 'star',   color: '#F97316', top: '18%',  left: '88%', size: 15, rotate: 35,  opacity: 0.8 },
+  { type: 'star',   color: '#fbbf24', top: '78%',  left: '85%', size: 20, rotate: -25, opacity: 0.9 },
+  // Circles
+  { type: 'circle', color: '#34d399', top: '8%',   left: '20%', size: 10, rotate: 0,   opacity: 0.8 },
+  { type: 'circle', color: '#60a5fa', top: '85%',  left: '18%', size: 8,  rotate: 0,   opacity: 0.75 },
+  { type: 'circle', color: '#f472b6', top: '10%',  left: '75%', size: 11, rotate: 0,   opacity: 0.8 },
+  { type: 'circle', color: '#a78bfa', top: '80%',  left: '78%', size: 9,  rotate: 0,   opacity: 0.75 },
+  // Squares / diamonds
+  { type: 'square', color: '#f472b6', top: '25%',  left: '4%',  size: 9,  rotate: 45,  opacity: 0.85 },
+  { type: 'square', color: '#34d399', top: '60%',  left: '7%',  size: 7,  rotate: 30,  opacity: 0.8 },
+  { type: 'square', color: '#60a5fa', top: '22%',  left: '90%', size: 8,  rotate: -40, opacity: 0.85 },
+  { type: 'square', color: '#fbbf24', top: '55%',  left: '92%', size: 10, rotate: 20,  opacity: 0.8 },
+  // Triangles (via border trick)
+  { type: 'tri',    color: '#F97316', top: '48%',  left: '3%',  size: 10, rotate: 10,  opacity: 0.8 },
+  { type: 'tri',    color: '#a78bfa', top: '38%',  left: '93%', size: 9,  rotate: -20, opacity: 0.8 },
+  // Squiggles / lines
+  { type: 'line',   color: '#34d399', top: '35%',  left: '6%',  size: 16, rotate: 55,  opacity: 0.7 },
+  { type: 'line',   color: '#f472b6', top: '52%',  left: '91%', size: 14, rotate: -50, opacity: 0.7 },
+  // Extra scattered dots
+  { type: 'circle', color: '#F97316', top: '42%',  left: '2%',  size: 6,  rotate: 0,   opacity: 0.65 },
+  { type: 'circle', color: '#fbbf24', top: '30%',  left: '95%', size: 7,  rotate: 0,   opacity: 0.65 },
+  { type: 'star',   color: '#60a5fa', top: '62%',  left: '93%', size: 12, rotate: 15,  opacity: 0.75 },
+  { type: 'square', color: '#a78bfa', top: '15%',  left: '14%', size: 7,  rotate: 60,  opacity: 0.7  },
+];
 
-// ─── Normalise (identical to FeaturedProducts) ────────────────────
-function normalise(p: any): UiProduct {
-  const price          = Number(p.original_price ?? p.price ?? 0);
-  const amountDiscount = Number(p.amount_discount ?? 0);
-  const pctDiscount    = Number(p.percentage_discount ?? 0);
+function ConfettiPiece({ piece }: { piece: typeof CONFETTI[0] }) {
+  const base: React.CSSProperties = {
+    position: 'absolute',
+    top:      piece.top,
+    left:     piece.left,
+    opacity:  piece.opacity,
+    transform: `rotate(${piece.rotate}deg)`,
+    pointerEvents: 'none',
+    zIndex: 6,
+  };
 
-  let sellingPrice = price;
-  if (amountDiscount > 0) {
-    sellingPrice = price - amountDiscount;
-  } else if (pctDiscount > 0) {
-    sellingPrice = Math.round(price - (price * pctDiscount) / 100);
+  if (piece.type === 'star') {
+    return (
+      <svg
+        style={{ ...base, width: piece.size, height: piece.size }}
+        viewBox="0 0 20 20"
+        fill={piece.color}
+      >
+        <path d="M10 1l2.39 4.84 5.34.78-3.87 3.77.91 5.32L10 13.27l-4.77 2.44.91-5.32L2.27 6.62l5.34-.78L10 1z"/>
+      </svg>
+    );
   }
-  sellingPrice = Math.max(0, Math.min(sellingPrice, price));
+  if (piece.type === 'circle') {
+    return (
+      <div style={{
+        ...base,
+        width: piece.size, height: piece.size,
+        borderRadius: '50%',
+        background: piece.color,
+      }} />
+    );
+  }
+  if (piece.type === 'square') {
+    return (
+      <div style={{
+        ...base,
+        width: piece.size, height: piece.size,
+        background: piece.color,
+        borderRadius: 2,
+      }} />
+    );
+  }
+  if (piece.type === 'tri') {
+    return (
+      <div style={{
+        ...base,
+        width: 0, height: 0,
+        borderLeft:   `${piece.size * 0.6}px solid transparent`,
+        borderRight:  `${piece.size * 0.6}px solid transparent`,
+        borderBottom: `${piece.size}px solid ${piece.color}`,
+        background: 'transparent',
+      }} />
+    );
+  }
+  if (piece.type === 'line') {
+    return (
+      <div style={{
+        ...base,
+        width: piece.size, height: 3,
+        borderRadius: 2,
+        background: piece.color,
+      }} />
+    );
+  }
+  return null;
+}
 
-  const rawImages = p.product_image ?? p.images ?? [];
-  const images: string[] = Array.isArray(rawImages)
-    ? rawImages
-        .map((img: any) =>
-          typeof img === 'string' ? img : (img?.url ?? img?.secure_url ?? '')
-        )
-        .filter(Boolean)
+function normalise(p: any): UiProduct {
+  const price  = Number(p.original_price ?? p.price ?? 0);
+  const amtOff = Number(p.amount_discount ?? 0);
+  const pctOff = Number(p.percentage_discount ?? 0);
+  let sale = price;
+  if (amtOff > 0)  sale = price - amtOff;
+  else if (pctOff) sale = Math.round(price - (price * pctOff) / 100);
+  sale = Math.max(0, Math.min(sale, price));
+
+  const rawImgs = p.product_image ?? p.images ?? [];
+  const images: string[] = Array.isArray(rawImgs)
+    ? rawImgs.map((i: any) => typeof i === 'string' ? i : (i?.url ?? i?.secure_url ?? '')).filter(Boolean)
     : [];
 
-  const stockCount = Number(p.count ?? p.stock ?? p.quantity ?? 0);
-
+  const stock = Number(p.count ?? p.stock ?? p.quantity ?? 0);
   return {
-    id:              String(p.id   ?? ''),
-    name:            String(p.name ?? ''),
-    price:           sellingPrice > 0 ? sellingPrice : price,
-    originalPrice:   price,
+    id: String(p.id ?? ''),
+    name: String(p.name ?? ''),
+    price: sale > 0 ? sale : price,
+    originalPrice: price,
     images,
-    brand:           String(p.brand ?? p.brand_name ?? ''),
-    category:        String(p.category ?? ''),
-    subcategory:     String(p.sub_category_name ?? p.sub_category_slug ?? p.subcategory ?? p.category ?? ''),
-    subcategorySlug: String(p.sub_category_slug ?? p.subcategory_slug ?? ''),
-    ageRange:        String(p.age_range ?? p.ageRange ?? ''),
-    stars:           Math.min(5, Math.max(0, Number(p.stars ?? p.rating ?? 0))),
-    reviews:         Number(p.reviews ?? p.review_count ?? p.reviewCount ?? 0),
-    inStock:         stockCount > 0,
-    stockCount,
-    badges:          Array.isArray(p.badges) ? p.badges : [],
-    bgGradient:      Boolean(p.bg_gradient ?? p.bgGradient),
-    description:     String(p.description ?? ''),
-    emoji:           String(p.emoji ?? ''),
-    discountPct:     pctDiscount,
+    brand: String(p.brand ?? ''),
+    category: String(p.category ?? ''),
+    subcategory: String(p.sub_category_name ?? p.subcategory ?? ''),
+    subcategorySlug: String(p.sub_category_slug ?? ''),
+    ageRange: String(p.age_range ?? ''),
+    stars: Math.min(5, Math.max(0, Number(p.stars ?? p.rating ?? 0))),
+    reviews: Number(p.reviews ?? p.review_count ?? 0),
+    inStock: stock > 0,
+    stockCount: stock,
+    badges: Array.isArray(p.badges) ? p.badges : [],
+    bgGradient: Boolean(p.bg_gradient),
+    description: String(p.description ?? ''),
+    emoji: String(p.emoji ?? ''),
+    discountPct: pctOff,
+    colors: [],
   };
 }
 
 const fmt = (n: number) =>
   Number.isFinite(n) && n > 0 ? n.toLocaleString('en-IN') : '0';
 
-// ─── Product image with fallback ──────────────────────────────────
-function ProductImg({ src, alt, className }: { src: string; alt: string; className: string }) {
-  const [err, setErr] = useState(false);
-  const safe = !err && src && (src.startsWith('http') || src.startsWith('/')) ? src : null;
-  return safe ? (
-    <Image src={safe} alt={alt} fill sizes="(max-width: 768px) 50vw, 20vw"
-      className={className} onError={() => setErr(true)} />
-  ) : (
-    <Image src={PLACEHOLDER} alt={alt} fill sizes="(max-width: 768px) 50vw, 20vw"
-      className={className} />
+function ProductImg({ src, alt }: { src: string; alt: string }) {
+  const [errored, setErrored] = useState(false);
+  const validSrc = !errored && src && (src.startsWith('http') || src.startsWith('/')) ? src : null;
+  return (
+    <Image
+      src={validSrc ?? PLACEHOLDER}
+      alt={alt}
+      width={52}
+      height={52}
+      style={{ objectFit: 'contain', display: 'block' }}
+      onError={() => setErrored(true)}
+    />
   );
 }
 
-// ─── Skeleton ─────────────────────────────────────────────────────
-function SkeletonProd() {
+function SkeletonRow() {
   return (
-    <div className={styles.skeletonProd}>
+    <div className={styles.skeletonRow}>
       <div className={styles.skeletonImg} />
-      <div className={styles.skeletonName} />
-      <div className={styles.skeletonPrice} />
+      <div className={styles.skeletonText}>
+        <div className={styles.skeletonName} />
+        <div className={styles.skeletonPrice} />
+      </div>
     </div>
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────
 export default function StationerySpotlight() {
-  const [products,    setProducts]    = useState<UiProduct[]>([]);
-  const [loading,     setLoading]     = useState(true);
-  const [fetchError,  setFetchError]  = useState(false);
-  const [cartStates,  setCartStates]  = useState<Record<string, CartState>>({});
-  const [wishlist,    setWishlist]    = useState<Set<string>>(new Set());
-  const [wishPending, setWishPending] = useState<Set<string>>(new Set());
+  const [products,   setProducts]   = useState<UiProduct[]>([]);
+  const [loading,    setLoading]    = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
-  const { dispatch } = useCart();
-
-  // ── Fetch stationery products ──────────────────────────────────
   useEffect(() => {
     setLoading(true);
     setFetchError(false);
-
-    _get('/api/product/all?category_slug=stationery&limit=4')
+    _get('/api/product/all?category_slug=stationery&limit=5')
       .then((res) => {
-        const raw: any[] = Array.isArray((res as any)?.data)     ? (res as any).data
-          : Array.isArray(res)                                    ? res
-          : Array.isArray((res as any)?.products)                ? (res as any).products
-          : Array.isArray((res as any)?.items)                   ? (res as any).items
+        const raw: any[] =
+          Array.isArray((res as any)?.data)       ? (res as any).data
+          : Array.isArray(res)                    ? res
+          : Array.isArray((res as any)?.products) ? (res as any).products
           : [];
-        if (raw.length === 0) { setFetchError(true); return; }
-        setProducts(raw.slice(0, 4).map(normalise));
+        if (!raw.length) { setFetchError(true); return; }
+        setProducts(raw.map(normalise).slice(0, 5));
       })
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, []);
 
-  // ── Fetch wishlist ─────────────────────────────────────────────
-  useEffect(() => {
-    _get('/api/favorite')
-      .then((res) => {
-        const items: any[] = Array.isArray(res) ? res
-          : Array.isArray((res as any)?.data)   ? (res as any).data
-          : [];
-        const ids = items
-          .map((i) => typeof i === 'string' ? i : String(i.product_id ?? i.productId ?? i.id ?? ''))
-          .filter(Boolean);
-        setWishlist(new Set(ids));
-      })
-      .catch(() => {});
-  }, []);
-
-  // ── Wishlist toggle (identical logic to FeaturedProducts) ──────
-  const toggleWishlist = useCallback(async (id: string) => {
-    if (wishPending.has(id)) return;
-    const already = wishlist.has(id);
-    setWishlist((prev) => { const n = new Set(prev); already ? n.delete(id) : n.add(id); return n; });
-    setWishPending((prev) => new Set(prev).add(id));
-    try {
-      await fetch(`/api/favorite/${id}`, { method: already ? 'DELETE' : 'POST' });
-    } catch {
-      // rollback on error
-      setWishlist((prev) => { const n = new Set(prev); already ? n.add(id) : n.delete(id); return n; });
-    } finally {
-      setWishPending((prev) => { const n = new Set(prev); n.delete(id); return n; });
-    }
-  }, [wishlist, wishPending]);
-
-  // ── Add to cart (identical logic to FeaturedProducts) ──────────
-  const addToCart = useCallback(async (product: UiProduct) => {
-    if (cartStates[product.id] === 'loading') return;
-    setCartStates((prev) => ({ ...prev, [product.id]: 'loading' }));
-
-    // Optimistic local dispatch first
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: {
-        id:            product.id,
-        name:          product.name,
-        price:         product.price,
-        originalPrice: product.originalPrice,
-        quantity:      1,
-        image:         product.images[0] ?? '',
-        emoji:         product.emoji || '🎁',
-        category:      product.category,
-        color:         '',
-        product_count: 0,
-        is_available:  product.inStock,
-      },
-    });
-
-    try {
-      await _post('/api/cart/items', { product_id: product.id, quantity: 1 });
-      setCartStates((prev) => ({ ...prev, [product.id]: 'added' }));
-      setTimeout(() => setCartStates((prev) => ({ ...prev, [product.id]: 'idle' })), 2000);
-    } catch {
-      setCartStates((prev) => ({ ...prev, [product.id]: 'error' }));
-      setTimeout(() => setCartStates((prev) => ({ ...prev, [product.id]: 'idle' })), 2500);
-    }
-  }, [cartStates, dispatch]);
-
-  // ── Render ─────────────────────────────────────────────────────
   return (
-    <section className={styles.spotlightSection}>
-      <div className={styles.spotlightInner}>
+    <section className={styles.section}>
+      <div className={styles.inner}>
 
-        {/* ── Left: text + tags + CTA ── */}
-        <div className={styles.spotlightText}>
-          <div className={styles.tag}>⭐ Stationery Collection</div>
-          <h2>
-            Tools That<br />
-            <span>Spark Creativity</span>
+        {/* ══ LEFT ══ */}
+        <div className={styles.left}>
+          <p className={styles.tag}>Educational Collection</p>
+          <h2 className={styles.heading}>
+            Tools That Inspire<br />
+            Curiosity &amp; Creativity
           </h2>
-          <p>
-            From vibrant sketch pads to premium gel pens — our curated stationery
-            collection turns every desk into a creative studio.
+          <p className={styles.body}>
+            Our toys and learning tools are designed by experts
+            to support your child's brain development and
+            spark imagination.
           </p>
-
-          <div className={styles.spotlightItems}>
-            {SPOTLIGHT_TAGS.map((tag) => (
-              <Link key={tag.label} href={`/category/${tag.slug}`} className={styles.spotlightItem}>
-                <span className={styles.tagIcon}>{tag.icon}</span>
-                {tag.label}
-              </Link>
+          <div className={styles.features}>
+            {FEATURE_ITEMS.map((f) => (
+              <div key={f.label} className={styles.featureItem}>
+                <span className={styles.featureIcon} aria-hidden="true">✓</span>
+                <span>{f.label}</span>
+              </div>
             ))}
           </div>
-
-          <Link href="/stationery" className={styles.btnPrimary}>
-            Explore Stationery →
+          <Link href="/stationery" className={styles.cta}>
+            Explore Collection &nbsp;→
           </Link>
         </div>
 
-        {/* ── Right: 2×2 product grid ── */}
-        <div className={styles.spotlightGrid}>
+        {/* ══ CENTER — hero + confetti ══ */}
+        <div className={styles.center}>
+          {/* Confetti layer */}
+          {CONFETTI.map((piece, i) => (
+            <ConfettiPiece key={i} piece={piece} />
+          ))}
+          <img
+            src="/girl.png"
+            alt="Child playing with educational toys"
+            className={styles.heroImg}
+          />
+        </div>
 
-          {/* Error */}
-          {!loading && fetchError && (
-            <div className={styles.errorState}>
-              <span>⚠️ Could not load products.</span>
-              <button type="button" className={styles.retryBtn}
-                onClick={() => window.location.reload()}>Retry</button>
-            </div>
-          )}
+        {/* ══ RIGHT — 5 products ══ */}
+        <div className={styles.right}>
+          <p className={styles.panelTitle}>Top Picks for Little Learners</p>
 
-          {/* Skeletons */}
-          {loading && Array.from({ length: 4 }, (_, i) => <SkeletonProd key={i} />)}
-
-          {/* Real products */}
-          {!loading && !fetchError && products.map((product) => {
-            const hasImg     = product.images.length > 0;
-            const cartState  = cartStates[product.id] ?? 'idle';
-            const wishlisted = wishlist.has(product.id);
-            const isPending  = wishPending.has(product.id);
-            const hasSave    = product.originalPrice > product.price;
-
-            // Cart button icon — same mapping as FeaturedProducts
-            const cartIcon =
-              cartState === 'loading' ? '⏳'
-              : cartState === 'added' ? '✓'
-              : cartState === 'error' ? '✗'
-              : !product.inStock      ? '✉'
-              : '🛒';
-
-            return (
-              <div key={product.id} className={styles.spotlightProd}>
-
-                {/* ── Wishlist button ── */}
-                <button
-                  type="button"
-                  className={[
-                    styles.wishBtn,
-                    wishlisted ? styles.wishlisted : '',
-                    isPending  ? styles.wishPending : '',
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => toggleWishlist(product.id)}
-                  disabled={isPending}
-                  aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-                  aria-pressed={wishlisted}
-                >
-                  {isPending ? '⏳' : wishlisted ? '❤️' : '🤍'}
-                </button>
-
-                {/* ── Product image (links to PDP) ── */}
-                <Link href={`/product/${product.id}`} className={styles.imgLink} aria-label={product.name}>
-                  <div className={styles.imgWrapper}>
-                    {hasImg ? (
-                      <ProductImg src={product.images[0]} alt={product.name} className={styles.prodImg} />
-                    ) : (
-                      <div className={styles.prodEmoji} aria-hidden="true">
-                        {product.emoji || '📦'}
-                      </div>
-                    )}
-                    {!product.inStock && <div className={styles.outOfStock}>Out of Stock</div>}
+          <div className={styles.list}>
+            {loading ? (
+              Array.from({ length: 5 }, (_, i) => <SkeletonRow key={i} />)
+            ) : fetchError ? (
+              <p className={styles.errorMsg}>Could not load products.</p>
+            ) : (
+              products.map((p) => (
+                <Link key={p.id} href={`/product/${p.id}`} className={styles.listItem}>
+                  <div className={styles.listImg}>
+                    {p.images.length > 0
+                      ? <ProductImg src={p.images[0]} alt={p.name} />
+                      : <span className={styles.listEmoji}>{p.emoji || '📦'}</span>
+                    }
                   </div>
-                </Link>
-
-                {/* ── Bottom row: name+price left, cart button right ── */}
-                <div className={styles.cardBottom}>
-                  <Link href={`/product/${product.id}`} className={styles.cardInfo}>
-                    <div className={styles.sname}>{product.name}</div>
-                    <div className={styles.priceRow}>
-                      <span className={styles.sprice}>₹{fmt(product.price)}</span>
-                      {hasSave && (
-                        <span className={styles.soriginal}>₹{fmt(product.originalPrice)}</span>
+                  <div className={styles.listText}>
+                    <p className={styles.listName}>{p.name}</p>
+                    <div className={styles.listPriceRow}>
+                      <span className={styles.listPrice}>₹{fmt(p.price)}</span>
+                      {p.originalPrice > p.price && (
+                        <span className={styles.listMrp}>₹{fmt(p.originalPrice)}</span>
                       )}
                     </div>
-                  </Link>
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
 
-                  <button
-                    type="button"
-                    className={[
-                      styles.cartBtn,
-                      cartState === 'added'   ? styles.cartBtnAdded   : '',
-                      cartState === 'error'   ? styles.cartBtnError   : '',
-                      cartState === 'loading' ? styles.cartBtnLoading : '',
-                      !product.inStock        ? styles.cartBtnDisabled : '',
-                    ].filter(Boolean).join(' ')}
-                    disabled={!product.inStock || cartState === 'loading'}
-                    onClick={() => addToCart(product)}
-                    aria-label={product.inStock ? 'Add to cart' : 'Notify me'}
-                  >
-                    {cartIcon}
-                  </button>
-                </div>
-
-              </div>
-            );
-          })}
-
+          {!loading && !fetchError && (
+            <Link href="/stationery" className={styles.viewAll}>View all</Link>
+          )}
         </div>
+
       </div>
     </section>
   );

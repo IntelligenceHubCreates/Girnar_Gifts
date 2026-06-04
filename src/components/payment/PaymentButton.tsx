@@ -8,11 +8,16 @@ import styles from './PaymentButton.module.css';
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
 
+// FIX: added color, color_hex, image so they reach POST /api/payments/create-order
+// which forwards cart_items to POST /api/orders → services.create_order → OrderItem.color
 interface CartItem {
   product_id: string;
   name:       string;
   price:      number;
   quantity:   number;
+  color?:     string | null;     // selected color variant name e.g. "Blue"
+  color_hex?: string | null;     // selected color hex e.g. "#5ca3ff"
+  image?:     string | null;     // color-specific image URL
 }
 
 interface ShippingAddress {
@@ -23,6 +28,7 @@ interface ShippingAddress {
   city:          string;
   state:         string;
   pincode:       string;
+  addressId?:    string;
 }
 
 interface Props {
@@ -49,11 +55,17 @@ export default function PaymentButton({
 
     try {
       // Step 1 — Create Razorpay order
+      // cart_items now includes color/color_hex/image so the backend
+      // can persist them on OrderItem via services.create_order
       const orderRes = await fetch(`${BACKEND}/api/payments/create-order`, {
         method:      'POST',
         headers:     { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ amount, cart_items: cartItems, shipping_address: shippingAddress }),
+        body: JSON.stringify({
+          amount,
+          cart_items:       cartItems,      // color fields now included
+          shipping_address: shippingAddress,
+        }),
       });
 
       if (!orderRes.ok) {
@@ -99,7 +111,6 @@ export default function PaymentButton({
 
             if (verifyRes.ok && result.success) {
               onSuccess?.(result.payment_id, result.order_id);
-              // Redirect to confirmation with both IDs so order can be created
               router.push(
                 `/order-confirmation?payment_id=${result.payment_id}&razorpay_order_id=${response.razorpay_order_id}`
               );

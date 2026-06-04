@@ -12,52 +12,39 @@ import { useCart } from '@/context/CartContext';
 type Step = 'address' | 'payment' | 'confirmation';
 
 interface Address {
-  fullName: string;
-  phone: string;
-  pincode: string;
-  city: string;
-  state: string;
-  addressLine1: string;
-  addressLine2: string;
-  landmark: string;
-  type: 'home' | 'work' | 'other';
+  fullName: string; phone: string; pincode: string; city: string;
+  state: string; addressLine1: string; addressLine2: string;
+  landmark: string; type: 'home' | 'work' | 'other';
 }
 
 interface SavedAddress {
-  id: number;
-  backendId?: string;
-  label: string;
-  emoji: string;
-  fullName: string;
-  line: string;
-  line2?: string;
-  landmark?: string;
-  city: string;
-  state: string;
-  pincode: string;
-  phone: string;
+  id: number; backendId?: string; label: string; emoji: string;
+  fullName: string; line: string; line2?: string; landmark?: string;
+  city: string; state: string; pincode: string; phone: string;
   isDefault?: boolean;
 }
 
-/* ─── CHANGE 1: add `image` field to order item type ─────────────────────── */
+// FIX: added color, color_hex to OrderItem so they flow into the order payload
 interface OrderItem {
-  id: string | number;
+  id:            string | number;
   backendItemId?: string;
-  name: string;
-  category: string;
-  price: number;
+  name:          string;
+  category:      string;
+  price:         number;
   originalPrice: number;
-  qty: number;
-  emoji: string;
-  bg: string;
-  image?: string;   // ← product image URL (first from product_image array)
+  qty:           number;
+  emoji:         string;
+  bg:            string;
+  image?:        string;
+  color?:        string;      // ← selected color variant name e.g. "Blue"
+  color_hex?:    string;      // ← selected color hex e.g. "#5ca3ff"
 }
 
 /* ─── Static Fallback Data ───────────────────────────────────────────────── */
 const DEFAULT_ORDER_ITEMS: OrderItem[] = [
-  { id: 1, emoji: '🚲', name: 'Balance Bicycle', category: 'Vehicles', price: 1399, originalPrice: 1999, qty: 1, bg: 'linear-gradient(135deg,#FFF3D4,#FFE099)' },
-  { id: 3, emoji: '🦕', name: 'Dino Pull-Along', category: 'Soft Toys', price: 899, originalPrice: 1200, qty: 2, bg: 'linear-gradient(135deg,#E1F7F2,#AAEEDD)' },
-  { id: 4, emoji: '🎨', name: 'Color Wonder Kit', category: 'Arts & Crafts', price: 449, originalPrice: 599, qty: 1, bg: 'linear-gradient(135deg,#EAE0FF,#C7A4F5)' },
+  { id: 1, emoji: '🚲', name: 'Balance Bicycle',  category: 'Vehicles',    price: 1399, originalPrice: 1999, qty: 1, bg: 'linear-gradient(135deg,#FFF3D4,#FFE099)' },
+  { id: 3, emoji: '🦕', name: 'Dino Pull-Along',  category: 'Soft Toys',   price: 899,  originalPrice: 1200, qty: 2, bg: 'linear-gradient(135deg,#E1F7F2,#AAEEDD)' },
+  { id: 4, emoji: '🎨', name: 'Color Wonder Kit',  category: 'Arts & Crafts',price: 449, originalPrice: 599,  qty: 1, bg: 'linear-gradient(135deg,#EAE0FF,#C7A4F5)' },
 ];
 
 const GRADIENTS = [
@@ -71,10 +58,10 @@ const EMOJIS: Record<string, string> = {
   Toys:'🧸', Vehicles:'🚲', 'Soft Toys':'🐻', Games:'🎮', Stationery:'✏️',
   'Arts & Crafts':'🎨', Books:'📚', 'Baby & Toddler':'🍼', Outdoor:'🛹', default:'🎁',
 };
+const STATES = ['Andhra Pradesh', 'Delhi', 'Goa', 'Gujarat', 'Karnataka', 'Kerala',
+  'Maharashtra', 'Odisha', 'Punjab', 'Rajasthan', 'Tamil Nadu', 'Telangana',
+  'Uttar Pradesh', 'West Bengal'];
 
-const STATES = ['Andhra Pradesh', 'Delhi', 'Goa', 'Gujarat', 'Karnataka', 'Kerala', 'Maharashtra', 'Odisha', 'Punjab', 'Rajasthan', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'West Bengal'];
-
-/* ─── CHANGE 2: helper — extract first image URL from product_image field ── */
 function extractFirstImage(productImage: any): string {
   if (!productImage) return '';
   if (typeof productImage === 'string') return productImage;
@@ -89,27 +76,24 @@ function extractFirstImage(productImage: any): string {
 export default function CheckoutPage() {
   const { data: session } = useSession();
   const userEmail = session?.user?.email ?? '';
-
   const { dispatch: cartDispatch } = useCart();
 
-  const [step, setStep] = useState<Step>('address');
+  const [step,          setStep]          = useState<Step>('address');
   const [selectedSaved, setSelectedSaved] = useState<number | null>(null);
-  const [showNewForm, setShowNewForm] = useState(false);
-  const [address, setAddress] = useState<Address>({
+  const [showNewForm,   setShowNewForm]   = useState(false);
+  const [address,       setAddress]       = useState<Address>({
     fullName: '', phone: '', pincode: '', city: '', state: '',
     addressLine1: '', addressLine2: '', landmark: '', type: 'home',
   });
-  const [addrErrors, setAddrErrors] = useState<Partial<Address>>({});
-  const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [addressSaving, setAddressSaving] = useState(false);
-  const [addressError, setAddressError] = useState<string | null>(null);
+  const [addrErrors,      setAddrErrors]      = useState<Partial<Address>>({});
+  const [paymentError,    setPaymentError]    = useState<string | null>(null);
+  const [addressSaving,   setAddressSaving]   = useState(false);
+  const [addressError,    setAddressError]    = useState<string | null>(null);
+  const [orderItems,      setOrderItems]      = useState<OrderItem[]>(DEFAULT_ORDER_ITEMS);
+  const [savedAddresses,  setSavedAddresses]  = useState<SavedAddress[]>([]);
+  const [backendAddressId,setBackendAddressId]= useState<string | null>(null);
   const confirmRef = useRef<HTMLDivElement>(null);
 
-  const [orderItems, setOrderItems] = useState<OrderItem[]>(DEFAULT_ORDER_ITEMS);
-  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
-  const [backendAddressId, setBackendAddressId] = useState<string | null>(null);
-
-  /* Derived totals */
   const SUBTOTAL        = orderItems.reduce((s, i) => s + i.price * i.qty, 0);
   const ORIGINAL_TOTAL  = orderItems.reduce((s, i) => s + i.originalPrice * i.qty, 0);
   const SAVINGS         = ORIGINAL_TOTAL - SUBTOTAL;
@@ -117,200 +101,155 @@ export default function CheckoutPage() {
   const COUPON_DISCOUNT = Math.round(SUBTOTAL * 0.1);
   const TOTAL           = SUBTOTAL + DELIVERY - COUPON_DISCOUNT;
 
-  /* Auto-scroll confirmation */
   useEffect(() => {
     if (step === 'confirmation' && confirmRef.current) {
       confirmRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [step]);
 
-  /* Load cart + addresses */
   useEffect(() => {
-    // Load cart items
+    // FIX: read color and color_hex from cart API response
     _get('/api/cart').then((res: any) => {
       const items: OrderItem[] = (res?.cart_items || []).map((ci: any, idx: number) => ({
         id:            ci.product?.id ?? idx,
         backendItemId: ci.id,
-        name:          ci.product?.name ?? 'Product',
+        name:          ci.product?.name     ?? 'Product',
         category:      ci.product?.category ?? 'General',
         price:         (ci.product?.original_price ?? 0) - (ci.product?.amount_discount ?? 0),
         originalPrice: ci.product?.original_price ?? 0,
         qty:           ci.quantity ?? 1,
         emoji:         EMOJIS[ci.product?.category] ?? EMOJIS.default,
         bg:            GRADIENTS[idx % GRADIENTS.length],
-        // ── CHANGE 3: extract real product image from API response ──────────
         image:         extractFirstImage(ci.product?.product_image),
+        // FIX: read color fields from cart item (saved when user selected variant)
+        color:         ci.color     ?? ci.product?.color     ?? null,
+        color_hex:     ci.color_hex ?? ci.product?.color_hex ?? null,
       }));
       if (items.length > 0) setOrderItems(items);
     }).catch(() => {});
 
-    // Load real user addresses
     _get('/api/address/addresses').then((res: any) => {
       const addrs: any[] = Array.isArray(res) ? res : (res?.addresses || res?.data || []);
-
       const mapped: SavedAddress[] = addrs.map((a: any, idx: number) => ({
         id:        idx + 1,
         backendId: String(a.id),
         label:     a.address_type
                      ? a.address_type.charAt(0).toUpperCase() + a.address_type.slice(1)
                      : a.is_default ? 'Home' : `Address ${idx + 1}`,
-        emoji:     a.address_type === 'work'  ? '🏢'
-                 : a.address_type === 'other' ? '📌' : '🏠',
-        fullName:  a.full_name    || a.fullName    || '',
-        line:      a.address_line1               || '',
-        line2:     a.address_line2               || '',
-        landmark:  a.landmark                    || '',
-        city:      a.city                        || '',
-        state:     a.state                       || '',
-        pincode:   a.postal_code || a.pincode    || '',
-        phone:     a.phone                       || '',
+        emoji:     a.address_type === 'work' ? '🏢' : a.address_type === 'other' ? '📌' : '🏠',
+        fullName:  a.full_name    || '',
+        line:      a.address_line1 || '',
+        line2:     a.address_line2 || '',
+        landmark:  a.landmark      || '',
+        city:      a.city          || '',
+        state:     a.state         || '',
+        pincode:   a.postal_code || a.pincode || '',
+        phone:     a.phone         || '',
         isDefault: Boolean(a.is_default),
       }));
-
       setSavedAddresses(mapped);
-
       if (mapped.length > 0) {
-        const defaultAddr = mapped.find(a => a.isDefault) || mapped[0];
-        setSelectedSaved(defaultAddr.id);
-        setBackendAddressId(defaultAddr.backendId || null);
+        const def = mapped.find(a => a.isDefault) || mapped[0];
+        setSelectedSaved(def.id);
+        setBackendAddressId(def.backendId || null);
       }
       if (mapped.length === 0) setShowNewForm(true);
-    }).catch(() => {
-      setShowNewForm(true);
-    });
+    }).catch(() => { setShowNewForm(true); });
   }, []);
 
-  /* ─── Address Validation ─────────────────────────────────────────────── */
   function validateAddress(): boolean {
     if (selectedSaved !== null) return true;
     const errs: Partial<Address> = {};
-    if (!address.fullName.trim())                              errs.fullName = 'Required';
-    if (!/^\d{10}$/.test(address.phone.replace(/\s/g, '')))   errs.phone = 'Enter valid 10-digit number';
-    if (!/^\d{6}$/.test(address.pincode))                     errs.pincode = 'Enter valid 6-digit pincode';
-    if (!address.addressLine1.trim())                          errs.addressLine1 = 'Required';
-    if (!address.city.trim())                                  errs.city = 'Required';
-    if (!address.state)                                        errs.state = 'Required' as never;
+    if (!address.fullName.trim())                            errs.fullName    = 'Required';
+    if (!/^\d{10}$/.test(address.phone.replace(/\s/g,'')))  errs.phone       = 'Enter valid 10-digit number';
+    if (!/^\d{6}$/.test(address.pincode))                   errs.pincode     = 'Enter valid 6-digit pincode';
+    if (!address.addressLine1.trim())                        errs.addressLine1= 'Required';
+    if (!address.city.trim())                                errs.city        = 'Required';
+    if (!address.state)                                      errs.state       = 'Required' as never;
     setAddrErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
   async function handleAddressNext() {
     if (!validateAddress()) return;
-
     if (showNewForm && selectedSaved === null) {
-      setAddressSaving(true);
-      setAddressError(null);
+      setAddressSaving(true); setAddressError(null);
       try {
         await _post('/api/address/addresses', {
-          full_name:     address.fullName,
-          phone:         address.phone,
-          address_line1: address.addressLine1,
-          address_line2: address.addressLine2,
-          landmark:      address.landmark,
-          city:          address.city,
-          state:         address.state,
-          postal_code:   address.pincode,
-          country:       'India',
-          address_type:  address.type,
-          is_default:    savedAddresses.length === 0,
+          full_name: address.fullName, phone: address.phone,
+          address_line1: address.addressLine1, address_line2: address.addressLine2,
+          landmark: address.landmark, city: address.city, state: address.state,
+          postal_code: address.pincode, country: 'India',
+          address_type: address.type, is_default: savedAddresses.length === 0,
         });
-
         const res: any = await _get('/api/address/addresses');
         const addrs: any[] = Array.isArray(res) ? res : (res?.addresses || res?.data || []);
         const mapped: SavedAddress[] = addrs.map((a: any, idx: number) => ({
-          id:        idx + 1,
-          backendId: String(a.id),
-          label:     a.address_type
-                       ? a.address_type.charAt(0).toUpperCase() + a.address_type.slice(1)
-                       : a.is_default ? 'Home' : `Address ${idx + 1}`,
-          emoji:     a.address_type === 'work'  ? '🏢'
-                   : a.address_type === 'other' ? '📌' : '🏠',
-          fullName:  a.full_name    || '',
-          line:      a.address_line1 || '',
-          line2:     a.address_line2 || '',
-          landmark:  a.landmark      || '',
-          city:      a.city          || '',
-          state:     a.state         || '',
-          pincode:   a.postal_code || a.pincode || '',
-          phone:     a.phone         || '',
+          id: idx+1, backendId: String(a.id),
+          label: a.address_type ? a.address_type.charAt(0).toUpperCase()+a.address_type.slice(1) : `Address ${idx+1}`,
+          emoji: a.address_type==='work' ? '🏢' : a.address_type==='other' ? '📌' : '🏠',
+          fullName: a.full_name||'', line: a.address_line1||'', line2: a.address_line2||'',
+          landmark: a.landmark||'', city: a.city||'', state: a.state||'',
+          pincode: a.postal_code||a.pincode||'', phone: a.phone||'',
           isDefault: Boolean(a.is_default),
         }));
-
         setSavedAddresses(mapped);
-
         const newAddr = mapped[mapped.length - 1];
-        if (newAddr) {
-          setSelectedSaved(newAddr.id);
-          setBackendAddressId(newAddr.backendId || null);
-        }
-
+        if (newAddr) { setSelectedSaved(newAddr.id); setBackendAddressId(newAddr.backendId||null); }
         setShowNewForm(false);
-        setAddress({
-          fullName: '', phone: '', pincode: '', city: '', state: '',
-          addressLine1: '', addressLine2: '', landmark: '', type: 'home',
-        });
-
-      } catch (err) {
-        console.error('Address save error:', err);
+        setAddress({ fullName:'', phone:'', pincode:'', city:'', state:'', addressLine1:'', addressLine2:'', landmark:'', type:'home' });
+      } catch {
         setAddressError('Could not save address. Please try again.');
-        setAddressSaving(false);
-        return;
-      } finally {
-        setAddressSaving(false);
-      }
+        setAddressSaving(false); return;
+      } finally { setAddressSaving(false); }
     }
-
-    setPaymentError(null);
-    setStep('payment');
+    setPaymentError(null); setStep('payment');
   }
 
   async function clearCartAfterPayment() {
+    // Clear local cart state immediately
     cartDispatch({ type: 'CLEAR_CART' });
+    // Backend has no /cart/clear endpoint — delete each item individually
     try {
-      await fetch('/api/cart/clear', { method: 'DELETE', credentials: 'include' });
-    } catch { /* silent */ }
+      const res = await fetch('/api/cart', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        const items: any[] = data?.cart_items ?? [];
+        await Promise.all(
+          items.map((item: any) => {
+            const id = item.id ?? item.cartItemId;
+            if (!id) return Promise.resolve();
+            return fetch(`/api/cart/items/${id}`, {
+              method: 'DELETE',
+              credentials: 'include',
+            }).catch(() => {});
+          })
+        );
+      }
+    } catch { /* silent — local cart is already cleared */ }
   }
 
-  /* ─── Build shipping address object ─────────────────────────────────── */
-  const SAVED_ADDRESSES = savedAddresses;
-  const confirmedAddress = selectedSaved !== null
-    ? SAVED_ADDRESSES.find(a => a.id === selectedSaved)
-    : null;
-
+  const SAVED_ADDRESSES  = savedAddresses;
+  const confirmedAddress = selectedSaved !== null ? SAVED_ADDRESSES.find(a => a.id === selectedSaved) : null;
   const shippingAddressForPayment = confirmedAddress
-    ? {
-        fullName:     confirmedAddress.fullName,
-        phone:        confirmedAddress.phone,
-        addressLine1: confirmedAddress.line,
-        addressLine2: confirmedAddress.line2 || '',
-        city:         confirmedAddress.city,
-        state:        confirmedAddress.state,
-        pincode:      confirmedAddress.pincode,
-        addressId:    confirmedAddress.backendId || '',
-      }
-    : {
-        fullName:     address.fullName,
-        phone:        address.phone,
-        addressLine1: address.addressLine1,
-        addressLine2: address.addressLine2,
-        city:         address.city,
-        state:        address.state,
-        pincode:      address.pincode,
-      };
+    ? { fullName: confirmedAddress.fullName, phone: confirmedAddress.phone,
+        addressLine1: confirmedAddress.line, addressLine2: confirmedAddress.line2||'',
+        city: confirmedAddress.city, state: confirmedAddress.state,
+        pincode: confirmedAddress.pincode, addressId: confirmedAddress.backendId||'' }
+    : { fullName: address.fullName, phone: address.phone,
+        addressLine1: address.addressLine1, addressLine2: address.addressLine2,
+        city: address.city, state: address.state, pincode: address.pincode };
 
-  /* ─── Step labels ────────────────────────────────────────────────────── */
   const STEPS = [
     { key: 'address' as Step, label: 'Address', num: 1 },
     { key: 'payment' as Step, label: 'Payment', num: 2 },
     { key: 'confirmation' as Step, label: 'Confirm', num: 3 },
   ];
-  const stepOrder: Step[] = ['address', 'payment', 'confirmation'];
-  const currentIndex = stepOrder.indexOf(step);
+  const stepOrder: Step[]  = ['address', 'payment', 'confirmation'];
+  const currentIndex        = stepOrder.indexOf(step);
 
   return (
     <div className={styles.page}>
-
-      {/* Breadcrumb */}
       <div className={styles.breadcrumb}>
         <Link href="/" className={styles.breadLink}>Home</Link>
         <span className={styles.breadSep}>›</span>
@@ -319,15 +258,13 @@ export default function CheckoutPage() {
         <span className={styles.breadCurrent}>Checkout</span>
       </div>
 
-      {/* Step Bar */}
       <div className={styles.stepBar}>
         {STEPS.map((s, i) => (
           <div key={s.key} className={styles.stepGroup}>
             <div className={`${styles.stepNode} ${currentIndex >= i ? styles.stepDone : ''} ${step === s.key ? styles.stepActive : ''}`}>
               {currentIndex > i
                 ? <span className={styles.stepCheck}>✓</span>
-                : <span className={styles.stepNum}>{s.num}</span>
-              }
+                : <span className={styles.stepNum}>{s.num}</span>}
             </div>
             <span className={`${styles.stepLabel} ${step === s.key ? styles.stepLabelActive : ''}`}>{s.label}</span>
             {i < STEPS.length - 1 && (
@@ -337,7 +274,6 @@ export default function CheckoutPage() {
         ))}
       </div>
 
-      {/* Layout */}
       <div className={styles.layout}>
         <div className={styles.left}>
 
@@ -357,11 +293,9 @@ export default function CheckoutPage() {
                   <div className={styles.savedTitle}>Your saved addresses</div>
                   <div className={styles.savedList}>
                     {SAVED_ADDRESSES.map((sa) => (
-                      <label
-                        key={sa.id}
+                      <label key={sa.id}
                         className={`${styles.savedAddr} ${selectedSaved === sa.id ? styles.savedAddrSelected : ''}`}
-                        onClick={() => { setSelectedSaved(sa.id); setShowNewForm(false); }}
-                      >
+                        onClick={() => { setSelectedSaved(sa.id); setShowNewForm(false); }}>
                         <div className={styles.savedAddrRadio}>
                           <div className={`${styles.radio} ${selectedSaved === sa.id ? styles.radioSelected : ''}`} />
                         </div>
@@ -372,8 +306,8 @@ export default function CheckoutPage() {
                             <span className={styles.savedAddrName}>{sa.fullName}</span>
                           </div>
                           <div className={styles.savedAddrLine}>{sa.line}</div>
-                          {sa.line2 && <div className={styles.savedAddrLine}>{sa.line2}</div>}
-                          {sa.landmark && <div className={styles.savedAddrLine}>Near: {sa.landmark}</div>}
+                          {sa.line2     && <div className={styles.savedAddrLine}>{sa.line2}</div>}
+                          {sa.landmark  && <div className={styles.savedAddrLine}>Near: {sa.landmark}</div>}
                           <div className={styles.savedAddrLine}>{sa.city}, {sa.state} – {sa.pincode}</div>
                           <div className={styles.savedAddrPhone}>📞 {sa.phone}</div>
                         </div>
@@ -386,8 +320,7 @@ export default function CheckoutPage() {
 
               <button
                 className={`${styles.newAddrToggle} ${showNewForm ? styles.newAddrToggleActive : ''}`}
-                onClick={() => { setShowNewForm(!showNewForm); setSelectedSaved(null); }}
-              >
+                onClick={() => { setShowNewForm(!showNewForm); setSelectedSaved(null); }}>
                 <span className={styles.newAddrPlus}>{showNewForm ? '−' : '+'}</span>
                 {showNewForm ? 'Cancel new address' : 'Add a new address'}
               </button>
@@ -397,71 +330,55 @@ export default function CheckoutPage() {
                   <div className={styles.formGrid2}>
                     <div className={styles.field}>
                       <label className={styles.label}>Full Name *</label>
-                      <input
-                        className={`${styles.input} ${addrErrors.fullName ? styles.inputError : ''}`}
-                        placeholder="e.g. Priya Sharma"
-                        value={address.fullName}
-                        onChange={e => setAddress(a => ({ ...a, fullName: e.target.value }))}
-                      />
+                      <input className={`${styles.input} ${addrErrors.fullName ? styles.inputError : ''}`}
+                        placeholder="e.g. Priya Sharma" value={address.fullName}
+                        onChange={e => setAddress(a => ({ ...a, fullName: e.target.value }))} />
                       {addrErrors.fullName && <span className={styles.errMsg}>{addrErrors.fullName}</span>}
                     </div>
                     <div className={styles.field}>
                       <label className={styles.label}>Mobile Number *</label>
-                      <input
-                        className={`${styles.input} ${addrErrors.phone ? styles.inputError : ''}`}
-                        placeholder="10-digit number"
-                        maxLength={10}
-                        value={address.phone}
-                        onChange={e => setAddress(a => ({ ...a, phone: e.target.value.replace(/\D/g, '') }))}
-                      />
+                      <input className={`${styles.input} ${addrErrors.phone ? styles.inputError : ''}`}
+                        placeholder="10-digit number" maxLength={10} value={address.phone}
+                        onChange={e => setAddress(a => ({ ...a, phone: e.target.value.replace(/\D/g,'') }))} />
                       {addrErrors.phone && <span className={styles.errMsg}>{addrErrors.phone}</span>}
                     </div>
                   </div>
                   <div className={styles.field}>
                     <label className={styles.label}>Address Line 1 *</label>
-                    <input
-                      className={`${styles.input} ${addrErrors.addressLine1 ? styles.inputError : ''}`}
-                      placeholder="House / Flat No., Street, Colony"
-                      value={address.addressLine1}
-                      onChange={e => setAddress(a => ({ ...a, addressLine1: e.target.value }))}
-                    />
+                    <input className={`${styles.input} ${addrErrors.addressLine1 ? styles.inputError : ''}`}
+                      placeholder="House / Flat No., Street, Colony" value={address.addressLine1}
+                      onChange={e => setAddress(a => ({ ...a, addressLine1: e.target.value }))} />
                     {addrErrors.addressLine1 && <span className={styles.errMsg}>{addrErrors.addressLine1}</span>}
                   </div>
                   <div className={styles.field}>
                     <label className={styles.label}>Address Line 2 <span className={styles.optional}>(optional)</span></label>
-                    <input className={styles.input} placeholder="Apartment, Area, Locality" value={address.addressLine2} onChange={e => setAddress(a => ({ ...a, addressLine2: e.target.value }))} />
+                    <input className={styles.input} placeholder="Apartment, Area, Locality"
+                      value={address.addressLine2} onChange={e => setAddress(a => ({ ...a, addressLine2: e.target.value }))} />
                   </div>
                   <div className={styles.field}>
                     <label className={styles.label}>Landmark <span className={styles.optional}>(optional)</span></label>
-                    <input className={styles.input} placeholder="Near bus stop, opposite park..." value={address.landmark} onChange={e => setAddress(a => ({ ...a, landmark: e.target.value }))} />
+                    <input className={styles.input} placeholder="Near bus stop, opposite park..."
+                      value={address.landmark} onChange={e => setAddress(a => ({ ...a, landmark: e.target.value }))} />
                   </div>
                   <div className={styles.formGrid3}>
                     <div className={styles.field}>
                       <label className={styles.label}>Pincode *</label>
-                      <input
-                        className={`${styles.input} ${addrErrors.pincode ? styles.inputError : ''}`}
-                        placeholder="6-digit code" maxLength={6}
-                        value={address.pincode}
-                        onChange={e => setAddress(a => ({ ...a, pincode: e.target.value.replace(/\D/g, '') }))}
-                      />
+                      <input className={`${styles.input} ${addrErrors.pincode ? styles.inputError : ''}`}
+                        placeholder="6-digit code" maxLength={6} value={address.pincode}
+                        onChange={e => setAddress(a => ({ ...a, pincode: e.target.value.replace(/\D/g,'') }))} />
                       {addrErrors.pincode && <span className={styles.errMsg}>{addrErrors.pincode}</span>}
                     </div>
                     <div className={styles.field}>
                       <label className={styles.label}>City *</label>
-                      <input
-                        className={`${styles.input} ${addrErrors.city ? styles.inputError : ''}`}
+                      <input className={`${styles.input} ${addrErrors.city ? styles.inputError : ''}`}
                         placeholder="City" value={address.city}
-                        onChange={e => setAddress(a => ({ ...a, city: e.target.value }))}
-                      />
+                        onChange={e => setAddress(a => ({ ...a, city: e.target.value }))} />
                       {addrErrors.city && <span className={styles.errMsg}>{addrErrors.city}</span>}
                     </div>
                     <div className={styles.field}>
                       <label className={styles.label}>State *</label>
-                      <select
-                        className={`${styles.select} ${addrErrors.state ? styles.inputError : ''}`}
-                        value={address.state}
-                        onChange={e => setAddress(a => ({ ...a, state: e.target.value }))}
-                      >
+                      <select className={`${styles.select} ${addrErrors.state ? styles.inputError : ''}`}
+                        value={address.state} onChange={e => setAddress(a => ({ ...a, state: e.target.value }))}>
                         <option value="">Select state</option>
                         {STATES.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
@@ -471,13 +388,11 @@ export default function CheckoutPage() {
                   <div className={styles.field}>
                     <label className={styles.label}>Address Type</label>
                     <div className={styles.typeRow}>
-                      {(['home', 'work', 'other'] as const).map(t => (
-                        <button
-                          key={t}
-                          className={`${styles.typeBtn} ${address.type === t ? styles.typeBtnActive : ''}`}
-                          onClick={() => setAddress(a => ({ ...a, type: t }))}
-                        >
-                          {t === 'home' ? '🏠' : t === 'work' ? '🏢' : '📌'} {t.charAt(0).toUpperCase() + t.slice(1)}
+                      {(['home','work','other'] as const).map(t => (
+                        <button key={t}
+                          className={`${styles.typeBtn} ${address.type===t ? styles.typeBtnActive : ''}`}
+                          onClick={() => setAddress(a => ({ ...a, type: t }))}>
+                          {t==='home' ? '🏠' : t==='work' ? '🏢' : '📌'} {t.charAt(0).toUpperCase()+t.slice(1)}
                         </button>
                       ))}
                     </div>
@@ -486,26 +401,19 @@ export default function CheckoutPage() {
               )}
 
               {addressError && (
-                <div style={{
-                  background: '#fff3f2', border: '1.5px solid #ffccc8',
-                  borderRadius: 12, padding: '10px 16px',
-                  fontSize: 13, color: '#c0392b', fontWeight: 600,
-                }}>
+                <div style={{ background:'#fff3f2', border:'1.5px solid #ffccc8', borderRadius:12,
+                  padding:'10px 16px', fontSize:13, color:'#c0392b', fontWeight:600 }}>
                   ⚠️ {addressError}
                 </div>
               )}
 
-              <button
-                className={styles.primaryBtn}
-                onClick={handleAddressNext}
-                disabled={(selectedSaved === null && !showNewForm) || addressSaving}
-              >
-                {addressSaving ? (
-                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-                    <span className={styles.spinner} />
-                    Saving address…
-                  </span>
-                ) : 'Continue to Payment →'}
+              <button className={styles.primaryBtn} onClick={handleAddressNext}
+                disabled={(selectedSaved === null && !showNewForm) || addressSaving}>
+                {addressSaving
+                  ? <span style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10 }}>
+                      <span className={styles.spinner} />Saving address…
+                    </span>
+                  : 'Continue to Payment →'}
               </button>
             </div>
           )}
@@ -550,6 +458,10 @@ export default function CheckoutPage() {
                     name:       i.name,
                     price:      i.price,
                     quantity:   i.qty,
+                    // FIX: pass color fields so they reach the order creation API
+                    color:      i.color     ?? null,
+                    color_hex:  i.color_hex ?? null,
+                    image:      i.image     ?? null,
                   }))}
                   shippingAddress={shippingAddressForPayment}
                   userEmail={userEmail}
@@ -592,7 +504,7 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        {/* ── RIGHT COLUMN: Order Summary ── */}
+        {/* ── RIGHT: Order Summary ── */}
         <div className={styles.right}>
           <div className={styles.summaryCard}>
             <div className={styles.summaryHeader}>
@@ -602,40 +514,34 @@ export default function CheckoutPage() {
 
             <div className={styles.summaryItems}>
               {orderItems.map(item => (
-                <div key={item.id} className={styles.summaryItem}>
-                  {/* ── CHANGE 4: show real product image, fall back to emoji ── */}
+                <div key={`${item.id}-${item.color ?? 'nc'}`} className={styles.summaryItem}>
                   <div className={styles.summaryItemImg} style={{ background: item.image ? 'transparent' : item.bg }}>
                     {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain',
-                          borderRadius: 'inherit',
-                          display: 'block',
-                        }}
+                      <img src={item.image} alt={item.name}
+                        style={{ width:'100%', height:'100%', objectFit:'contain', borderRadius:'inherit', display:'block' }}
                         onError={(e) => {
-                          // if image fails, hide it and reveal the emoji fallback
                           (e.currentTarget as HTMLImageElement).style.display = 'none';
-                          const parent = e.currentTarget.parentElement;
-                          if (parent) {
-                            parent.style.background = item.bg;
-                            const span = document.createElement('span');
-                            span.textContent = item.emoji;
-                            parent.appendChild(span);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <span>{item.emoji}</span>
-                    )}
+                          const p = e.currentTarget.parentElement;
+                          if (p) { p.style.background = item.bg; const s = document.createElement('span'); s.textContent = item.emoji; p.appendChild(s); }
+                        }} />
+                    ) : <span>{item.emoji}</span>}
                     <span className={styles.summaryItemQty}>{item.qty}</span>
                   </div>
                   <div className={styles.summaryItemInfo}>
                     <div className={styles.summaryItemName}>{item.name}</div>
                     <div className={styles.summaryItemCat}>{item.category}</div>
+                    {/* Show selected color in summary */}
+                    {item.color && (
+                      <div style={{ display:'inline-flex', alignItems:'center', gap:4, marginTop:3,
+                        background:'#f5f2ee', border:'1px solid #e8e0d5', borderRadius:20,
+                        padding:'2px 7px 2px 4px' }}>
+                        {item.color_hex && (
+                          <span style={{ width:8, height:8, borderRadius:'50%', background:item.color_hex,
+                            border:'1px solid rgba(0,0,0,0.12)', display:'inline-block', flexShrink:0 }} />
+                        )}
+                        <span style={{ fontSize:10, fontWeight:700, color:'#555' }}>{item.color}</span>
+                      </div>
+                    )}
                   </div>
                   <div className={styles.summaryItemPrice}>₹{(item.price * item.qty).toLocaleString('en-IN')}</div>
                 </div>
@@ -661,14 +567,11 @@ export default function CheckoutPage() {
               <span>Total</span>
               <span className={styles.summaryTotalAmt}>₹{TOTAL.toLocaleString('en-IN')}</span>
             </div>
-
             <div className={styles.savingsBadge}>
               🎉 You're saving <strong>₹{(SAVINGS + COUPON_DISCOUNT + (DELIVERY === 0 ? 49 : 0)).toLocaleString('en-IN')}</strong> on this order
             </div>
-
             <div className={styles.secureStrip}>
-              <span>🔒</span>
-              <span>Secured by 256-bit SSL encryption</span>
+              <span>🔒</span><span>Secured by 256-bit SSL encryption</span>
             </div>
           </div>
 

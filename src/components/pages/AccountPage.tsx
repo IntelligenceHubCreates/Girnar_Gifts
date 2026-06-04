@@ -43,7 +43,7 @@ const EMPTY_ADDR: AddressFormData = {
 };
 const EMPTY_PROFILE = { firstName:'', lastName:'', email:'', phone:'', dob:'', gender:'' };
 
-/* ─── Typed header helper — fixes TS2769 ────────────────────────── */
+/* ─── Typed header helper ────────────────────────────────────────── */
 function authHeaders(token?: string | null): Record<string, string> {
   if (!token) return {};
   return { Authorization: `Bearer ${token}` };
@@ -92,14 +92,14 @@ function getSellingPrice(product: any): number {
 
 /* ─── Status helpers ─────────────────────────────────────────────── */
 const STATUS_COLOR: Record<string, { bg: string; color: string }> = {
-  delivered:        { bg:'#e8faf3', color:'#0d8a6a' },
-  shipped:          { bg:'#e8f3ff', color:'#1a7dc9' },
-  processing:       { bg:'#fff7e0', color:'#b07800' },
-  confirmed:        { bg:'#fff7e0', color:'#b07800' },
-  pending:          { bg:'#fff7e0', color:'#b07800' },
-  cancelled:        { bg:'#fff0f0', color:'#d63030' },
-  out_for_delivery: { bg:'#e8f3ff', color:'#1a7dc9' },
-  packed:           { bg:'#e8f3ff', color:'#1a7dc9' },
+  delivered:        { bg:'#ecfdf5', color:'#059669' },
+  shipped:          { bg:'#eff6ff', color:'#2563eb' },
+  processing:       { bg:'#fffbeb', color:'#d97706' },
+  confirmed:        { bg:'#fffbeb', color:'#d97706' },
+  pending:          { bg:'#fffbeb', color:'#d97706' },
+  cancelled:        { bg:'#fff1f2', color:'#e11d48' },
+  out_for_delivery: { bg:'#eff6ff', color:'#2563eb' },
+  packed:           { bg:'#eff6ff', color:'#2563eb' },
 };
 const STATUS_LABEL: Record<string, string> = {
   confirmed:'Confirmed', processing:'Processing', pending:'Pending',
@@ -230,10 +230,59 @@ export default function AccountPage() {
   const [reviewFilter,     setReviewFilter]      = useState<'all' | 'pending'>('all');
   const [waReminderSent,   setWaReminderSent]    = useState<Set<string>>(new Set());
 
-  const carouselRef = useRef<HTMLDivElement>(null);
+  const carouselRef    = useRef<HTMLDivElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const [localAvatar,     setLocalAvatar]     = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3500); };
   const token = (session as any)?.backendToken as string | undefined;
+
+  /* ── Avatar upload handler ─────────────────────────────────────── */
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (e.target) (e.target as HTMLInputElement).value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('⚠️ Please select an image file.'); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('⚠️ Image must be under 5 MB.'); return; }
+    setAvatarUploading(true);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            const MAX = 400;
+            const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+            const w = Math.round(img.width * scale);
+            const h = Math.round(img.height * scale);
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.85));
+          };
+          img.onerror = () => reject(new Error('img'));
+          img.src = ev.target!.result as string;
+        };
+        reader.onerror = () => reject(new Error('read'));
+        reader.readAsDataURL(file);
+      });
+      setLocalAvatar(dataUrl);
+      if (token) {
+        try {
+          const blob = await (await fetch(dataUrl)).blob();
+          const form = new FormData();
+          form.append('avatar', blob, 'avatar.jpg');
+          await fetch('/api/user/avatar', { method: 'POST', headers: authHeaders(token), body: form });
+          showToast('✅ Profile photo updated!');
+        } catch { showToast('📸 Photo saved — could not sync to server.'); }
+      } else {
+        showToast('✅ Profile photo updated!');
+      }
+    } catch { showToast('❌ Could not read image. Try another file.'); }
+    setAvatarUploading(false);
+  };
 
   /* ── Seed profile from session ─────────────────────────────────── */
   useEffect(() => {
@@ -250,9 +299,7 @@ export default function AccountPage() {
   useEffect(() => {
     if (status !== 'authenticated') return;
     const ah = authHeaders(token);
-    const jh = jsonHeaders(token);
 
-    // Profile
     if (token) {
       fetch('/api/user/profile', { headers: ah })
         .then(r => r.json())
@@ -268,7 +315,6 @@ export default function AccountPage() {
         .catch(() => {});
     }
 
-    // Orders
     fetch('/api/orders', { headers: ah })
       .then(r => r.json())
       .then((res: any) => {
@@ -277,18 +323,15 @@ export default function AccountPage() {
       })
       .catch(() => {});
 
-    // Wishlist
     fetch('/api/favorite', { headers: ah })
       .then(r => r.json())
       .then((res: any) => { setFavs(Array.isArray(res) ? res : (res?.favorites ?? [])); })
       .catch(() => {});
 
-    // Featured products
     _get('/api/product/featured')
       .then((res: any) => { setFeatured((Array.isArray(res) ? res : (res?.data || [])).slice(0, 8)); })
       .catch(() => {});
 
-    // Addresses
     setAddrLoading(true);
     fetch('/api/address/addresses', { headers: ah })
       .then(r => r.json())
@@ -299,7 +342,6 @@ export default function AccountPage() {
       .catch(() => {})
       .finally(() => setAddrLoading(false));
 
-    // Reviews
     fetch('/api/reviews/user', { headers: ah })
       .then(r => r.json())
       .then((res: any) => {
@@ -501,12 +543,11 @@ export default function AccountPage() {
   };
 
   /* ── Derived ───────────────────────────────────────────────────── */
-  const profileImage = session?.user?.image || null;
+  const profileImage = localAvatar || session?.user?.image || null;
   const displayName  = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || session?.user?.email || '—';
   const displayEmail = profile.email || session?.user?.email || '—';
-  const recentOrders = orders.slice(0, 5);
+  const recentOrders = orders.slice(0, 4);
 
-  // All reviewable products from delivered orders (de-duped by productId)
   const seen = new Set<string>();
   const reviewableProducts: ReviewableProduct[] = orders
     .filter(o => o.status.toLowerCase() === 'delivered')
@@ -530,16 +571,7 @@ export default function AccountPage() {
   const pendingReviewProducts = reviewableProducts.filter(p => !p.alreadyReviewed);
   const filteredReviewProducts = reviewFilter === 'pending' ? pendingReviewProducts : reviewableProducts;
 
-  const NAV = [
-    { id:'overview'   as Tab, label:'My Account',    icon:'👤' },
-    { id:'orders'     as Tab, label:'Orders',         icon:'📦', badge: orders.length    || undefined },
-    { id:'wishlist'   as Tab, label:'Wishlist',       icon:'❤️',  badge: favs.length      || undefined },
-    { id:'addresses'  as Tab, label:'Addresses',      icon:'📍', badge: addresses.length || undefined },
-    { id:'coupons'    as Tab, label:'Coupons',         icon:'🎟️' },
-    { id:'reviews'    as Tab, label:'Reviews',         icon:'⭐', badge: pendingReviewProducts.length || undefined },
-    { id:'settings'   as Tab, label:'Settings',        icon:'⚙️' },
-    { id:'help'       as Tab, label:'Help & Support',  icon:'🎧' },
-  ];
+  const activeCoupons = coupons.filter(c => !c.used && new Date(c.expiry) >= new Date()).length;
 
   if (status === 'loading' || (status === 'authenticated' && profileLoading)) {
     return (
@@ -556,6 +588,47 @@ export default function AccountPage() {
 
       {/* ══════════ SIDEBAR ══════════ */}
       <aside className={styles.sidebar}>
+
+        {/* Profile block */}
+        <div className={styles.sidebarProfile}>
+          {/* Hidden file input */}
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleAvatarChange}
+          />
+          <div className={styles.sidebarAvatarRow}>
+            {/* Avatar with camera overlay */}
+            <div className={styles.sidebarAvatarWrap} onClick={() => avatarInputRef.current?.click()}>
+              {profileImage
+                ? <img src={profileImage} alt={displayName} className={styles.sidebarAvatar} referrerPolicy="no-referrer" />
+                : <div className={styles.sidebarAvatarFallback}>{(displayName[0] || 'U').toUpperCase()}</div>
+              }
+              <div className={styles.sidebarAvatarOverlay}>
+                {avatarUploading
+                  ? <div className={styles.avatarSpinner} />
+                  : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                  )
+                }
+              </div>
+            </div>
+            <div className={styles.sidebarTextBlock}>
+              <div className={styles.sidebarName}>{displayName}</div>
+              <div className={styles.sidebarEmail}>{displayEmail}</div>
+            </div>
+          </div>
+          <button type="button" className={styles.sidebarEditLink} onClick={() => setTab('settings')}>
+            ✏️ Edit Profile
+          </button>
+        </div>
+
+        {/* Mobile-only logo */}
         <div className={styles.sidebarLogo}>
           <div className={styles.logoIcon}>🧸</div>
           <div>
@@ -564,78 +637,227 @@ export default function AccountPage() {
           </div>
         </div>
 
+        {/* Nav */}
         <nav className={styles.sidebarNav}>
-          {NAV.map(n => (
-            <button key={n.id} type="button"
-              className={`${styles.navBtn} ${tab === n.id ? styles.navBtnActive : ''}`}
-              onClick={() => setTab(n.id)}>
-              <span className={styles.navIcon}>{n.icon}</span>
-              <span className={styles.navLabel}>{n.label}</span>
-              {n.badge ? <span className={styles.navBadge}>{n.badge}</span> : null}
-            </button>
-          ))}
+          {/* Dashboard */}
+          <button type="button" className={`${styles.navBtn} ${tab === 'overview' ? styles.navBtnActive : ''}`} onClick={() => setTab('overview')}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </span>
+            <span className={styles.navLabel}>Dashboard</span>
+          </button>
+
+          {/* My Orders */}
+          <button type="button" className={`${styles.navBtn} ${tab === 'orders' ? styles.navBtnActive : ''}`} onClick={() => setTab('orders')}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+            </span>
+            <span className={styles.navLabel}>My Orders</span>
+            {orders.length > 0 && <span className={styles.navBadge}>{orders.length}</span>}
+          </button>
+
+          {/* Wishlist */}
+          <button type="button" className={`${styles.navBtn} ${tab === 'wishlist' ? styles.navBtnActive : ''}`} onClick={() => setTab('wishlist')}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </span>
+            <span className={styles.navLabel}>Wishlist</span>
+            {favs.length > 0 && <span className={styles.navBadge}>{favs.length}</span>}
+          </button>
+
+          {/* Addresses */}
+          <button type="button" className={`${styles.navBtn} ${tab === 'addresses' ? styles.navBtnActive : ''}`} onClick={() => setTab('addresses')}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            </span>
+            <span className={styles.navLabel}>Addresses</span>
+          </button>
+
+          {/* Payment Methods */}
+          <button type="button" className={`${styles.navBtn} ${tab === 'settings' ? styles.navBtnActive : ''}`} onClick={() => setTab('settings')}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+            </span>
+            <span className={styles.navLabel}>Payment Methods</span>
+          </button>
+
+          {/* My Reviews */}
+          <button type="button" className={`${styles.navBtn} ${tab === 'reviews' ? styles.navBtnActive : ''}`} onClick={() => setTab('reviews')}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </span>
+            <span className={styles.navLabel}>My Reviews</span>
+            {pendingReviewProducts.length > 0 && <span className={styles.navBadge}>{pendingReviewProducts.length}</span>}
+          </button>
+
+          {/* Little Loot Club */}
+          <button type="button" className={styles.navBtn}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z"/></svg>
+            </span>
+            <span className={styles.navLabel}>Little Loot Club</span>
+            <span className={styles.navBadgeNew}>New</span>
+          </button>
+
+          {/* Rewards */}
+          <button type="button" className={`${styles.navBtn} ${tab === 'coupons' ? styles.navBtnActive : ''}`} onClick={() => setTab('coupons')}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+            </span>
+            <span className={styles.navLabel}>Rewards</span>
+            <span className={styles.navBadgePoints}>320 Points</span>
+          </button>
+
+          {/* Coupons */}
+          <button type="button" className={`${styles.navBtn} ${tab === 'coupons' ? styles.navBtnActive : ''}`} onClick={() => setTab('coupons')}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            </span>
+            <span className={styles.navLabel}>Coupons</span>
+          </button>
+
+          {/* Notifications */}
+          <button type="button" className={styles.navBtn}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </span>
+            <span className={styles.navLabel}>Notifications</span>
+          </button>
+
+          {/* Settings */}
+          <button type="button" className={`${styles.navBtn} ${tab === 'settings' ? styles.navBtnActive : ''}`} onClick={() => setTab('settings')}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </span>
+            <span className={styles.navLabel}>Settings</span>
+          </button>
+
+          {/* Help & Support */}
+          <button type="button" className={`${styles.navBtn} ${tab === 'help' ? styles.navBtnActive : ''}`} onClick={() => setTab('help')}>
+            <span className={styles.navIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </span>
+            <span className={styles.navLabel}>Help &amp; Support</span>
+          </button>
+
+          {/* Logout */}
+          <button type="button" className={styles.logoutBtn}
+            onClick={() => signOut({ callbackUrl: '/login' })}>
+            <span className={styles.logoutIcon}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </span>
+            <span>Logout</span>
+          </button>
         </nav>
 
         <div style={{ flex: 1 }} />
 
-        <div className={styles.helpCard}>
-          <div className={styles.helpTop}>
-            <div className={styles.helpIconWrap}><span>🎧</span></div>
-            <div>
-              <div className={styles.helpTitle}>Need Help?</div>
-              <div className={styles.helpSub}>We are here for you</div>
-            </div>
+        {/* Little Loot Club card */}
+        <div className={styles.clubCard}>
+          <div className={styles.clubCardTitle}>
+            <span>👑</span> Little Loot Club
           </div>
-          <button type="button" className={styles.helpBtn} onClick={() => setTab('help')}>
-            Contact Support
-          </button>
+          <div className={styles.clubCardSub}>Join &amp; enjoy exclusive perks!</div>
+          <ul className={styles.clubCardPerks}>
+            <li>Early access to new launches</li>
+            <li>Exclusive member discounts</li>
+            <li>Birthday special rewards</li>
+            <li>Earn extra Loot Points</li>
+          </ul>
+          <button type="button" className={styles.clubJoinBtn}>Join Now →</button>
         </div>
 
-        <button type="button" className={styles.logoutBtn}
-          onClick={() => signOut({ callbackUrl: '/login' })}>
-          <span>🚪</span><span>Logout</span>
-        </button>
+        {/* Need Help card */}
+        <div className={styles.helpCard}>
+          <div className={styles.helpTop}>
+            <div className={styles.helpTitle}>Need Help?</div>
+            <div className={styles.helpSub}>We're here for you</div>
+          </div>
+          <div className={styles.helpContactList}>
+            <div className={styles.helpContact}>
+              <span className={styles.helpContactIcon}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.86a16 16 0 0 0 6 6l.95-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.77 16.92z"/></svg>
+              </span>
+              +91 98765 43210
+            </div>
+            <div className={styles.helpContact}>
+              <span className={styles.helpContactIcon}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </span>
+              hello@littleloot.com
+            </div>
+            <div className={styles.helpContact}>
+              <span className={styles.helpContactIcon}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </span>
+              Mon – Sat: 10AM – 7PM
+            </div>
+          </div>
+        </div>
+
       </aside>
 
       {/* ══════════ MAIN ══════════ */}
       <main className={styles.main}>
 
-        <div className={styles.pageHeader}>
-          <h1 className={styles.pageTitle}>My Account <span className={styles.sparkle}>✨</span></h1>
-          <p className={styles.pageSub}>Manage your account details and view your activity</p>
-        </div>
-
         {/* ─── OVERVIEW ─── */}
         {tab === 'overview' && (
           <>
-            {/* Profile banner */}
-            <div className={styles.profileBanner}>
-              <div className={styles.profileBannerLeft}>
-                <div className={styles.profileAvatarWrap}>
+            {/* Welcome banner */}
+            <div className={styles.welcomeBanner}>
+              <div className={styles.welcomeLeft}>
+                <div className={styles.welcomeAvatarWrap}>
                   {profileImage
-                    ? <img src={profileImage} alt={displayName} className={styles.profileAvatar} referrerPolicy="no-referrer" />
-                    : <div className={styles.profileAvatarFallback}>{(displayName[0] || 'U').toUpperCase()}</div>
+                    ? <img src={profileImage} alt={displayName} className={styles.welcomeAvatar} referrerPolicy="no-referrer" />
+                    : <div className={styles.welcomeAvatarFallback}>{(displayName[0] || 'U').toUpperCase()}</div>
                   }
                   <button type="button" className={styles.cameraBtn} aria-label="Change photo">📷</button>
                 </div>
-                <div className={styles.profileBannerInfo}>
-                  <h2 className={styles.profileBannerName}>{displayName}</h2>
-                  <p className={styles.profileBannerEmail}>{displayEmail}</p>
-                  {profile.phone && <p className={styles.profileBannerPhone}>📞 {profile.phone}</p>}
+                <div className={styles.welcomeInfo}>
+                  <h2 className={styles.welcomeName}>Welcome back, {profile.firstName || displayName}! 👋</h2>
+                  <p className={styles.welcomeEmail}>{displayEmail}</p>
+                  {profile.phone && <p className={styles.welcomePhone}>📞 {profile.phone}</p>}
+                  <button type="button" className={styles.welcomeEditBtn} onClick={() => setTab('settings')}>
+                    ✏️ Edit Profile
+                  </button>
                 </div>
               </div>
-              <button type="button" className={styles.editProfileBtn} onClick={() => setTab('settings')}>
-                ✏️ Edit Profile
-              </button>
+
+              {/* Loot Points card */}
+              <div className={styles.lootPointsCard}>
+                <div className={styles.lootPointsStarIcon}>⭐</div>
+                <div className={styles.lootPointsLabel}>Loot Points</div>
+                <div className={styles.lootPointsNum}>320</div>
+                <div className={styles.lootPointsSub}>Available Points</div>
+                <button type="button" className={styles.lootPointsLink}>View Rewards →</button>
+              </div>
             </div>
 
-            {/* Two-col */}
+            {/* Stats row */}
+            <div className={styles.statsRow}>
+              {[
+                { icon:'📦', label:'Orders',    value: orders.length,    color:'Blue',   link:'View all orders →',    tab:'orders'    as Tab },
+                { icon:'❤️', label:'Wishlist',  value: favs.length,      color:'Pink',   link:'View your wishlist →', tab:'wishlist'  as Tab },
+                { icon:'📍', label:'Addresses', value: addresses.length, color:'Teal',   link:'Manage addresses →',   tab:'addresses' as Tab },
+                { icon:'🎟️', label:'Coupons',   value: activeCoupons,    color:'Orange', link:'View coupons →',       tab:'coupons'   as Tab },
+              ].map(s => (
+                <div key={s.label} className={styles.statCard} onClick={() => setTab(s.tab)}>
+                  <div className={`${styles.statIconWrap} ${styles[`statIcon${s.color}`]}`}>
+                    <span className={styles.statIcon}>{s.icon}</span>
+                  </div>
+                  <div className={styles.statNum}>{s.value}</div>
+                  <div className={styles.statLabel}>{s.label}</div>
+                  <button type="button" className={styles.statLink}>{s.link}</button>
+                </div>
+              ))}
+            </div>
+
+            {/* Recent orders + Account details */}
             <div className={styles.overviewGrid}>
-              {/* Recent orders */}
               <div className={styles.overviewCard}>
                 <div className={styles.overviewCardHeader}>
-                  <h3 className={styles.overviewCardTitle}>Recent Orders</h3>
-                  <button type="button" className={styles.viewAllBtn} onClick={() => setTab('orders')}>View All</button>
+                  <h3 className={styles.overviewCardTitle}>My Recent Orders</h3>
+                  <button type="button" className={styles.viewAllBtn} onClick={() => setTab('orders')}>View All Orders →</button>
                 </div>
                 {recentOrders.length === 0
                   ? <div className={styles.emptyMini}><span>📦</span><span>No orders yet</span></div>
@@ -653,12 +875,15 @@ export default function AccountPage() {
                               }
                             </div>
                             <div className={styles.recentOrderInfo}>
-                              <div className={styles.recentOrderName}>{o.name}</div>
-                              <div className={styles.recentOrderMeta}>#{o.id.slice(0, 8).toUpperCase()} · {o.date}</div>
+                              <div className={styles.recentOrderId}>Order #{o.id.slice(0, 8).toUpperCase()}</div>
+                              <div className={styles.recentOrderMeta}>{o.date} · {o.itemCount} {o.itemCount === 1 ? 'Item' : 'Items'}</div>
                             </div>
-                            <span className={styles.recentOrderStatus} style={{ background: sc.bg, color: sc.color }}>
-                              {o.status}
-                            </span>
+                            <div className={styles.recentOrderRight}>
+                              <div className={styles.recentOrderAmt}>₹{o.amount.toLocaleString('en-IN')}</div>
+                              <span className={styles.recentOrderStatus} style={{ background: sc.bg, color: sc.color }}>
+                                {o.status}
+                              </span>
+                            </div>
                             <span className={styles.recentOrderChevron}>›</span>
                           </Link>
                         );
@@ -687,7 +912,7 @@ export default function AccountPage() {
                         <div className={styles.accountDetailValue}>{d.value}</div>
                       </div>
                       {d.action && (
-                        <button type="button" className={styles.changePassBtn}>Change Password</button>
+                        <button type="button" className={styles.changePassBtn}>Change</button>
                       )}
                     </div>
                   ))}
@@ -695,7 +920,127 @@ export default function AccountPage() {
               </div>
             </div>
 
-            {/* Recommended */}
+            {/* Reward progress banner */}
+            <div className={styles.rewardBanner}>
+              <div className={styles.rewardBannerIcon}>👑</div>
+              <div className={styles.rewardBannerBody}>
+                <div className={styles.rewardBannerTitle}>You're just 180 points away from a ₹250 reward!</div>
+                <div className={styles.rewardBannerSub}>Keep shopping and earn more Loot Points.</div>
+              </div>
+              <button type="button" className={styles.rewardBannerBtn} onClick={() => setTab('orders')}>Shop Now</button>
+            </div>
+
+            {/* Wishlist + Addresses two-col */}
+            <div className={styles.overviewGrid}>
+              {/* Wishlist mini */}
+              <div className={styles.overviewCard}>
+                <div className={styles.overviewCardHeader}>
+                  <h3 className={styles.overviewCardTitle}>My Wishlist</h3>
+                  <button type="button" className={styles.viewAllBtn} onClick={() => setTab('wishlist')}>View All</button>
+                </div>
+                {favs.length === 0
+                  ? <div className={styles.emptyMini}><span>💔</span><span>Wishlist is empty</span></div>
+                  : (
+                    <div className={styles.wishMiniGrid}>
+                      {favs.slice(0, 3).map(item => {
+                        const p = item.product;
+                        const img = getProductImage(p);
+                        const price = getSellingPrice(p);
+                        return (
+                          <Link key={String(p.id)} href={`/product/${p.id}`} className={styles.wishMiniCard}>
+                            <button type="button" className={styles.wishMiniHeart} onClick={e => { e.preventDefault(); e.stopPropagation(); }}>❤️</button>
+                            <img src={img} alt={p.name} className={styles.wishMiniImg} onError={e => { (e.target as HTMLImageElement).src = PLACEHOLDER; }} />
+                            <div className={styles.wishMiniInfo}>
+                              <div className={styles.wishMiniName}>{p.name}</div>
+                              <div className={styles.wishMiniPrice}>₹{price.toLocaleString('en-IN')}</div>
+                              <span className={styles.wishMiniStock}>In Stock</span>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )
+                }
+              </div>
+
+              {/* Addresses mini */}
+              <div className={styles.overviewCard}>
+                <div className={styles.overviewCardHeader}>
+                  <h3 className={styles.overviewCardTitle}>My Addresses</h3>
+                  <button type="button" className={styles.viewAllBtn} onClick={() => setTab('addresses')}>Manage Addresses</button>
+                </div>
+                <div className={styles.addrMiniList}>
+                  {addresses.slice(0, 2).map(a => (
+                    <div key={a.id} className={styles.addrMiniItem}>
+                      <div className={styles.addrMiniIcon}>{a.type === 'Home' ? '🏠' : a.type === 'Office' ? '🏢' : '📌'}</div>
+                      <div className={styles.addrMiniBody}>
+                        <div className={styles.addrMiniType}>{a.type}</div>
+                        <div className={styles.addrMiniText}>
+                          {a.line1}, {a.city} – {a.pincode}<br />
+                          {a.state}<br />
+                          +91 {a.phone}
+                        </div>
+                      </div>
+                      <button type="button" className={styles.addrMiniEdit}
+                        onClick={() => { setEditingAddr(a); setAddrForm({ type:a.type, name:a.name, phone:a.phone, line1:a.line1, line2:a.line2, city:a.city, state:a.state, pincode:a.pincode, isDefault:a.isDefault }); setAddrErrors({}); setShowAddrModal(true); }}>
+                        ✏️ Edit
+                      </button>
+                    </div>
+                  ))}
+                  <button type="button" className={styles.addAddrBtn}
+                    onClick={() => { setEditingAddr(null); setAddrForm(EMPTY_ADDR); setAddrErrors({}); setShowAddrModal(true); }}>
+                    <span>➕</span><span>Add New Address</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Trust bar + Reviews mini two-col */}
+            <div className={styles.overviewGrid}>
+              {/* Trust bar */}
+              <div className={styles.trustBar} style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 16, background: '#fff', borderRadius: 16, padding: '20px 18px', border: '1px solid #f0f0f0' }}>
+                {[
+                  { icon:'🚚', title:'Free Delivery',    sub:'On orders above ₹499' },
+                  { icon:'🔄', title:'7 Days Returns',   sub:'Hassle-free returns' },
+                  { icon:'🔒', title:'Secure Payments',  sub:'100% safe & secure' },
+                  { icon:'🧸', title:'Made for Kids',    sub:'Child-safe materials' },
+                ].map(t => (
+                  <div key={t.title} className={styles.trustItem}>
+                    <div className={styles.trustIconWrap}><span>{t.icon}</span></div>
+                    <div>
+                      <div className={styles.trustTitle}>{t.title}</div>
+                      <div className={styles.trustSub}>{t.sub}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Reviews mini */}
+              {reviews.length > 0 && (
+                <div className={styles.overviewCard}>
+                  <div className={styles.overviewCardHeader}>
+                    <h3 className={styles.overviewCardTitle}>My Reviews</h3>
+                    <button type="button" className={styles.viewAllBtn} onClick={() => setTab('reviews')}>View All</button>
+                  </div>
+                  <div className={styles.reviewsMiniList}>
+                    {reviews.slice(0, 2).map(r => (
+                      <div key={r.id} className={styles.reviewMiniItem}>
+                        <div className={styles.reviewMiniImg}>
+                          <img src={r.productImage} alt={r.productName} onError={e => { (e.target as HTMLImageElement).src = PLACEHOLDER; }} />
+                        </div>
+                        <div className={styles.reviewMiniBody}>
+                          <div className={styles.reviewMiniName}>{r.productName}</div>
+                          <StarRating value={r.rating} readonly size="sm" />
+                          <div className={styles.reviewMiniDate}>Reviewed on {r.createdAt}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Recommended products carousel */}
             {featured.length > 0 && (
               <div className={styles.recommendedSection}>
                 <div className={styles.recommendedHeader}>
@@ -728,28 +1073,10 @@ export default function AccountPage() {
                   </div>
                   <button type="button"
                     className={`${styles.carouselArrow} ${styles.carouselArrowRight}`}
-                    onClick={() => carouselRef.current?.scrollBy({ left: 280, behavior: 'smooth' })}>›</button>
+                    onClick={() => carouselRef.current?.scrollBy({ left: 260, behavior: 'smooth' })}>›</button>
                 </div>
               </div>
             )}
-
-            {/* Trust bar */}
-            <div className={styles.trustBar}>
-              {[
-                { icon:'🔒', title:'Secure Payments',  sub:'100% secure' },
-                { icon:'🔄', title:'Easy Returns',     sub:'30-day policy' },
-                { icon:'🚚', title:'Fast Delivery',    sub:'3–5 business days' },
-                { icon:'🧸', title:'Kids Friendly',    sub:'Safety certified' },
-              ].map(t => (
-                <div key={t.title} className={styles.trustItem}>
-                  <div className={styles.trustIcon}>{t.icon}</div>
-                  <div>
-                    <div className={styles.trustTitle}>{t.title}</div>
-                    <div className={styles.trustSub}>{t.sub}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </>
         )}
 
@@ -876,7 +1203,7 @@ export default function AccountPage() {
           <div className={styles.tabCard}>
             <div className={styles.tabCardHeader}>
               <h2 className={styles.tabCardTitle}>📍 Saved Addresses</h2>
-              <button type="button" className={styles.addAddrBtn}
+              <button type="button" className={styles.editProfileOutlineBtn}
                 onClick={() => { setEditingAddr(null); setAddrForm(EMPTY_ADDR); setAddrErrors({}); setShowAddrModal(true); }}>
                 + Add New
               </button>
@@ -923,7 +1250,7 @@ export default function AccountPage() {
           <div className={styles.tabCard}>
             <div className={styles.tabCardHeader}>
               <h2 className={styles.tabCardTitle}>🎟️ My Coupons</h2>
-              <span className={styles.tabMeta}>{coupons.filter(c => !c.used && new Date(c.expiry) >= new Date()).length} active</span>
+              <span className={styles.tabMeta}>{activeCoupons} active</span>
             </div>
             <div className={styles.couponsGrid}>
               {coupons.map(c => {
@@ -977,8 +1304,7 @@ export default function AccountPage() {
               <div className={styles.reviewHeaderRight}>
                 {pendingReviewProducts.length > 0 && (
                   <button type="button" className={styles.waReminderBtn}
-                    onClick={() => sendWhatsAppReminder(pendingReviewProducts)}
-                    title="Send yourself a WhatsApp reminder to review">
+                    onClick={() => sendWhatsAppReminder(pendingReviewProducts)}>
                     <span>📲</span> WhatsApp Reminder
                   </button>
                 )}
@@ -986,7 +1312,6 @@ export default function AccountPage() {
               </div>
             </div>
 
-            {/* Filter tabs */}
             <div className={styles.reviewFilterRow}>
               <button type="button"
                 className={`${styles.reviewFilterBtn} ${reviewFilter === 'all' ? styles.reviewFilterActive : ''}`}
@@ -1001,7 +1326,6 @@ export default function AccountPage() {
               </button>
             </div>
 
-            {/* Empty state */}
             {filteredReviewProducts.length === 0 && (
               <div className={styles.emptyState}>
                 <div className={styles.emptyIcon}>{reviewFilter === 'pending' ? '🎉' : '⭐'}</div>
@@ -1013,14 +1337,12 @@ export default function AccountPage() {
               </div>
             )}
 
-            {/* Product review cards */}
             {filteredReviewProducts.length > 0 && (
               <div className={styles.reviewProductGrid}>
                 {filteredReviewProducts.map(p => {
                   const ex = reviews.find(r => r.productId === p.productId);
                   return (
                     <div key={p.productId} className={`${styles.reviewProductCard} ${ex ? styles.reviewProductCardDone : ''}`}>
-                      {/* Product image + info */}
                       <div className={styles.reviewProductTop}>
                         <div className={styles.reviewProductImgWrap}>
                           <img src={p.productImage} alt={p.productName}
@@ -1049,7 +1371,6 @@ export default function AccountPage() {
                         </div>
                       </div>
 
-                      {/* Existing review preview */}
                       {ex && (
                         <div className={styles.reviewPreview}>
                           <p className={styles.reviewPreviewComment}>"{ex.comment}"</p>
@@ -1057,7 +1378,6 @@ export default function AccountPage() {
                         </div>
                       )}
 
-                      {/* WhatsApp nudge for pending */}
                       {!ex && (
                         <div className={styles.reviewNudge}>
                           <span>💛 Share your experience to help other parents!</span>
@@ -1079,7 +1399,6 @@ export default function AccountPage() {
               </div>
             )}
 
-            {/* Submitted reviews summary */}
             {reviews.length > 0 && (
               <div className={styles.submittedReviewsSection}>
                 <div className={styles.submittedReviewsTitle}>Your Submitted Reviews</div>
@@ -1125,10 +1444,10 @@ export default function AccountPage() {
             </div>
             <div className={styles.profileForm}>
               {[
-                { id:'firstName', label:'First Name',   icon:'👤', ph:'First name' },
-                { id:'lastName',  label:'Last Name',    icon:'👤', ph:'Last name' },
-                { id:'email',     label:'Email',        icon:'✉️',  ph:'Email address', disabled: true },
-                { id:'phone',     label:'Mobile Number',icon:'📱', ph:'10-digit number (used for WhatsApp reminders)' },
+                { id:'firstName', label:'First Name',    icon:'👤', ph:'First name' },
+                { id:'lastName',  label:'Last Name',     icon:'👤', ph:'Last name' },
+                { id:'email',     label:'Email',         icon:'✉️', ph:'Email address', disabled: true },
+                { id:'phone',     label:'Mobile Number', icon:'📱', ph:'10-digit number' },
               ].map(f => (
                 <div key={f.id} className={styles.profileField}>
                   <label className={styles.profileLabel}>{f.label}</label>
@@ -1272,7 +1591,6 @@ export default function AccountPage() {
               <button className={styles.modalClose} onClick={() => setShowReviewModal(false)}>✕</button>
             </div>
             <div className={styles.modalBody}>
-              {/* Product preview */}
               <div className={styles.reviewModalProduct}>
                 <img
                   src={reviewTarget.productImage} alt={reviewTarget.productName}
@@ -1284,7 +1602,6 @@ export default function AccountPage() {
                 </div>
               </div>
 
-              {/* Star rating */}
               <div className={styles.modalField}>
                 <label className={styles.modalLabel}>Overall Rating *</label>
                 <StarRating
@@ -1293,7 +1610,6 @@ export default function AccountPage() {
                   size="lg" />
               </div>
 
-              {/* Review text */}
               <div className={styles.modalField}>
                 <label className={styles.modalLabel}>Your Review *</label>
                 <textarea
@@ -1304,7 +1620,7 @@ export default function AccountPage() {
                   value={reviewDraft.comment}
                   onChange={e => setReviewDraft(d => ({ ...d, comment: e.target.value }))} />
                 <div className={styles.reviewCharCount}>
-                  <span style={{ color: reviewDraft.comment.length < 10 ? '#ff4444' : '#999' }}>
+                  <span style={{ color: reviewDraft.comment.length < 10 ? '#ff4444' : '#bbb' }}>
                     {reviewDraft.comment.length < 10 && reviewDraft.comment.length > 0
                       ? `${10 - reviewDraft.comment.length} more characters needed`
                       : `${reviewDraft.comment.length}/500`}
@@ -1312,7 +1628,6 @@ export default function AccountPage() {
                 </div>
               </div>
 
-              {/* WhatsApp nudge */}
               {!reviewTarget.alreadyReviewed && profile.phone && (
                 <div className={styles.reviewModalWaNudge}>
                   <span>💡 Want a reminder? We'll send you a WhatsApp message.</span>

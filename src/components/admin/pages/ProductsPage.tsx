@@ -295,6 +295,27 @@ function ProductForm({ product, categories, onClose, onSaved }: ProductFormProps
     setKeptImages((prev) => prev.filter((_, i) => i !== idx))
   }
 
+  // Video state
+  const existingVideoUrl = (product as any)?.product_video ?? ''
+  const [videoFile,    setVideoFile]    = useState<File | null>(null)
+  const [videoPreview, setVideoPreview] = useState<string>(existingVideoUrl)
+  const [removeVideo,  setRemoveVideo]  = useState(false)
+  const videoRef = useRef<HTMLInputElement>(null)
+
+  function handleVideoFile(file: File | null) {
+    if (!file) return
+    setVideoFile(file)
+    setVideoPreview(URL.createObjectURL(file))
+    setRemoveVideo(false)
+  }
+
+  function handleRemoveVideo() {
+    setVideoFile(null)
+    setVideoPreview('')
+    setRemoveVideo(true)
+    if (videoRef.current) videoRef.current.value = ''
+  }
+
 
   // ── FIXED handleSubmit ────────────────────────────────────────
   // Key changes vs original:
@@ -396,6 +417,35 @@ function ProductForm({ product, categories, onClose, onSaved }: ProductFormProps
           uploadedUrlsByVariant[i] = urls.filter(Boolean)
         })
       )
+
+      // ── Step 2b: Upload video if a new file was selected ──────────
+      if (videoFile) {
+        const videoBuf  = await videoFile.arrayBuffer()
+        const uploadFd  = new FormData()
+        uploadFd.append('file', new File([videoBuf], videoFile.name, { type: videoFile.type }))
+
+        // Upload video DIRECTLY to FastAPI — bypass Next.js proxy entirely.
+        // Next.js has a hard body size limit that kills large file proxying.
+        const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000'
+        const vRes = await fetch(`${BACKEND}/api/product/upload/video`, {
+          method:      'POST',
+          body:        uploadFd,
+          credentials: 'include',
+        })
+        if (!vRes.ok) {
+          let detail = `Video upload failed (HTTP ${vRes.status})`
+          try { const e = await vRes.json(); if (e?.detail) detail = e.detail } catch {}
+          throw new Error(detail)
+        }
+        const vData = await vRes.json()
+        form.append('productVideo', vData.url ?? '')
+      } else if (removeVideo) {
+        // admin explicitly removed the video
+        form.append('productVideo', '')
+      } else if (existingVideoUrl) {
+        // keep existing
+        form.append('productVideo', existingVideoUrl)
+      }
 
       // ── Step 3: Build final color_variants payload ──────────────
       const finalVariants = colorVariants
@@ -596,6 +646,78 @@ function ProductForm({ product, categories, onClose, onSaved }: ProductFormProps
                 multiple
                 style={{ display: 'none' }}
                 onChange={(e) => setImageFiles(Array.from(e.target.files ?? []))}
+              />
+            </div>
+
+            {/* ── Product Video ── */}
+            <div className="form-group">
+              <label className="form-label">Product Video</label>
+              <p style={{ fontSize: '.75rem', color: 'var(--muted)', marginBottom: 8 }}>
+                Upload an MP4/WEBM demo video (max 50 MB). Shown on the product page.
+              </p>
+
+              {/* Existing or new preview */}
+              {videoPreview && !removeVideo && (
+                <div style={{ position: 'relative', marginBottom: 10, display: 'inline-block' }}>
+                  <video
+                    src={videoPreview}
+                    controls
+                    style={{ width: '100%', maxWidth: 320, borderRadius: 10, border: '1.5px solid var(--border)', display: 'block' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveVideo}
+                    style={{
+                      position: 'absolute', top: -8, right: -8,
+                      width: 24, height: 24, borderRadius: '50%',
+                      border: 'none', background: '#e74c3c', color: '#fff',
+                      fontWeight: 700, fontSize: 12, cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      lineHeight: 1, padding: 0,
+                    }}
+                    title="Remove video"
+                  >✕</button>
+                </div>
+              )}
+
+              {/* Upload zone */}
+              {(!videoPreview || removeVideo) && (
+                <div
+                  style={{
+                    border: '2px dashed var(--border)', borderRadius: 10,
+                    padding: '16px', textAlign: 'center', cursor: 'pointer',
+                    fontSize: '.82rem', color: 'var(--muted)', background: '#fafafa',
+                  }}
+                  onClick={() => videoRef.current?.click()}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    const file = e.dataTransfer.files?.[0]
+                    if (file && file.type.startsWith('video/')) handleVideoFile(file)
+                  }}
+                >
+                  🎬 Click or drag & drop an MP4 / WEBM video
+                </div>
+              )}
+
+              {/* Change button when video already set */}
+              {videoPreview && !removeVideo && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  style={{ marginTop: 6 }}
+                  onClick={() => videoRef.current?.click()}
+                >
+                  🔄 Replace Video
+                </button>
+              )}
+
+              <input
+                ref={videoRef}
+                type="file"
+                accept="video/mp4,video/webm,video/*"
+                style={{ display: 'none' }}
+                onChange={(e) => handleVideoFile(e.target.files?.[0] ?? null)}
               />
             </div>
 

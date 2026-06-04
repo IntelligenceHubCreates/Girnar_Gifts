@@ -37,7 +37,7 @@ export interface Testimonial {
   quote: string;
   author: string;
   sub: string;
-  avatar: string;
+  profilePhoto?: string;
 }
 
 export interface BlogPost {
@@ -110,19 +110,19 @@ export const TESTIMONIALS: Testimonial[] = [
     quote: 'My daughter absolutely loves the art kit from Little Loot. The quality is outstanding and the packaging is so adorable. Will definitely be ordering again!',
     author: 'Priya Sharma',
     sub: 'Mom of 2 · Hyderabad',
-    avatar: '👩',
+    profilePhoto: '',
   },
   {
     quote: 'Great stationery selection! My son needed a full kit for school and Little Loot had everything in one place. Delivery was super fast too!',
     author: 'Rahul Mehta',
     sub: 'Father of 1 · Vijayawada',
-    avatar: '👨',
+    profilePhoto: '',
   },
   {
     quote: "The teddy bear I ordered for my niece's birthday was so soft and premium! She hasn't put it down since. Perfect gifting experience.",
     author: 'Ananya Reddy',
     sub: 'Aunt · Guntur',
-    avatar: '👩‍💼',
+    profilePhoto: '',
   },
 ];
 

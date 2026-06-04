@@ -37,6 +37,7 @@ export interface ApiProductListResponse {
 }
 
 export interface UiProduct {
+  colors: string[];
   bgGradient: boolean;
   emoji: string;
   id: string;
@@ -94,4 +95,10 @@ export interface ProductQueryParams {
   sort_by?: 'featured' | 'price_asc' | 'price_desc' | 'newest' | 'rating';
   in_stock?: boolean;
   on_sale?: boolean;
+}
+
+export interface ProductColor {
+  hex:      string;   // CSS color, e.g. "#FF6B35"
+  image?:   string;   // URL of the variant image shown when this color is selected
+  label?:   string;   // Human-readable name, e.g. "Coral Red"
 }

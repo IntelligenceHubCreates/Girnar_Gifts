@@ -26,14 +26,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: 1px;
+  margin-bottom: 0;
 }
 
 .headingBlock {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
   flex-shrink: 0;
 }
 
@@ -85,19 +85,15 @@
 
 .viewAll {
   display: inline-flex; align-items: center; gap: 8px;
-  background: #fff;
-  border: 1.5px solid rgba(26,26,26,0.13);
-  border-radius: 50px;
   padding: 8px 14px 8px 16px;
   font-size: 13px; font-weight: 700; color: #1A1A1A;
   text-decoration: none; white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   transition: background .18s, border-color .18s, color .18s;
 }
 .viewAll:hover {
-  background: #F47C20; border-color: #F47C20; color: #fff;
+   color: #fff;
 }
-.viewAllText { line-height: 1; }
+.viewAllText { line-height: 1; color: #F47C20; }
 
 .viewAllCircle {
   width: 24px; height: 24px;
@@ -118,9 +114,9 @@
 .outerWrap {
   overflow: hidden;
   /* bleed window: must be >= productWrap's upward offset */
-  padding-top: 108px;
-  margin-top:  -108px;
-  padding-bottom: 6px;
+  padding-top: 28px;
+  margin-top:  0;
+  padding-bottom: 0;
 }
 
 /* ── Sliding track ───────────────────────────────────────── */
@@ -234,7 +230,7 @@
   padding: 88px 14px 20px;
   position: relative;
   /* Fixed height = uniform cards regardless of name length */
-  height: 220px;
+  height: 180px;
   display: flex; flex-direction: column;
   align-items: center; justify-content: flex-end;
   box-sizing: border-box;
@@ -261,7 +257,7 @@
 }
 
 .cardName {
-  font-size: 15px; font-weight: 900; color: #fff;
+  font-size: 15px; font-weight: 900; color: var(txtclr);
   text-align: center; line-height: 1.25;
   letter-spacing: -0.01em; margin: 0 0 3px;
   text-shadow: 0 1px 5px rgba(0,0,0,0.14);
@@ -270,7 +266,7 @@
 
 .cardCount {
   font-size: 11.5px; font-weight: 600;
-  color: rgba(255,255,255,0.70);
+  color: var(txtclr);
   text-align: center; margin: 0 0 14px;
   position: relative; z-index: 2;
 }
@@ -337,6 +333,9 @@
   .cardName       { font-size: 14px; }
   .cardCount      { font-size: 11px; margin-bottom: 12px; }
   .cardArrow      { width: 30px; height: 30px; font-size: 13px; }
+    .navBtns {
+    display: none;
+  }
 }
 
 /* ── ≤600px: card 148px ─────────────────────────────────── */
@@ -345,7 +344,7 @@
   .section        { padding: 20px 14px 28px; }
   .header         { margin-bottom: 24px; }
   .heading        { font-size: 17px; }
-  .viewAllText    { display: none; }          /* show only arrow circle */
+  .viewAllText    { font-size: 15px; }          /* show only arrow circle */
   .viewAll        { padding: 0; background: transparent; border: none;
                     box-shadow: none; gap: 0; }
   .viewAllCircle  { width: 34px; height: 34px; font-size: 15px; }
@@ -367,6 +366,9 @@
   .dots           { gap: 4px; margin-top: 16px; }
   .dot            { width: 5px; height: 5px; }
   .dotOn          { width: 10px; height: 5px; border-radius: 2px; }
+    .navBtns {
+    display: none;
+  }
 }
 
 /* ── ≤420px: card 130px ─────────────────────────────────── */
@@ -389,6 +391,9 @@
   .dots           { gap: 3px; margin-top: 14px; }
   .dot            { width: 4px; height: 4px; }
   .dotOn          { width: 11px; height: 4px; border-radius: 2px; }
+    .navBtns {
+    display: none;
+  }
 }
 
 /* ── ≤360px: card 116px ─────────────────────────────────── */
