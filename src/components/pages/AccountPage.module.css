@@ -1438,3 +1438,35 @@
   .reviewProductTop { flex-wrap: wrap; }
   .reviewProductActions { width: 100%; }
 }
+
+/* ── Recommended carousel — wishlist heart button ───────────────── */
+.recWishBtn {
+  position: absolute; top: 7px; right: 7px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  border: none; cursor: pointer; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  color: #ccc;                      /* grey by default */
+  transition: color 0.18s, transform 0.18s, box-shadow 0.18s;
+  flex-shrink: 0;
+}
+.recWishBtn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.16);
+  color: #ff4d6d;
+}
+/* When product IS wishlisted */
+.recWishBtnActive {
+  color: #ff4d6d !important;        /* red filled heart */
+  background: #fff0f3 !important;
+}
+.recWishBtnActive:hover {
+  background: #ffe0e6 !important;
+}
+
+/* Wishlist mini-grid heart — always red since they're already wishlisted */
+.wishMiniHeartActive {
+  color: #ff4d6d !important;
+  background: #fff0f3 !important;
+}

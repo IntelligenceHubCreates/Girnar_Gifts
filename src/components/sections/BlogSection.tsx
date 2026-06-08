@@ -2,41 +2,95 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { BLOG_POSTS } from '@/lib/data';
 import styles from './BlogSection.module.css';
 
-const AUTOPLAY_DELAY = 5000;
-// How many cards visible per slide depends on screen — handled via CSS width
-// Logic: we always render all cards, track scrolls by CARDS_PER_VIEW steps
+interface BlogPost {
+  id:       string;
+  title:    string;
+  tag:      string;
+  tagColor: string;
+  date:     string;
+  readTime: string;
+  image:    string;
+  slug:     string;
+}
+
+const POSTS: BlogPost[] = [
+  {
+    id: '1',
+    title:    '10 Best Educational Toys for Kids in 2024',
+    tag:      'EDUCATION',
+    tagColor: '#7c6ff7',
+    date:     'May 22, 2024',
+    readTime: '5 min read',
+    image:    'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=600&q=80',
+    slug:     '10-best-educational-toys-2024',
+  },
+  {
+    id: '2',
+    title:    'How Play Helps Your Child Learn and Grow',
+    tag:      'PARENTING',
+    tagColor: '#22c55e',
+    date:     'May 8, 2024',
+    readTime: '4 min read',
+    image:    'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600&q=80',
+    slug:     'how-play-helps-child-learn-grow',
+  },
+  {
+    id: '3',
+    title:    'Easy DIY Crafts to Do at Home with Kids',
+    tag:      'ACTIVITIES',
+    tagColor: '#f59e0b',
+    date:     'May 5, 2024',
+    readTime: '4 min read',
+    image:    'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600&q=80',
+    slug:     'easy-diy-crafts-at-home',
+  },
+  {
+    id: '4',
+    title:    'Choosing the Right Stationery for Your Child',
+    tag:      'STATIONERY',
+    tagColor: '#ec4899',
+    date:     'Apr 28, 2024',
+    readTime: '3 min read',
+    image:    'https://images.unsplash.com/photo-1456735190827-d1262f71b8a3?w=600&q=80',
+    slug:     'choosing-right-stationery',
+  },
+  {
+    id: '5',
+    title:    'Screen-Free Activities for Toddlers',
+    tag:      'PARENTING',
+    tagColor: '#22c55e',
+    date:     'Apr 15, 2024',
+    readTime: '6 min read',
+    image:    'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?w=600&q=80',
+    slug:     'screen-free-activities-toddlers',
+  },
+];
+
+const AUTOPLAY_MS  = 5000;
+// Show 3 full cards + ~30% of 4th peeking — achieved via cardWidth=28%
+const CARD_WIDTH_PCT = 28.5;   // each card = 28.5% of track
 
 export default function BlogSection() {
-  const [current, setCurrent]     = useState(0);
-  const [dragging, setDragging]   = useState(false);
+  const [current,    setCurrent]    = useState(0);
+  const [dragging,   setDragging]   = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
-  const dragStartX  = useRef(0);
-  const timerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [perView, setPerView]     = useState(3);
-  const total = BLOG_POSTS.length;
-  const maxIndex = Math.max(0, total - perView);
+  const dragStartX = useRef(0);
+  const timerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  /* ── Detect cards per view from window width ── */
-  useEffect(() => {
-    function update() {
-      if (window.innerWidth <= 600)       setPerView(1);
-      else if (window.innerWidth <= 900)  setPerView(2);
-      else                                setPerView(3);
-    }
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
+  const maxIndex = POSTS.length - 1;
 
-  /* ── Autoplay ── */
+  const goTo = useCallback((idx: number) => {
+    setCurrent(Math.max(0, Math.min(idx, maxIndex)));
+  }, [maxIndex]);
+
+  // Autoplay
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      setCurrent((c) => (c >= maxIndex ? 0 : c + 1));
-    }, AUTOPLAY_DELAY);
+      setCurrent((c) => (c >= maxIndex - 2 ? 0 : c + 1));
+    }, AUTOPLAY_MS);
   }, [maxIndex]);
 
   useEffect(() => {
@@ -44,16 +98,10 @@ export default function BlogSection() {
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [current, resetTimer]);
 
-  /* ── Navigation ── */
-  const goTo = useCallback((idx: number) => {
-    setCurrent(Math.max(0, Math.min(idx, maxIndex)));
-  }, [maxIndex]);
-
-  /* ── Drag ── */
+  // Drag / swipe
   function onDragStart(clientX: number) {
     dragStartX.current = clientX;
     setDragging(true);
-    setDragOffset(0);
     if (timerRef.current) clearTimeout(timerRef.current);
   }
   function onDragMove(clientX: number) {
@@ -63,65 +111,87 @@ export default function BlogSection() {
   function onDragEnd() {
     if (!dragging) return;
     setDragging(false);
-    if (dragOffset < -50)     goTo(current + 1);
-    else if (dragOffset > 50) goTo(current - 1);
+    if      (dragOffset < -50) goTo(current + 1);
+    else if (dragOffset >  50) goTo(current - 1);
     setDragOffset(0);
+    resetTimer();
   }
 
-  /* ── Keyboard ── */
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'ArrowLeft')  goTo(current - 1);
     if (e.key === 'ArrowRight') goTo(current + 1);
   }
 
-  /* ── Dot count = number of "pages" ── */
-  const dotCount = maxIndex + 1;
-  const cardWidth = 100 / perView; // percent
+  // translateX: each step moves one card width
+  const translateX = -(current * CARD_WIDTH_PCT) + (typeof window !== 'undefined'
+    ? (dragOffset / window.innerWidth) * 100
+    : 0);
 
   return (
-    <section className={styles.blogSection}>
-      <div className={styles.sectionHeader}>
-        <div className={styles.sectionTitle}>Latest from Our Blog</div>
-        <Link href="/blog" className={styles.viewAll}>All Posts →</Link>
+    <section className={styles.section}>
+
+      {/* ── Header ── */}
+      <div className={styles.header}>
+        <h2 className={styles.title}>Latest from Our Blog</h2>
+        <Link href="/blog" className={styles.viewAll}>
+          View All Articles
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </Link>
       </div>
 
+      {/* ── Carousel ── */}
       <div
-        className={styles.carouselWrap}
+        className={styles.viewport}
         role="region"
-        aria-label="Blog posts carousel"
+        aria-label="Blog posts"
         tabIndex={0}
         onKeyDown={onKeyDown}
+        onMouseDown={(e)  => onDragStart(e.clientX)}
+        onMouseMove={(e)  => onDragMove(e.clientX)}
+        onMouseUp={onDragEnd}
+        onMouseLeave={onDragEnd}
+        onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
+        onTouchMove={(e)  => onDragMove(e.touches[0].clientX)}
+        onTouchEnd={onDragEnd}
       >
         <div
-          className={`${styles.track} ${dragging ? styles.trackDragging : ''}`}
+          className={`${styles.track} ${dragging ? styles.noTransition : ''}`}
           style={{
-            transform: `translateX(calc(-${current * cardWidth}% + ${dragOffset}px))`,
+            transform: `translateX(calc(-${current * CARD_WIDTH_PCT}% + ${dragOffset}px))`,
           }}
-          onMouseDown={(e) => onDragStart(e.clientX)}
-          onMouseMove={(e) => onDragMove(e.clientX)}
-          onMouseUp={onDragEnd}
-          onMouseLeave={onDragEnd}
-          onTouchStart={(e) => onDragStart(e.touches[0].clientX)}
-          onTouchMove={(e) => onDragMove(e.touches[0].clientX)}
-          onTouchEnd={onDragEnd}
         >
-          {BLOG_POSTS.map((post, i) => (
-            <div
-              key={post.title}
-              className={styles.slide}
-              style={{ width: `${cardWidth}%` }}
-              aria-hidden={i < current || i >= current + perView}
-            >
-              <div className={styles.blogCard}>
-                <div className={styles.blogThumb} style={{ background: post.bg }}>
-                  {post.emoji}
-                  <div className={styles.blogDate}>{post.date}</div>
+          {POSTS.map((post) => (
+            <div key={post.id} className={styles.card}>
+              {/* Photo */}
+              <Link href={`/blog/${post.slug}`} className={styles.imgLink} tabIndex={-1}>
+                <div className={styles.imgBox}>
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className={styles.img}
+                    loading="lazy"
+                    draggable={false}
+                  />
                 </div>
-                <div className={styles.blogBody}>
-                  <div className={styles.blogTag}>{post.tag}</div>
-                  <div className={styles.blogTtl}>{post.title}</div>
-                  <div className={styles.blogExcerpt}>{post.excerpt}</div>
-                  <Link href="/blog" className={styles.blogRead}>Read More →</Link>
+              </Link>
+
+              {/* Text */}
+              <div className={styles.body}>
+                <span className={styles.tag} style={{ color: post.tagColor }}>
+                  {post.tag}
+                </span>
+                <Link href={`/blog/${post.slug}`} className={styles.cardTitle}>
+                  {post.title}
+                </Link>
+                <div className={styles.meta}>
+                  <span>{post.date}</span>
+                  <span className={styles.dot}>·</span>
+                  <span>{post.readTime}</span>
+                  <span className={styles.dot}>·</span>
+                  <Link href={`/blog/${post.slug}`} className={styles.readLink}>read</Link>
                 </div>
               </div>
             </div>
@@ -129,23 +199,6 @@ export default function BlogSection() {
         </div>
       </div>
 
-      {/* Dots */}
-      {dotCount > 1 && (
-        <div className={styles.dots} role="tablist">
-          {Array.from({ length: dotCount }).map((_, i) => (
-            <span key={i} className={styles.dotWrap} onClick={() => goTo(i)}>
-              <span
-                className={`${styles.dot} ${i === current ? styles.dotActive : ''}`}
-                role="tab"
-                aria-selected={i === current}
-                aria-label={`Go to slide ${i + 1}`}
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && goTo(i)}
-              />
-            </span>
-          ))}
-        </div>
-      )}
     </section>
   );
 }

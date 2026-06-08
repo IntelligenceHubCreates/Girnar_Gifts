@@ -159,6 +159,16 @@ export default function CategoryPage({
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged      = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  // ── Subcategory counts from ALL loaded products (ignores active filters) ──
+  const subcatCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    products.forEach((p) => {
+      const key = p.subcategory || p.category || '';
+      if (key) counts[key] = (counts[key] ?? 0) + 1;
+    });
+    return counts;
+  }, [products]);
+
   // ── Handlers ───────────────────────────────────────────────────
 
   const handleSubcatClick = useCallback((sub: SubcategoryDef | null) => {
@@ -259,6 +269,18 @@ export default function CategoryPage({
     'New Arrivals':    '✨',
   };
 
+  // ── Category bubble colour map ─────────────────────────────────
+  const BUBBLE_CLASS: Record<string, string> = {
+    'All Products':    styles.bubbleAll,
+    'School Bags':     styles.bubbleBags,
+    'Lunch & Bottles': styles.bubbleLunch,
+    'Toys & Games':    styles.bubbleToys,
+    'Stationery':      styles.bubbleStationery,
+    'Arts & Crafts':   styles.bubbleArts,
+    'Educational':     styles.bubbleEdu,
+    'Gift Sets':       styles.bubbleGifts,
+  };
+
   // ── Render ─────────────────────────────────────────────────────
 
   return (
@@ -289,29 +311,55 @@ export default function CategoryPage({
             </div>
           </div>
 
-          {/* ── Category Icon Strip ── */}
-          <div className={styles.catStrip}>
-            <button
-              className={`${styles.catChip} ${!activeSubcat ? styles.catChipActive : ''}`}
-              onClick={() => handleSubcatClick(null)}
-              type="button"
-            >
+        </div>
+      </div>
+
+      {/* ── Category Card Strip ── */}
+      <div className={styles.catStripWrap}>
+        <div className={styles.catStrip}>
+
+          {/* All Products chip */}
+          <button
+            className={`${styles.catChip} ${!activeSubcat ? styles.catChipActive : ''}`}
+            onClick={() => handleSubcatClick(null)}
+            type="button"
+          >
+            <div className={`${styles.catIconBubble} ${styles.bubbleAll}`}>
               <span className={styles.catIcon}>🛍️</span>
-              <span className={styles.catLabel}>All Products</span>
-              <span className={styles.catCount}>{totalCount || products.length}</span>
-            </button>
-            {subcategories.map((sc) => (
+            </div>
+            <span className={styles.catLabel}>All Products</span>
+            <span className={styles.catCount}>{totalCount || products.length}</span>
+          </button>
+
+          {/* Subcategory chips — count derived from real product data */}
+          {subcategories.map((sc) => {
+            // match count by label (subcategory name in product data) or provided count
+            const count = (sc as any).count
+              ?? subcatCounts[sc.label]
+              ?? Object.entries(subcatCounts).find(([k]) =>
+                  k.toLowerCase().includes(sc.label.toLowerCase()) ||
+                  sc.label.toLowerCase().includes(k.toLowerCase())
+                )?.[1]
+              ?? 0;
+
+            const bubbleCls = BUBBLE_CLASS[sc.label] ?? styles.bubbleDefault;
+
+            return (
               <button
                 key={sc.slug}
                 className={`${styles.catChip} ${activeSubcat?.slug === sc.slug ? styles.catChipActive : ''}`}
                 onClick={() => handleSubcatClick(sc as SubcategoryDef)}
                 type="button"
               >
-                <span className={styles.catIcon}>{CATEGORY_ICONS[sc.label] ?? '📦'}</span>
+                <div className={`${styles.catIconBubble} ${bubbleCls}`}>
+                  <span className={styles.catIcon}>{CATEGORY_ICONS[sc.label] ?? '📦'}</span>
+                </div>
                 <span className={styles.catLabel}>{sc.label}</span>
+                {count > 0 && <span className={styles.catCount}>{count}</span>}
               </button>
-            ))}
-          </div>
+            );
+          })}
+
         </div>
       </div>
 
@@ -700,30 +748,41 @@ const BADGE_STYLES: Record<string, { bg: string; color: string; label: string }>
   bestseller: { bg: '#FF6B35', color: '#fff',    label: 'Bestseller' },
 };
 
-// ─── Colour swatch helper ─────────────────────────────────────────
-// Reads product.colors — an array of hex strings like ['#FF0000','#00FF00']
-// Falls back to a deterministic palette derived from the product name if
-// no colors are supplied, so every card always shows swatches.
+// ─── Colour swatch types ──────────────────────────────────────────
+// product.colors can be either:
+//   - ProductColor[]  →  { hex: string; image?: string; label?: string }
+//   - string[]        →  plain hex strings (no per-color image)
+// We normalise both shapes into ProductColor internally.
 
-const FALLBACK_PALETTES: string[][] = [
-  ['#FF6B6B','#4ECDC4','#45B7D1','#96E6A1'],
-  ['#A8E6CF','#FFD93D','#FF6B6B','#6C5CE7'],
-  ['#FD79A8','#FDCB6E','#6C5CE7','#00B894'],
-  ['#E17055','#74B9FF','#A29BFE','#55EFC4'],
-  ['#FF7675','#81ECEC','#FFEAA7','#DFE6E9'],
-  ['#FAB1A0','#74B9FF','#B2BEC3','#2D3436'],
-];
-
-function getSwatchColors(product: UiProduct): string[] {
-  if (product.colors && product.colors.length > 0) return product.colors;
-  // derive a consistent palette from product id hash
-  const hash = product.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  return FALLBACK_PALETTES[hash % FALLBACK_PALETTES.length];
+interface ProductColor {
+  hex:    string;
+  image?: string;   // URL of the colour-variant image (optional)
+  label?: string;
 }
 
-function ColorSwatch({ product }: { product: UiProduct }) {
-  const [active, setActive] = useState(0);
-  const colors = getSwatchColors(product);
+function normaliseColors(colors: any[] | undefined): ProductColor[] {
+  if (!colors || colors.length === 0) return [];
+  return colors.map((c) =>
+    typeof c === 'string'
+      ? { hex: c }
+      : { hex: c.hex ?? c.color ?? '#ccc', image: c.image ?? c.imageUrl ?? undefined, label: c.label ?? c.name ?? undefined }
+  );
+}
+
+// ─── ColorSwatch component ────────────────────────────────────────
+// Renders swatch dots. When a swatch is clicked it calls onSelect(color)
+// so the parent card can swap its displayed image.
+
+interface SwatchProps {
+  product:  UiProduct;
+  active:   number;
+  onSelect: (index: number, color: ProductColor) => void;
+}
+
+function ColorSwatch({ product, active, onSelect }: SwatchProps) {
+  const colors = normaliseColors(product.colors as any[]);
+  if (colors.length === 0) return null;   // no colours → render nothing
+
   const visible = colors.slice(0, 4);
   const extra   = colors.length - 4;
 
@@ -734,10 +793,10 @@ function ColorSwatch({ product }: { product: UiProduct }) {
           key={i}
           type="button"
           className={`${styles.swatch} ${i === active ? styles.swatchActive : ''}`}
-          style={{ background: c }}
-          onClick={(e) => { e.preventDefault(); setActive(i); }}
-          aria-label={`Color option ${i + 1}`}
-          title={c}
+          style={{ background: c.hex }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSelect(i, c); }}
+          aria-label={c.label ?? `Color ${i + 1}`}
+          title={c.label ?? c.hex}
         />
       ))}
       {extra > 0 && (
@@ -755,35 +814,46 @@ function ProductGridCard({ product, wishlisted, onWishlist, addedToCart, onAddTo
     ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0;
 
+  // ── Colour-variant image state ──
+  const [activeColorIdx, setActiveColorIdx] = useState(0);
+  const [displayImage,   setDisplayImage]   = useState<string>(product.images[0] ?? '');
+
+  const handleSwatchSelect = useCallback((idx: number, color: ProductColor) => {
+    setActiveColorIdx(idx);
+    // Use the colour's own image if provided, else fall back to the
+    // matching index in product.images (or the first image)
+    if (color.image) {
+      setDisplayImage(color.image);
+    } else if (product.images[idx]) {
+      setDisplayImage(product.images[idx]);
+    } else {
+      setDisplayImage(product.images[0] ?? '');
+    }
+  }, [product.images]);
+
   return (
     <article className={styles.card}>
       <Link href={`/product/${product.id}`} className={styles.cardImgLink} aria-label={product.name}>
         <div className={styles.cardImg}>
-          <ProductImg src={product.images[0]} alt={product.name} className={styles.cardImageTag} />
+          <ProductImg src={displayImage} alt={product.name} className={styles.cardImageTag} />
 
-          {/* Top-left badge */}
-          {product.badges.length > 0 && (
+          {/* Top-left badge — Bestseller=orange, New=green outline, discount=grey */}
+          {(product.badges.length > 0 || discountPct > 0) && (
             <div className={styles.badgeTopLeft}>
               {product.badges.slice(0, 1).map((b) => {
-                const s = BADGE_STYLES[b.type] ?? { bg: '#FF6B35', color: '#fff', label: b.label };
-                const isOutline = b.type === 'new';
+                const badgeCls =
+                  b.type === 'new'
+                    ? styles.badgeNew
+                    : styles.badgeBestseller;
                 return (
-                  <span
-                    key={b.label}
-                    className={`${styles.badge} ${isOutline ? styles.badgeOutline : ''}`}
-                    style={{ background: s.bg, color: s.color, border: isOutline ? `1.5px solid #2E7D32` : 'none' }}
-                  >
+                  <span key={b.label} className={`${styles.badge} ${badgeCls}`}>
                     {b.label}
                   </span>
                 );
               })}
-            </div>
-          )}
-
-          {/* Top-left discount */}
-          {discountPct > 0 && product.badges.length === 0 && (
-            <div className={styles.badgeTopLeft}>
-              <span className={styles.badge} style={{ background: '#f5f5f5', color: '#555' }}>-{discountPct}%</span>
+              {discountPct > 0 && product.badges.length === 0 && (
+                <span className={`${styles.badge} ${styles.badgeDiscount}`}>-{discountPct}%</span>
+              )}
             </div>
           )}
 
@@ -816,8 +886,8 @@ function ProductGridCard({ product, wishlisted, onWishlist, addedToCart, onAddTo
           <span className={styles.cardReviews}>({product.reviews})</span>
         </div>
 
-        {/* Colour swatches */}
-        <ColorSwatch product={product} />
+        {/* Colour swatches — only rendered when product has real colors */}
+        <ColorSwatch product={product} active={activeColorIdx} onSelect={handleSwatchSelect} />
 
         {/* Price row */}
         <div className={styles.cardPriceRow}>
@@ -860,16 +930,32 @@ function ProductListCard({ product, wishlisted, onWishlist, addedToCart, onAddTo
     ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0;
 
+  const [activeColorIdx, setActiveColorIdx] = useState(0);
+  const [displayImage,   setDisplayImage]   = useState<string>(product.images[0] ?? '');
+
+  const handleSwatchSelect = useCallback((idx: number, color: ProductColor) => {
+    setActiveColorIdx(idx);
+    if (color.image) {
+      setDisplayImage(color.image);
+    } else if (product.images[idx]) {
+      setDisplayImage(product.images[idx]);
+    } else {
+      setDisplayImage(product.images[0] ?? '');
+    }
+  }, [product.images]);
+
   return (
     <article className={styles.listCard}>
       <Link href={`/product/${product.id}`} aria-label={product.name}>
         <div className={styles.listImg}>
-          <ProductImg src={product.images[0]} alt={product.name} className={styles.listImageTag} />
+          <ProductImg src={displayImage} alt={product.name} className={styles.listImageTag} />
           {product.badges.map((b) => {
-            const s = BADGE_STYLES[b.type] ?? { bg: '#FF6B35', color: '#fff', label: b.label };
+            const badgeCls =
+              b.type === 'new'
+                ? styles.badgeNew
+                : styles.badgeBestseller;
             return (
-              <span key={b.label} className={styles.listBadge}
-                style={{ background: s.bg, color: s.color }}>{b.label}</span>
+              <span key={b.label} className={`${styles.listBadge} ${badgeCls}`}>{b.label}</span>
             );
           })}
         </div>
@@ -893,7 +979,8 @@ function ProductListCard({ product, wishlisted, onWishlist, addedToCart, onAddTo
           <span className={styles.starsGold}>{'★'.repeat(product.stars)}{'☆'.repeat(5 - product.stars)}</span>
           <span className={styles.cardReviews}>({product.reviews} reviews)</span>
         </div>
-        <ColorSwatch product={product} />
+        {/* Colour swatches — only rendered when product has real colors */}
+        <ColorSwatch product={product} active={activeColorIdx} onSelect={handleSwatchSelect} />
         <div className={styles.listFoot}>
           <div className={styles.cardPriceRow}>
             <span className={styles.priceNow}>₹{product.price.toLocaleString('en-IN')}</span>

@@ -41,7 +41,7 @@ interface ReviewableProduct {
 const EMPTY_ADDR: AddressFormData = {
   type:'Home', name:'', phone:'', line1:'', line2:'', city:'', state:'', pincode:'', isDefault:false
 };
-const EMPTY_PROFILE = { firstName:'', lastName:'', email:'', phone:'', dob:'', gender:'' };
+const EMPTY_PROFILE = { firstName:'', lastName:'', email:'', phone:'', dob:'', gender:'', backendAvatar:'' };
 
 /* ─── Typed header helper ────────────────────────────────────────── */
 function authHeaders(token?: string | null): Record<string, string> {
@@ -233,13 +233,36 @@ export default function AccountPage() {
   const carouselRef    = useRef<HTMLDivElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
-  const [localAvatar,     setLocalAvatar]     = useState<string | null>(null);
+  /* localAvatar — seeded from localStorage on mount so photo survives refresh */
+  const [localAvatar,     setLocalAvatar]     = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try { return localStorage.getItem('ll_avatar') || null; } catch { return null; }
+  });
   const [avatarUploading, setAvatarUploading] = useState(false);
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3500); };
   const token = (session as any)?.backendToken as string | undefined;
 
+  /* Persist localAvatar to localStorage whenever it changes */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      if (localAvatar) localStorage.setItem('ll_avatar', localAvatar);
+      else             localStorage.removeItem('ll_avatar');
+    } catch {}
+  }, [localAvatar]);
+
   /* ── Avatar upload handler ─────────────────────────────────────── */
+  /* ── dataURL → Blob (no secondary fetch, pure canvas) ───────────── */
+  const dataUrlToBlob = (dataUrl: string): Blob => {
+    const [header, data] = dataUrl.split(',');
+    const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
+    const bytes = atob(data);
+    const arr   = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  };
+
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (e.target) (e.target as HTMLInputElement).value = '';
@@ -247,20 +270,21 @@ export default function AccountPage() {
     if (!file.type.startsWith('image/')) { showToast('⚠️ Please select an image file.'); return; }
     if (file.size > 5 * 1024 * 1024) { showToast('⚠️ Image must be under 5 MB.'); return; }
     setAvatarUploading(true);
+
     try {
+      /* Step 1: compress via canvas → base64 JPEG */
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = ev => {
           const img = new Image();
           img.onload = () => {
-            const MAX = 400;
+            const MAX = 600;
             const scale = Math.min(1, MAX / Math.max(img.width, img.height));
-            const w = Math.round(img.width * scale);
-            const h = Math.round(img.height * scale);
             const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/jpeg', 0.85));
+            canvas.width  = Math.round(img.width  * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.88));
           };
           img.onerror = () => reject(new Error('img'));
           img.src = ev.target!.result as string;
@@ -268,29 +292,69 @@ export default function AccountPage() {
         reader.onerror = () => reject(new Error('read'));
         reader.readAsDataURL(file);
       });
+
+      /* Step 2: immediately show the photo AND persist base64 to localStorage.
+         This guarantees the photo survives a refresh even if the upload fails. */
       setLocalAvatar(dataUrl);
-      if (token) {
-        try {
-          const blob = await (await fetch(dataUrl)).blob();
-          const form = new FormData();
-          form.append('avatar', blob, 'avatar.jpg');
-          await fetch('/api/user/avatar', { method: 'POST', headers: authHeaders(token), body: form });
-          showToast('✅ Profile photo updated!');
-        } catch { showToast('📸 Photo saved — could not sync to server.'); }
-      } else {
+      try { localStorage.setItem('ll_avatar', dataUrl); } catch {}
+
+      if (!token) {
         showToast('✅ Profile photo updated!');
+        setAvatarUploading(false);
+        return;
       }
-    } catch { showToast('❌ Could not read image. Try another file.'); }
+
+      /* Step 3: upload to backend */
+      let serverUrl = '';
+      try {
+        const blob = dataUrlToBlob(dataUrl);
+        const form = new FormData();
+        form.append('avatar', blob, 'avatar.jpg');
+        const res  = await fetch('/api/user/avatar', {
+          method: 'POST',
+          headers: authHeaders(token),
+          body: form,
+        });
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          /* backend returns { url, profile_picture, ... } */
+          serverUrl = data?.url || data?.profile_picture || data?.avatar_url || '';
+        }
+      } catch { /* network error — base64 in localStorage is the fallback */ }
+
+      if (serverUrl && serverUrl.startsWith('http')) {
+        /* We have a real Cloudinary URL — swap out the base64 immediately.
+           Store the URL in localStorage so refresh shows the hosted image. */
+        setLocalAvatar(serverUrl);
+        try { localStorage.setItem('ll_avatar', serverUrl); } catch {}
+        setProfile(p => ({ ...p, backendAvatar: serverUrl }));
+        setDraft(p =>   ({ ...p, backendAvatar: serverUrl }));
+        showToast('✅ Profile photo saved!');
+      } else {
+        /* Upload failed or backend returned no URL.
+           base64 is still in localStorage — photo persists on refresh. */
+        showToast('📸 Photo saved locally (server sync pending).');
+      }
+
+    } catch {
+      showToast('❌ Could not process image. Try another file.');
+    }
+
     setAvatarUploading(false);
   };
 
-  /* ── Seed profile from session ─────────────────────────────────── */
+  /* ── Seed profile from session (immediate — before backend fetch) ── */
   useEffect(() => {
     if (status !== 'authenticated' || !session?.user) return;
     const parts = (session.user.name || '').trim().split(' ');
     const s = {
-      firstName: parts[0] || '', lastName: parts.slice(1).join(' ') || '',
-      email: session.user.email || '', phone: '', dob: '', gender: '',
+      firstName:     parts[0] || '',
+      lastName:      parts.slice(1).join(' ') || '',
+      email:         session.user.email || '',
+      phone:         '',
+      dob:           '',
+      gender:        '',
+      backendAvatar: (session?.user as any)?.image || '',
     };
     setProfile(s); setDraft(s); setProfileLoading(false);
   }, [session, status]);
@@ -302,15 +366,30 @@ export default function AccountPage() {
 
     if (token) {
       fetch('/api/user/profile', { headers: ah })
-        .then(r => r.json())
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
         .then((res: any) => {
           if (!res || res.detail) return;
           const parts = (res.name || '').trim().split(' ');
+          /* Resolve the best avatar URL from the backend response */
+          const serverAvatar: string =
+            res.profile_picture || res.avatar_url || res.avatar || '';
           const m = {
-            firstName: parts[0] || '', lastName: parts.slice(1).join(' ') || '',
-            email: res.email || '', phone: res.phone || '', dob: res.dob || '', gender: res.gender || '',
+            firstName:     parts[0] || '',
+            lastName:      parts.slice(1).join(' ') || '',
+            email:         res.email || '',
+            phone:         res.phone || '',
+            dob:           res.dob   || '',
+            gender:        res.gender || '',
+            backendAvatar: serverAvatar,
           };
           setProfile(m); setDraft(m);
+          /* If backend returned a real Cloudinary URL, prefer it over localStorage.
+             Store it in localStorage so it survives future refreshes too. */
+          if (serverAvatar && serverAvatar.startsWith('http')) {
+            setLocalAvatar(serverAvatar);
+            try { localStorage.setItem('ll_avatar', serverAvatar); } catch {}
+          }
+          /* If NO server URL yet, keep whatever is in localStorage (base64 fallback) */
         })
         .catch(() => {});
     }
@@ -363,15 +442,67 @@ export default function AccountPage() {
   }, [session, status, token]);
 
   /* ── Profile save ──────────────────────────────────────────────── */
-  const handleSave = () => {
-    if (token) {
-      fetch('/api/user/profile', {
+  const handleSave = async () => {
+    if (!token) {
+      /* No backend token — still update local state */
+      setProfile({ ...draft }); setEditing(false);
+      showToast('✅ Profile updated locally!');
+      return;
+    }
+
+    const fullName = `${draft.firstName} ${draft.lastName}`.trim();
+    const payload: Record<string, string> = {
+      name:       fullName,
+      first_name: draft.firstName.trim(),
+      last_name:  draft.lastName.trim(),
+      phone:      draft.phone.trim(),
+    };
+    /* include optional fields only if non-empty */
+    if (draft.dob)    payload.dob    = draft.dob;
+    if (draft.gender) payload.gender = draft.gender;
+
+    let saved = false;
+    let serverError = '';
+
+    /* Try PUT first */
+    try {
+      const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: jsonHeaders(token),
-        body: JSON.stringify({ name: `${draft.firstName} ${draft.lastName}`.trim(), phone: draft.phone }),
-      }).catch(() => {});
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        saved = true;
+      } else {
+        const body = await res.json().catch(() => ({}));
+        serverError = body?.detail || body?.message || `HTTP ${res.status}`;
+      }
+    } catch (err: any) {
+      serverError = err?.message || 'Network error';
     }
-    setProfile({ ...draft }); setEditing(false); showToast('✅ Profile updated!');
+
+    /* If PUT failed try PATCH */
+    if (!saved) {
+      try {
+        const res = await fetch('/api/user/profile', {
+          method: 'PATCH',
+          headers: jsonHeaders(token),
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) saved = true;
+      } catch { /* ignore */ }
+    }
+
+    if (saved) {
+      setProfile({ ...draft });
+      setEditing(false);
+      showToast('✅ Profile saved successfully!');
+    } else {
+      /* Still update local state so the UI reflects changes */
+      setProfile({ ...draft });
+      setEditing(false);
+      showToast(`⚠️ Saved locally but server error: ${serverError || 'Unknown error'}`);
+    }
   };
 
   /* ── Wishlist add to cart ──────────────────────────────────────── */
@@ -390,6 +521,36 @@ export default function AccountPage() {
       setTimeout(() => setCartStates(p => ({ ...p, [id]: 'idle' })), 2500);
     }
   }, [cartStates]);
+
+  /* ── Toggle wishlist (add / remove) ───────────────────────────── */
+  const toggleWishlist = useCallback(async (e: React.MouseEvent, product: any) => {
+    e.preventDefault(); e.stopPropagation();
+    const id       = String(product.id);
+    const isInFavs = favs.some(f => String(f.product?.id) === id);
+
+    if (isInFavs) {
+      /* Optimistic remove */
+      setFavs(prev => prev.filter(f => String(f.product?.id) !== id));
+      try {
+        await fetch(`/api/favorite/${id}`, { method: 'DELETE', headers: authHeaders(token) });
+      } catch {
+        /* Rollback on failure */
+        setFavs(prev => [...prev, { product }]);
+        showToast('❌ Could not remove from wishlist.');
+      }
+    } else {
+      /* Optimistic add */
+      setFavs(prev => [...prev, { product }]);
+      showToast(`❤️ Added to wishlist!`);
+      try {
+        await _post('/api/favorite', { product_id: product.id });
+      } catch {
+        /* Rollback on failure */
+        setFavs(prev => prev.filter(f => String(f.product?.id) !== id));
+        showToast('❌ Could not add to wishlist.');
+      }
+    }
+  }, [favs, token]);
 
   /* ── Address helpers ───────────────────────────────────────────── */
   const validateAddr = () => {
@@ -543,7 +704,8 @@ export default function AccountPage() {
   };
 
   /* ── Derived ───────────────────────────────────────────────────── */
-  const profileImage = localAvatar || session?.user?.image || null;
+  /* Avatar priority: just-uploaded blob → DB URL → OAuth photo → null */
+  const profileImage = localAvatar || profile.backendAvatar || session?.user?.image || null;
   const displayName  = [profile.firstName, profile.lastName].filter(Boolean).join(' ') || session?.user?.email || '—';
   const displayEmail = profile.email || session?.user?.email || '—';
   const recentOrders = orders.slice(0, 4);
@@ -948,7 +1110,19 @@ export default function AccountPage() {
                         const price = getSellingPrice(p);
                         return (
                           <Link key={String(p.id)} href={`/product/${p.id}`} className={styles.wishMiniCard}>
-                            <button type="button" className={styles.wishMiniHeart} onClick={e => { e.preventDefault(); e.stopPropagation(); }}>❤️</button>
+                            <button type="button"
+                              className={`${styles.wishMiniHeart} ${styles.wishMiniHeartActive}`}
+                              title="Remove from wishlist"
+                              onClick={async e => {
+                                e.preventDefault(); e.stopPropagation();
+                                const pid = String(p.id);
+                                setFavs(prev => prev.filter(i => String(i.product?.id) !== pid));
+                                try { await fetch(`/api/favorite/${pid}`, { method: 'DELETE', headers: authHeaders(token) }); } catch {}
+                              }}>
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                              </svg>
+                            </button>
                             <img src={img} alt={p.name} className={styles.wishMiniImg} onError={e => { (e.target as HTMLImageElement).src = PLACEHOLDER; }} />
                             <div className={styles.wishMiniInfo}>
                               <div className={styles.wishMiniName}>{p.name}</div>
@@ -1055,8 +1229,23 @@ export default function AccountPage() {
                       const orig  = Number(p.original_price ?? 0);
                       return (
                         <Link key={String(p.id) + i} href={`/product/${p.id}`} className={styles.recCard}>
-                          <button type="button" className={styles.recWishBtn}
-                            onClick={e => { e.preventDefault(); e.stopPropagation(); }}>❤️</button>
+                          {(() => {
+                            const isWished = favs.some(f => String(f.product?.id) === String(p.id));
+                            return (
+                              <button
+                                type="button"
+                                className={`${styles.recWishBtn} ${isWished ? styles.recWishBtnActive : ''}`}
+                                title={isWished ? 'Remove from wishlist' : 'Add to wishlist'}
+                                onClick={e => toggleWishlist(e, p)}>
+                                <svg width="14" height="14" viewBox="0 0 24 24"
+                                  fill={isWished ? 'currentColor' : 'none'}
+                                  stroke="currentColor" strokeWidth="2"
+                                  strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                              </button>
+                            );
+                          })()}
                           <div className={styles.recImgWrap}>
                             <img src={img} alt={p.name} onError={e => { (e.target as HTMLImageElement).src = PLACEHOLDER; }} />
                           </div>
