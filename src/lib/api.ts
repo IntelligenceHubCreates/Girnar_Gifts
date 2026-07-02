@@ -1,99 +1,107 @@
 // src/lib/api.ts
-// FIX: fetchProductsByCategory now accepts sub_slug.
-//      fetchProductsBySubcategory is a new explicit helper.
-//      All subcategory filtering goes to the backend — zero client-side category matching.
+// ---------------------------------------------------------------------------
+// Thin client for the FastAPI product/category endpoints.
+//
+// IMPORTANT: these endpoints paginate via `skip` + `limit` (NOT `page`).
+// We always call the backend directly through NEXT_PUBLIC_API_BASE so the
+// Next.js App Router never tries to intercept / cache the request.
+//
+// Fixes vs. previous version:
+//   • The AbortSignal is now actually forwarded to fetch(), so in-flight
+//     requests are truly cancelled when the user navigates / refilters.
+//   • Path segments are URL-encoded.
+//   • skip=0 is sent explicitly (so the first page is unambiguous).
+// ---------------------------------------------------------------------------
 
-import type {
-  ApiCategory,
-  ApiProduct,
-  ApiProductListResponse,
-  ProductQueryParams,
-} from '@/types/product';
+import type { ApiProduct, ApiProductListResponse, ProductQueryParams } from '@/types/products';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '';
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE ??
+  process.env.NEXT_PUBLIC_BACKEND_URL ??
+  '';
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
     ...init,
   });
+
   if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`API ${res.status}: ${body}`);
+    let detail = '';
+    try {
+      const body = await res.json();
+      detail = body?.detail ?? '';
+    } catch {
+      /* ignore parse errors */
+    }
+    throw new Error(detail || `Request failed (${res.status})`);
   }
+
   return res.json() as Promise<T>;
 }
 
-// ─── Categories ───────────────────────────────────────────────────
-
-export async function fetchCategories(): Promise<ApiCategory[]> {
-  return apiFetch<ApiCategory[]>('/api/categories');
-}
-
-export async function fetchCategory(slug: string): Promise<ApiCategory> {
-  return apiFetch<ApiCategory>(`/api/categories/${slug}`);
-}
-
-// ─── Products by Category ─────────────────────────────────────────
-
-/**
- * Primary fetch function used by CategoryPage.
- *
- * categorySlug = parent or subcategory slug (e.g. "toys", "puzzles")
- * subSlug      = optional deeper filter (e.g. pass "puzzles" when on /toys with chip selected)
- *
- * Examples:
- *   fetchProductsByCategory("toys")                → all Toys
- *   fetchProductsByCategory("toys", { subSlug: "puzzles" })  → Puzzles only
- *   fetchProductsByCategory("puzzles")             → Puzzles only (direct subcat page)
- */
+/** Products for a category slug (the backend returns the category + all descendants). */
 export async function fetchProductsByCategory(
   categorySlug: string,
-  params: Omit<ProductQueryParams, 'category' | 'category_slug'> & { subSlug?: string } = {}
+  params: Omit<ProductQueryParams, 'category' | 'category_slug'> & { subSlug?: string } = {},
 ): Promise<ApiProductListResponse> {
   const qs = new URLSearchParams();
-  if (params.subSlug)   qs.set('sub_slug', params.subSlug);
-  if (params.limit)     qs.set('limit',    String(params.limit));
-  if (params.skip)      qs.set('skip',     String(params.skip));
-  if (params.sort_by)   qs.set('sort_by',  params.sort_by);
-  if (params.in_stock)  qs.set('in_stock', 'true');
-  if (params.on_sale)   qs.set('on_sale',  'true');
+  if (params.subSlug) qs.set('sub_slug', params.subSlug);
+  if (params.limit !== undefined) qs.set('limit', String(params.limit));
+  if (params.skip !== undefined) qs.set('skip', String(params.skip));
+  if (params.sort_by) qs.set('sort_by', params.sort_by);
+  if (params.in_stock) qs.set('in_stock', 'true');
+  if (params.on_sale) qs.set('on_sale', 'true');
+  if (params.is_new) qs.set('is_new', 'true');
+  if (params.is_featured) qs.set('is_featured', 'true');
+  if (params.min_price !== undefined) qs.set('min_price', String(params.min_price));
+  if (params.max_price !== undefined) qs.set('max_price', String(params.max_price));
 
   const query = qs.toString();
   return apiFetch<ApiProductListResponse>(
-    `/api/categories/${categorySlug}/products${query ? `?${query}` : ''}`
-  );
+    `/api/categories/${encodeURIComponent(categorySlug)}/products${query ? `?${query}` : ''}`,
+    { signal: params.signal },
+  );  
 }
 
-/**
- * Legacy /api/product/all endpoint — still works, accepts sub_slug.
- */
+/** The "all products" endpoint, optionally filtered by category name / slug. */
 export async function fetchAllProducts(
-  params: ProductQueryParams = {}
+  params: ProductQueryParams = {},
 ): Promise<ApiProductListResponse> {
   const qs = new URLSearchParams();
   if (params.category_slug) qs.set('category_slug', params.category_slug);
-  if (params.sub_slug)      qs.set('sub_slug',      params.sub_slug);
-  if (params.category)      qs.set('category',      params.category);
-  if (params.limit)         qs.set('limit',          String(params.limit));
-  if (params.skip)          qs.set('skip',           String(params.skip));
-  if (params.sort_by)       qs.set('sort_by',        params.sort_by);
-  if (params.in_stock)      qs.set('in_stock',       'true');
-  if (params.on_sale)       qs.set('on_sale',        'true');
+  if (params.sub_slug) qs.set('sub_slug', params.sub_slug);
+  if (params.category) qs.set('category', params.category);
+  if (params.limit !== undefined) qs.set('limit', String(params.limit));
+  if (params.skip !== undefined) qs.set('skip', String(params.skip));
+  if (params.sort_by) qs.set('sort_by', params.sort_by);
+  if (params.in_stock) qs.set('in_stock', 'true');
+  if (params.on_sale) qs.set('on_sale', 'true');
+  if (params.is_new) qs.set('is_new', 'true');
+  if (params.is_featured) qs.set('is_featured', 'true');
+  if (params.min_price !== undefined) qs.set('min_price', String(params.min_price));
+  if (params.max_price !== undefined) qs.set('max_price', String(params.max_price));
 
-  return apiFetch<ApiProductListResponse>(`/api/product/all?${qs}`);
+  const query = qs.toString();
+  return apiFetch<ApiProductListResponse>(
+    `/api/product/all${query ? `?${query}` : ''}`,
+    { signal: params.signal },
+  );
 }
 
-// ─── Single product ────────────────────────────────────────────────
-
-export async function fetchProduct(id: string): Promise<ApiProduct> {
-  const res = await apiFetch<{ product_details: ApiProduct }>(`/api/product/${id}`);
-  return res.product_details;
+/** Single product detail. */
+export async function fetchProduct(
+  id: string,
+  signal?: AbortSignal,
+): Promise<ApiProduct> {
+  return apiFetch<ApiProduct>(`/api/product/${encodeURIComponent(id)}`, { signal });
 }
 
-// ─── Featured ─────────────────────────────────────────────────────
-
-export async function fetchFeaturedProducts(limit = 8): Promise<ApiProduct[]> {
-  const res = await apiFetch<ApiProductListResponse>(`/api/product/featured?limit=${limit}`);
-  return res.data;
+/** Featured products for the home page. */
+export async function fetchFeaturedProducts(
+  limit = 12,
+  signal?: AbortSignal,
+): Promise<ApiProductListResponse> {
+  return apiFetch<ApiProductListResponse>(`/api/product/featured?limit=${limit}`, { signal });
 }

@@ -1,195 +1,292 @@
+/* ══════════════════════════════════════════════════════════════
+   Footer.module.css — styled to match Header design language
+   Colors: #FDF8F3 bg, #F47C20 orange, #1A1A2E navy, #F0EAE0 border
+   Fonts: Nunito (body), Baloo 2 (brand)
+   ══════════════════════════════════════════════════════════════ */
+
 .footer {
-  background: var(--navy);
-  color: rgba(255, 255, 255, 0.75);
+  background: #1A1A2E;           /* navy — matches header .logoName color */
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-nunito, 'Nunito', sans-serif);
   padding: 56px 40px 28px;
+  border-top: 3px solid #F47C20; /* orange top accent — matches header allCatsBtn */
 }
 
+/* ── Grid ────────────────────────────────────────────────────── */
 .footerGrid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1fr;
-  gap: 40px;
-  margin-bottom: 40px;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
 }
 
+/* ── Brand column ────────────────────────────────────────────── */
 .footerBrand p {
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.75;
   max-width: 240px;
   margin-top: 14px;
+  color: rgba(255, 255, 255, 0.6);
 }
 
+/* Logo — matches header .logo structure exactly */
 .logo {
-  font-family: var(--font-baloo), 'Baloo 2', cursive;
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--coral);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   text-decoration: none;
   margin-bottom: 4px;
 }
 
-.dot {
-  color: var(--sun);
-}
-
-.star {
-  width: 30px;
-  height: 30px;
-  background: var(--sun);
-  border-radius: 50%;
+/* Orange square icon — matches header .logoIcon */
+.logoIcon {
+  width: 40px;
+  height: 40px;
+  background: #F47C20;
+  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
+/* Brand name — matches header .logoName */
+.logoText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.logoName {
+  font-family: var(--font-baloo, 'Baloo 2', cursive);
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* "Loot" in orange — matches header brand accent color */
+.logoDot {
+  color: #F47C20;
+}
+
+.logoTagline {
+  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+}
+
+/* Social buttons — match header .iconAction rounded style */
 .footerSocial {
   display: flex;
-  gap: 10px;
-  margin-top: 18px;
+  gap: 8px;
+  margin-top: 20px;
   flex-wrap: wrap;
 }
 
 .socialBtn {
   width: 38px;
   height: 38px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;              /* matches header .iconAction border-radius */
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
   cursor: pointer;
-  transition: background 0.2s;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
-
 .socialBtn:hover {
-  background: var(--coral);
+  background: #F47C20;             /* orange on hover — matches header allCatsBtn */
+  border-color: #F47C20;
+  transform: translateY(-2px);
 }
 
+/* ── Footer columns ──────────────────────────────────────────── */
 .footerCol h4 {
-  color: #fff;
-  font-size: 15px;
+  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-size: 13px;
   font-weight: 800;
-  margin-bottom: 16px;
+  color: #fff;
+  margin-bottom: 18px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  /* Orange underline bar — matches header .titleUnderline */
+  position: relative;
+  padding-bottom: 10px;
+}
+.footerCol h4::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 28px;
+  height: 3px;
+  background: #F47C20;
+  border-radius: 3px;
 }
 
 .footerCol ul {
   list-style: none;
-}
-
-.footerCol ul li {
-  margin-bottom: 9px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .footerCol ul li a {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.65);
-  transition: color 0.2s;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: color 0.18s, padding-left 0.18s;
+  display: inline-block;
 }
-
 .footerCol ul li a:hover {
-  color: var(--sun);
+  color: #F47C20;                  /* matches header nav link hover */
+  padding-left: 4px;
 }
 
+/* ── Contact items ───────────────────────────────────────────── */
 .contactItem {
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  margin-bottom: 10px;
   font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .contactItem a {
-  color: rgba(255, 255, 255, 0.65);
-  transition: color 0.2s;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: color 0.18s;
 }
-
-.contactItem a:hover {
-  color: var(--sun);
-}
+.contactItem a:hover { color: #F47C20; }
 
 .contactIcon {
-  font-size: 16px;
+  font-size: 15px;
   flex-shrink: 0;
   margin-top: 1px;
+  width: 28px;
+  height: 28px;
+  background: rgba(244, 124, 32, 0.15);
+  border-radius: 8px;              /* matches header .dropdownEmoji style */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* ── Divider ─────────────────────────────────────────────────── */
 .footerBottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1.5px solid rgba(240, 234, 224, 0.12); /* matches header border-top color */
   padding-top: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.38);
   flex-wrap: wrap;
   gap: 12px;
 }
 
+/* Payment icons — match header .payIcon pill style */
 .paymentIcons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .payIcon {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;              /* matches header rounded elements */
   padding: 5px 10px;
   font-size: 11px;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.3px;
+  transition: background 0.18s, color 0.18s;
+}
+.payIcon:hover {
+  background: rgba(244, 124, 32, 0.15);
+  color: #F47C20;
 }
 
-/* ── Responsive ─────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — mirrors header breakpoints exactly
+   ══════════════════════════════════════════════════════════════ */
+
+/* ≤ 1280px — matches header @media (max-width: 1280px) */
+@media (max-width: 1280px) {
+  .footer      { padding: 48px 28px 24px; }
+  .footerGrid  { gap: 36px; }
+}
+
+/* ≤ 1024px — matches header @media (max-width: 1024px) */
 @media (max-width: 1024px) {
-  .footer {
-    padding: 48px 24px 24px;
-  }
-
-  .footerGrid {
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
-  }
+  .footer      { padding: 44px 20px 22px; }
+  .footerGrid  { grid-template-columns: 1fr 1fr; gap: 32px; }
 }
 
+/* ≤ 768px — matches header @media (max-width: 768px) */
 @media (max-width: 768px) {
-  .footer {
-    padding: 40px 16px 20px;
-  }
-
-  .footerGrid {
-    grid-template-columns: 1fr 1fr;
-    gap: 28px;
-    margin-bottom: 32px;
-  }
-
-  .footerBrand {
-    grid-column: 1 / -1;
-  }
-
-  .footerBrand p {
-    max-width: 100%;
-  }
+  .footer      { padding: 36px 16px 20px; }
+  .footerGrid  { grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 32px; }
+  .footerBrand { grid-column: 1 / -1; }
+  .footerBrand p { max-width: 100%; }
 }
 
+/* ≤ 480px — matches header @media (max-width: 480px) */
 @media (max-width: 480px) {
-  .footerGrid {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .footerBrand {
-    grid-column: auto;
-  }
-
+  .footer      { padding: 28px 14px 18px; }
+  .footerGrid  { grid-template-columns: 1fr; gap: 24px; }
+  .footerBrand { grid-column: auto; }
   .footerBottom {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
+  .logoName { font-size: 20px; }
+}
+
+/* ── Social hover — uses --hover-color CSS variable set inline ── */
+.socialBtn:hover {
+  background: var(--hover-color, #F47C20) !important;
+  border-color: var(--hover-color, #F47C20) !important;
+  color: #fff;
+}
+
+/* ── Support CTA button ──────────────────────────────────────── */
+.supportBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 9px 16px;
+  background: rgba(244, 124, 32, 0.12);
+  border: 1.5px solid rgba(244, 124, 32, 0.35);
+  border-radius: 50px;
+  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #F47C20;
+  text-decoration: none;
+  transition: background 0.18s, border-color 0.18s, transform 0.15s;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+.supportBtn:hover {
+  background: #F47C20;
+  border-color: #F47C20;
+  color: #fff;
+  transform: translateY(-1px);
 }

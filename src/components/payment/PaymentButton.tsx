@@ -36,13 +36,16 @@ interface Props {
   cartItems:       CartItem[];
   shippingAddress: ShippingAddress;
   userEmail:       string;
+  couponCode?:     string | null;
+  giftMessage?:    string | null;
   disabled?:       boolean;
   onSuccess?:      (paymentId: string, orderId: string) => void;
   onFailure?:      (error: string) => void;
 }
 
 export default function PaymentButton({
-  amount, cartItems, shippingAddress, userEmail,
+  amount, cartItems, shippingAddress, userEmail,   couponCode = null,
+  giftMessage = null,
   disabled = false, onSuccess, onFailure,
 }: Props) {
   const [loading, setLoading] = useState<'idle' | 'creating' | 'processing' | 'verifying'>('idle');
@@ -52,6 +55,16 @@ export default function PaymentButton({
   async function handlePayment() {
     if (disabled || loading !== 'idle') return;
     setLoading('creating');
+
+    // Read coupon code + gift message persisted by the cart (code only — server recomputes money)
+    let couponCode: string | null = null;
+    let giftMessage: string | null = null;
+    try {
+      const raw = localStorage.getItem('appliedCoupon');
+      couponCode = raw ? (JSON.parse(raw)?.code ?? null) : null;
+    } catch {}
+    try { giftMessage = localStorage.getItem('littleloot_gift_message') || null; } catch {}
+
 
     try {
       // Step 1 — Create Razorpay order
@@ -65,6 +78,8 @@ export default function PaymentButton({
           amount,
           cart_items:       cartItems,      // color fields now included
           shipping_address: shippingAddress,
+          coupon_code:      couponCode,     // ← NEW
+          gift_message:     giftMessage,    // ← NEW
         }),
       });
 

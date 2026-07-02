@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}"
+self.__REACT_LOADABLE_MANIFEST="{\"shared\\\\fetchwrapper.ts -> next-auth/react\":{\"id\":\"shared\\\\fetchwrapper.ts -> next-auth/react\",\"files\":[]}}"

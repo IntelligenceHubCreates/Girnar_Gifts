@@ -507,6 +507,36 @@ export default function Header() {
         </div>{/* /headerInner */}
       </header>
 
+      {/* ── Mobile category chip strip (≤768px only) ── */}
+      <nav className={styles.catStripMobile} aria-label="Browse categories">
+        <Link
+          href="/products"
+          className={`${styles.catChip} ${pathname === '/products' ? styles.catChipActive : ''}`}
+        >
+          <span className={styles.catChipEmoji} aria-hidden="true">🛍️</span>
+          All
+        </Link>
+
+        {NAV_ITEMS.filter((item) => item.href !== '/').map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className={`${styles.catChip} ${isActive(item.href) ? styles.catChipActive : ''}`}
+          >
+            <span className={styles.catChipEmoji} aria-hidden="true">{item.emoji}</span>
+            {item.label}
+          </Link>
+        ))}
+
+        <Link
+          href="/new-arrivals"
+          className={`${styles.catChip} ${isActive('/new-arrivals') ? styles.catChipActive : ''}`}
+        >
+          <span className={styles.catChipEmoji} aria-hidden="true">⭐</span>
+          New Arrivals
+        </Link>
+      </nav>
+
       {/* ── ROW 3: CATEGORY NAV BAR ────────────────────────────────── */}
       <nav
         ref={catBarRef}

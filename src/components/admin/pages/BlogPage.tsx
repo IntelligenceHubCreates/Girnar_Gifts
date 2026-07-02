@@ -8,32 +8,56 @@ import { fetchBlogPosts, createBlogPost, updateBlogPost, deleteBlogPost, type Ap
 // ── Blog Post Form ────────────────────────────────────────────────
 
 function BlogPostForm({ post, onClose, onSaved }: { post?: ApiBlogPost | null; onClose: () => void; onSaved: () => void }) {
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving]   = useState(false)
+  const [error,  setError]    = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
   const isEdit = !!post
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setSaving(true); setError(null)
-    const fd = e.currentTarget
-    const data = {
-      title:   (fd.elements.namedItem('title') as HTMLInputElement).value,
-      slug:    (fd.elements.namedItem('slug') as HTMLInputElement).value,
-      excerpt: (fd.elements.namedItem('excerpt') as HTMLTextAreaElement).value,
-      content: (fd.elements.namedItem('content') as HTMLTextAreaElement).value,
-      tag:     (fd.elements.namedItem('tag') as HTMLInputElement).value,
-      status:  (fd.elements.namedItem('status') as HTMLSelectElement).value as 'published' | 'draft',
-    }
-    try {
-      if (isEdit) await updateBlogPost(post!.id, data)
-      else        await createBlogPost(data)
-      onSaved(); onClose()
-    } catch (err: any) { setError(err.message) } finally { setSaving(false) }
+  const titleToSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+  const [form, setForm] = useState({
+    title:     post?.title     ?? '',
+    slug:      post?.slug      ?? '',
+    excerpt:   post?.excerpt   ?? '',
+    content:   post?.content   ?? '',
+    tag:       post?.tag       ?? '',
+    image_url: post?.image_url ?? '',
+    status:    (post?.status   ?? 'draft') as 'published' | 'draft',
+  })
+
+  function handleTitle(val: string) {
+    setForm(f => ({ ...f, title: val, slug: isEdit ? f.slug : titleToSlug(val) }))
   }
 
-  // Auto-generate slug from title
-  function titleToSlug(title: string) {
-    return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  async function handleImageUpload(file: File) {
+    setUploading(true); setError(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/admin/blog/upload-image', { method: 'POST', body: fd, credentials: 'include' })
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || 'Upload failed')
+      const { url } = await res.json()
+      setForm(f => ({ ...f, image_url: url }))
+    } catch (e: any) {
+      setError(e.message ?? 'Image upload failed')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  async function handleSave() {
+    if (!form.title.trim()) { setError('Title is required'); return }
+    if (!form.slug.trim())  { setError('Slug is required');  return }
+    setSaving(true); setError(null)
+    try {
+      if (isEdit) await updateBlogPost(post!.id, form)
+      else        await createBlogPost(form)
+      onSaved(); onClose()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -43,53 +67,64 @@ function BlogPostForm({ post, onClose, onSaved }: { post?: ApiBlogPost | null; o
           <div className="drawer-title">{isEdit ? '✏️ Edit Post' : '✏️ New Blog Post'}</div>
           <button className="drawer-close" onClick={onClose}>✕</button>
         </div>
-        <form onSubmit={handleSubmit}>
-          <div className="drawer-body">
-            {error && <div style={{ background: '#FFF0F0', border: '1px solid var(--coral)', borderRadius: 8, padding: '10px 14px', color: 'var(--coral)', fontSize: '.82rem', marginBottom: 16 }}>⚠️ {error}</div>}
 
+        <div className="drawer-body">
+          {error && <div style={{ background:'#FFF0F0', border:'1px solid var(--coral)', borderRadius:8, padding:'10px 14px', color:'var(--coral)', fontSize:'.82rem', marginBottom:16 }}>⚠️ {error}</div>}
+
+          <div className="form-group">
+            <label className="form-label">Title *</label>
+            <input className="form-input" value={form.title} onChange={e => handleTitle(e.target.value)} placeholder="10 Best Educational Toys for Kids…" />
+          </div>
+
+          <div className="form-grid form-grid-2">
             <div className="form-group">
-              <label className="form-label">Title *</label>
-              <input name="title" className="form-input" required defaultValue={post?.title} placeholder="10 Best Educational Toys for Kids…"
-                onChange={(e) => {
-                  const slugEl = (e.target.form?.elements.namedItem('slug') as HTMLInputElement)
-                  if (slugEl && !isEdit) slugEl.value = titleToSlug(e.target.value)
-                }} />
+              <label className="form-label">Slug *</label>
+              <input className="form-input" value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} placeholder="10-best-educational-toys" />
             </div>
-
-            <div className="form-grid form-grid-2">
-              <div className="form-group">
-                <label className="form-label">Slug *</label>
-                <input name="slug" className="form-input" required defaultValue={post?.slug} placeholder="10-best-educational-toys" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Tag / Category *</label>
-                <input name="tag" className="form-input" required defaultValue={post?.tag} placeholder="Parenting Tips" />
-              </div>
-            </div>
-
             <div className="form-group">
-              <label className="form-label">Excerpt *</label>
-              <textarea name="excerpt" className="form-input" rows={2} required defaultValue={post?.excerpt} placeholder="Brief summary shown in listing…" />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Content *</label>
-              <textarea name="content" className="form-input" rows={10} required defaultValue={post?.content} placeholder="Full blog post content (supports Markdown)…" />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Status</label>
-              <select name="status" className="form-select" defaultValue={post?.status ?? 'draft'}>
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-              </select>
+              <label className="form-label">Tag / Category</label>
+              <input className="form-input" value={form.tag} onChange={e => setForm(f => ({ ...f, tag: e.target.value }))} placeholder="Parenting Tips" />
             </div>
           </div>
-          <div className="drawer-footer">
-            <button type="button" className="btn btn-outline" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? '⏳ Saving…' : isEdit ? '💾 Update Post' : '✅ Publish'}</button>
+
+          <div className="form-group">
+            <label className="form-label">Hero Image</label>
+            {form.image_url ? (
+              <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:8 }}>
+                <img src={form.image_url} alt="" style={{ width:80, height:60, objectFit:'cover', borderRadius:8, border:'1px solid var(--border)' }} />
+                <button className="btn btn-outline btn-sm" onClick={() => setForm(f => ({ ...f, image_url: '' }))}>Remove</button>
+              </div>
+            ) : null}
+            <input type="file" accept="image/*" disabled={uploading}
+              onChange={e => { const file = e.target.files?.[0]; if (file) handleImageUpload(file) }} />
+            {uploading && <div style={{ fontSize:'.72rem', color:'var(--muted)', marginTop:4 }}>⏳ Uploading…</div>}
           </div>
-        </form>
+
+          <div className="form-group">
+            <label className="form-label">Excerpt</label>
+            <textarea className="form-input" rows={2} value={form.excerpt} onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))} placeholder="Brief summary shown in listing…" />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Content *</label>
+            <textarea className="form-input" rows={10} value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Full blog post content (supports Markdown)…" />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Status</label>
+            <select className="form-select" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as 'published' | 'draft' }))}>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="drawer-footer">
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={saving || uploading}>
+            {saving ? '⏳ Saving…' : isEdit ? '💾 Update Post' : '✅ Publish'}
+          </button>
+        </div>
       </div>
     </div>
   )

@@ -3,7 +3,7 @@
 export type PageId =
   | 'dashboard' | 'orders' | 'products' | 'customers'
   | 'categories' | 'coupons' | 'reviews' | 'blog'
-  | 'analytics' | 'settings'
+  | 'analytics' | 'settings' | 'returns' | 'shipping'
 
 export interface NavItem {
   id: PageId
@@ -36,12 +36,14 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { id: 'analytics', icon: '📈', label: 'Analytics' },
       { id: 'settings',  icon: '⚙️', label: 'Settings' },
+      { id: 'returns', label: 'Returns', icon: '🔄' },
+      { id: 'shipping', label: 'Shipping', icon: '🚚' },
     ],
   },
 ]
 
 export const PAGE_META: Record<PageId, { title: string; section: string; sub: string }> = {
-  dashboard:  { title: 'Dashboard',  section: 'Overview',      sub: 'Welcome back, Varsha 👋' },
+  dashboard:  { title: 'Dashboard',  section: 'Overview',      sub: 'Welcome back, Suchaina 👋' },
   orders:     { title: 'Orders',     section: 'Management',    sub: 'All customer orders' },
   products:   { title: 'Products',   section: 'Catalog',       sub: 'Manage your product listing' },
   customers:  { title: 'Customers',  section: 'Database',      sub: 'Registered customer profiles' },
@@ -51,4 +53,6 @@ export const PAGE_META: Record<PageId, { title: string; section: string; sub: st
   blog:       { title: 'Blog',       section: 'Manager',       sub: 'Published posts and drafts' },
   analytics:  { title: 'Analytics',  section: 'Reports',       sub: 'Traffic, conversions & sales' },
   settings:   { title: 'Settings',   section: 'Configuration', sub: 'Store preferences & integrations' },
+  returns: { title: 'Returns', section: 'Operations', sub: 'Manage return & refund requests' },
+  shipping: { title: 'Shipping', section: 'Operations', sub: 'Manage shipments, couriers & delivery' },
 }

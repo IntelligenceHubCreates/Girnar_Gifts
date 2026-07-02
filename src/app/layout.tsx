@@ -3,6 +3,7 @@ import { Baloo_2, Nunito } from 'next/font/google';
 import '@/styles/globals.css';
 import SessionProvider from '@/components/SessionProvider';
 import { CartProvider } from '@/context/CartContext';
+import { WishlistProvider } from '@/context/WishlistContext';
 import { Toaster } from 'react-hot-toast';
 
 const baloo2 = Baloo_2({
@@ -41,8 +42,10 @@ export default function RootLayout({
       <body>
         <SessionProvider>
           <CartProvider>
-            {children}
-            <Toaster position="top-right" />
+            <WishlistProvider>
+              {children}
+              <Toaster position="top-right" />
+            </WishlistProvider>
           </CartProvider>
         </SessionProvider>
       </body>

@@ -1,0 +1,140 @@
+/* ══════════════════════════════════════════════════════════════
+   WhatsAppButton — floating action button
+   ══════════════════════════════════════════════════════════════ */
+
+.fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 999;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #25D366;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(37, 211, 102, 0.45);
+  text-decoration: none;
+  cursor: pointer;
+  /* Start hidden, animate in */
+  opacity: 0;
+  transform: scale(0.6) translateY(20px);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.2s ease;
+  /* Touch target */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fabVisible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.fab:hover {
+  background: #1ebe57;
+  box-shadow: 0 10px 32px rgba(37, 211, 102, 0.55);
+  transform: scale(1.08) translateY(-2px);
+}
+
+.fab:active {
+  transform: scale(0.96);
+}
+
+/* ── Ping ring — animated pulse behind button ── */
+.ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(37, 211, 102, 0.4);
+  animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes ping {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  70%  { transform: scale(1.7); opacity: 0;   }
+  100% { transform: scale(1.7); opacity: 0;   }
+}
+
+/* ── Tooltip bubble ── */
+.tooltip {
+  position: absolute;
+  right: calc(100% + 12px);
+  bottom: 50%;
+  transform: translateY(50%);
+  background: #fff;
+  color: #1a1a2e;
+  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 14px;
+  border-radius: 12px;
+  white-space: nowrap;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: tooltipIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  pointer-events: all;
+}
+
+/* Arrow pointing right */
+.tooltip::after {
+  content: '';
+  position: absolute;
+  right: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 7px solid transparent;
+  border-right: none;
+  border-left-color: #fff;
+}
+
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateY(50%) translateX(8px); }
+  to   { opacity: 1; transform: translateY(50%) translateX(0); }
+}
+
+.tooltipClose {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 10px;
+  color: #aaa;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.tooltipClose:hover {
+  background: #f0ece8;
+  color: #555;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .fab {
+    bottom: 20px;
+    right: 16px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .tooltip {
+    font-size: 12px;
+    padding: 8px 12px;
+    right: calc(100% + 10px);
+  }
+}
+
+@media (max-width: 380px) {
+  .fab    { width: 48px; height: 48px; }
+  .tooltip { display: none; } /* too cramped on tiny screens */
+}

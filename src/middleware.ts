@@ -3,11 +3,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
 
   // Proxy all /api/* (except /api/auth/*) to backend
   if (pathname.startsWith('/api') && !pathname.startsWith('/api/auth')) {
-    return NextResponse.rewrite(new URL(pathname, process.env.BACKEND_URL));
+    return NextResponse.rewrite(new URL(pathname + search, process.env.BACKEND_URL));
   }
 
   // Protect these routes — redirect to /login if not authenticated
@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
 
   if (isProtected) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-    if (!token) {
+    if (!token || !token.backendToken) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('callbackUrl', encodeURI(pathname));
       return NextResponse.redirect(loginUrl);

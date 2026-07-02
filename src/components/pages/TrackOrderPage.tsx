@@ -65,6 +65,22 @@ const STATUS_CFG: Record<string, { color: string; bg: string; label: string; emo
 
 const STEP_ORDER = ['confirmed', 'packed', 'shipped', 'out_for_delivery', 'delivered'];
 
+/* Phase 14: map a shipment status → the 5-step customer rail position + a
+   friendly label. RTO/failed/lost are surfaced as a banner, not a rail step. */
+const SHIPMENT_TO_STEP: Record<string, string> = {
+  pending: 'confirmed', ready_to_pack: 'confirmed',
+  packed: 'packed', label_generated: 'packed', pickup_scheduled: 'packed',
+  picked_up: 'shipped', in_transit: 'shipped',
+  out_for_delivery: 'out_for_delivery',
+  delivered: 'delivered',
+};
+const SHIPMENT_EXCEPTION = new Set(['delivery_failed', 'rto_initiated', 'returned_to_origin', 'lost', 'damaged_in_transit', 'cancelled']);
+const SHIP_STATUS_FRIENDLY: Record<string, string> = {
+  delivery_failed: 'Delivery attempted — failed', rto_initiated: 'Returning to seller',
+  returned_to_origin: 'Returned to seller', lost: 'Shipment delayed', damaged_in_transit: 'Shipment issue',
+  cancelled: 'Shipment cancelled',
+};
+
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 function fmtDate(iso: string | null) {
   if (!iso) return '—';
@@ -95,6 +111,31 @@ function buildTrackingEvents(order: OrderData): TrackEvent[] {
     done:        i < currentIdx,
     active:      i === currentIdx,
   }));
+}
+
+/* Phase 14: build timeline from the real shipment history if we have it;
+   otherwise fall back to the order-derived synthetic timeline (unchanged). */
+function buildShipmentEvents(order: OrderData, tracking: any): TrackEvent[] {
+  if (tracking?.timeline?.length > 0) {
+    const SHIP_LABEL: Record<string, string> = {
+      ready_to_pack: 'Ready to Pack', packed: 'Packed', label_generated: 'Label Generated',
+      pickup_scheduled: 'Pickup Scheduled', picked_up: 'Picked Up', in_transit: 'In Transit',
+      out_for_delivery: 'Out for Delivery', delivered: 'Delivered', delivery_failed: 'Delivery Failed',
+      rto_initiated: 'Returning to Seller', returned_to_origin: 'Returned to Seller',
+      lost: 'Delayed', damaged_in_transit: 'Issue Reported', cancelled: 'Cancelled',
+    };
+    const tl = tracking.timeline;
+    return tl.map((h: any, i: number) => ({
+      status:      h.new_status,
+      label:       SHIP_LABEL[h.new_status] ?? h.new_status,
+      description: h.note || '',
+      timestamp:   fmtDateTime(h.created_at),
+      location:    '',
+      done:        i < tl.length - 1,
+      active:      i === tl.length - 1,
+    }));
+  }
+  return buildTrackingEvents(order);
 }
 
 function getDefaultDesc(s: string) {
@@ -162,6 +203,7 @@ export default function TrackOrderPage() {
   const [searched,    setSearched]    = useState(false);
   const [copied,      setCopied]      = useState(false);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [tracking,    setTracking]    = useState<any | null>(null);
 
   useEffect(() => {
     if (prefilledOrderId) fetchOrder(prefilledOrderId);
@@ -170,7 +212,7 @@ export default function TrackOrderPage() {
   async function fetchOrder(id: string) {
     const trimmed = id.trim();
     if (!trimmed) return;
-    setLoading(true); setNotFound(false); setOrder(null); setSearched(false);
+    setLoading(true); setNotFound(false); setOrder(null); setSearched(false); setTracking(null);
 
     try {
       const res = await fetch(`${BACKEND}/api/orders/${trimmed}`, { credentials: 'include' });
@@ -198,6 +240,17 @@ export default function TrackOrderPage() {
       } else {
         setOrder(data);
       }
+
+      /* Phase 14: pull the real shipment tracking (if a shipment exists). */
+      try {
+        const tr = await fetch(`${BACKEND}/api/orders/${trimmed}/tracking`, { credentials: 'include' });
+        if (tr.ok) {
+          const td = await tr.json();
+          setTracking(td?.has_shipment ? td : null);
+        } else {
+          setTracking(null);
+        }
+      } catch { setTracking(null); }
     } catch {
       setNotFound(true);
     } finally {
@@ -210,19 +263,35 @@ export default function TrackOrderPage() {
   function clearSearch()  { setInputValue(''); setOrder(null); setNotFound(false); setSearched(false); }
 
   function handleCopy() {
-    if (!order?.awb_number) return;
-    navigator.clipboard.writeText(order.awb_number).catch(() => {});
+    const awb = tracking?.awb_number ?? order?.awb_number;
+    if (!awb) return;
+    navigator.clipboard.writeText(awb).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const normStatus = order ? normaliseStatus(order.status) : 'confirmed';
+/* Phase 14: prefer real shipment data. courierName/awb/trackingUrl now come
+     from the shipment (the order's own fields were always null). */
+  const courierName  = tracking?.courier_name  ?? order?.courier_name  ?? null;
+  const awbNumber    = tracking?.awb_number     ?? order?.awb_number    ?? null;
+  const trackingUrl  = tracking?.tracking_url   ?? null;
+  const shipStatus   = tracking?.status as string | undefined;
+  const shipException = shipStatus && SHIPMENT_EXCEPTION.has(shipStatus) ? shipStatus : null;
+  const expectedDate = tracking?.expected_delivery_date ?? order?.estimated_delivery ?? null;
+
+  /* Rail position: shipment status wins; else fall back to order status. */
+  const railStatus = shipStatus && SHIPMENT_TO_STEP[shipStatus]
+    ? SHIPMENT_TO_STEP[shipStatus]
+    : (order ? normaliseStatus(order.status) : 'confirmed');
+
+  const normStatus = railStatus;
   const cfg        = order ? (STATUS_CFG[order.status] ?? STATUS_CFG['confirmed']) : null;
   const currentIdx = STEP_ORDER.indexOf(normStatus);
-  const events     = order ? buildTrackingEvents(order) : [];
+  const events     = order ? buildShipmentEvents(order, tracking) : [];
   const shipping   = order ? parseShipping(order) : null;
   const orderItems = order ? getOrderItems(order) : [];
   const amount     = order ? getOrderAmount(order) : 0;
+  const latestAttempt = tracking?.latest_attempt ?? null;
 
   return (
     <div className={styles.page}>
@@ -310,6 +379,17 @@ export default function TrackOrderPage() {
       {/* Order result */}
       {order && cfg && (
         <div className={styles.results}>
+          {/* Phase 14: shipment exception / delay banner */}
+          {shipException && (
+            <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', color: '#9a3412', borderRadius: 14, padding: '12px 16px', marginBottom: 16, fontSize: 14, fontWeight: 600 }}>
+              {shipException === 'delivery_failed' && '🚪 A delivery attempt was unsuccessful. The courier will try again soon.'}
+              {shipException === 'rto_initiated' && '↩️ This shipment is on its way back to the seller. Our team will reach out about next steps.'}
+              {shipException === 'returned_to_origin' && '↩️ This shipment was returned to the seller. Please contact support for a refund or reshipment.'}
+              {shipException === 'lost' && '⏱️ This shipment is delayed. We’re working with the courier — thanks for your patience.'}
+              {shipException === 'damaged_in_transit' && '⚠️ There was an issue with this shipment in transit. Please contact support.'}
+              {shipException === 'cancelled' && '❌ This shipment was cancelled.'}
+            </div>
+          )}
 
           {/* Status strip */}
           <div className={styles.statusStrip} style={{ '--sc': cfg.color, '--sb': cfg.bg } as React.CSSProperties}>
@@ -318,8 +398,16 @@ export default function TrackOrderPage() {
               <div>
                 <div className={styles.statusLabel} style={{ color: cfg.color }}>{cfg.label}</div>
                 <div className={styles.statusOrderId}>Order #{order.id.slice(0,8).toUpperCase()}</div>
-                {order.status === 'out_for_delivery' && <div className={styles.statusEta}>⏱ Expected delivery today</div>}
-                {order.status === 'delivered' && order.delivered_at && <div className={styles.statusDelivered}>Delivered · {fmtDateTime(order.delivered_at)}</div>}
+                {(shipStatus === 'out_for_delivery' || order.status === 'out_for_delivery') && <div className={styles.statusEta}>⏱ Expected delivery today</div>}
+                {latestAttempt && latestAttempt.status === 'failed' && latestAttempt.failure_reason && (
+                  <div className={styles.statusEta} style={{ color: '#b45309' }}>
+                    Last attempt: {String(latestAttempt.failure_reason).replace(/_/g, ' ')}
+                    {latestAttempt.next_attempt_at ? ` · next ${fmtDate(latestAttempt.next_attempt_at)}` : ''}
+                  </div>
+                )}
+                {(shipStatus === 'delivered' || order.status === 'delivered') && (tracking?.delivered_at || order.delivered_at) && (
+                  <div className={styles.statusDelivered}>Delivered · {fmtDateTime(tracking?.delivered_at || order.delivered_at)}</div>
+                )}
                 {!['delivered','out_for_delivery','cancelled','returned'].includes(order.status) && order.estimated_delivery && (
                   <div className={styles.statusEta}>📅 Est. delivery: {fmtDate(order.estimated_delivery)}</div>
                 )}
@@ -328,18 +416,24 @@ export default function TrackOrderPage() {
                 )}
               </div>
             </div>
-            {order.courier_name && (
+            {courierName && (
               <div className={styles.courierPill}>
                 <span>🚚</span>
                 <div>
-                  <div className={styles.courierName}>{order.courier_name}</div>
-                  {order.awb_number && (
+                  <div className={styles.courierName}>{courierName}</div>
+                  {awbNumber && (
                     <div className={styles.awbRow}>
-                      <span className={styles.awbNum}>{order.awb_number}</span>
+                      <span className={styles.awbNum}>{awbNumber}</span>
                       <button className={`${styles.copyBtn} ${copied ? styles.copyBtnDone : ''}`} onClick={handleCopy}>
                         {copied ? '✓' : '📋'}
                       </button>
                     </div>
+                  )}
+                  {trackingUrl && (
+                    <a href={trackingUrl} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 11, fontWeight: 700, color: '#5BBEF5', textDecoration: 'none', display: 'inline-block', marginTop: 2 }}>
+                      Track on courier site →
+                    </a>
                   )}
                 </div>
               </div>
@@ -463,17 +557,17 @@ export default function TrackOrderPage() {
                       ₹{amount.toLocaleString('en-IN')}
                     </span>
                   </div>
-                  {order.courier_name && (
+                  {courierName && (
                     <div className={styles.detailRow}>
                       <span className={styles.detailKey}>Courier</span>
-                      <span className={styles.detailVal}>{order.courier_name}</span>
+                      <span className={styles.detailVal}>{courierName}</span>
                     </div>
                   )}
-                  {order.awb_number && (
+                  {awbNumber && (
                     <div className={styles.detailRow}>
                       <span className={styles.detailKey}>AWB Number</span>
                       <div className={styles.detailValRow}>
-                        <span className={styles.detailVal}>{order.awb_number}</span>
+                        <span className={styles.detailVal}>{awbNumber}</span>
                         <button className={`${styles.copySmall} ${copied ? styles.copySmallDone : ''}`} onClick={handleCopy}>
                           {copied ? '✓ Copied' : '📋 Copy'}
                         </button>

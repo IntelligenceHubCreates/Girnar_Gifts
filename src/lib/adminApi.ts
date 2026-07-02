@@ -73,7 +73,7 @@ export interface ApiOrder {
   status:         string
   created_at:     string
   updated_at:     string
-  // Derived fields (not from backend)
+  // Derived / admin fields
   order_number:   string
   customer_name:  string
   customer_email: string
@@ -84,6 +84,8 @@ export interface ApiOrder {
   pincode:        string
   payment_method: string
   payment_status: string
+  razorpay_payment_id: string | null   // NEW (Phase 4)
+  paid_at:        string | null         // NEW (Phase 4)
   notes:          string
   items:          OrderItem[]
 }
@@ -135,19 +137,75 @@ export interface ApiCategory {
   description: string | null
   sort_order:  number
   is_active:   boolean
+  product_count?: number      // NEW (Phase 6 — admin list only)
   children:    ApiCategory[]
 }
 
 export interface ApiCustomer {
+  id:              string
+  name:            string
+  email:           string
+  phone:           string
+  city:            string
+  total_orders:    number
+  total_spent:     number
+  last_order_date: string | null
+  segment?:        string
+  role:            number
+  is_active:       boolean
+  created_at:      string
+}
+
+export interface ApiCustomerOrder {
   id:           string
-  name:         string
-  email:        string
-  phone:        string
-  city:         string
-  total_orders: number
-  total_spent:  number
-  created_at:   string
-  is_active:    boolean
+  order_number: string
+  status:       string
+  total_amount: number
+  created_at:   string | null
+  item_count:   number
+}
+
+export interface ApiCustomerAddress {
+  id:            string
+  full_name:     string
+  phone:         string
+  address_line1: string
+  address_line2: string
+  city:          string
+  state:         string
+  postal_code:   string
+  country:       string
+  address_type:  string
+  is_default:    boolean
+}
+
+export interface ApiCustomerDetail {
+  id:              string
+  name:            string
+  email:           string
+  phone:           string
+  city:            string
+  role:            number
+  confirmed:       boolean
+  is_active:       boolean
+  created_at:      string
+  profile_image:   string | null
+  total_orders:    number
+  total_spent:     number
+  last_order_date: string | null
+  orders:          ApiCustomerOrder[]
+  addresses:       ApiCustomerAddress[]
+}
+
+export async function fetchCustomerById(id: string): Promise<ApiCustomerDetail> {
+  return adminFetch<ApiCustomerDetail>(`/api/admin/customers/${id}`)
+}
+
+export async function setCustomerActive(id: string, isActive: boolean): Promise<void> {
+  await adminFetch(`/api/admin/customers/${id}`, {
+    method: 'PUT',
+    body:   JSON.stringify({ is_active: isActive }),
+  })
 }
 
 export interface ApiCustomerListResponse {
@@ -166,10 +224,12 @@ export interface ApiDashboardStats {
   orders_trend:        number
   customers_trend:     number
   order_status_counts: {
-    delivered:   number
-    processing:  number
-    pending:     number
-    cancelled:   number
+    pending:    number
+    confirmed:  number
+    processing: number
+    shipped:    number
+    delivered:  number
+    cancelled:  number
   }
   recent_orders: RawBackendOrder[]
   top_products:  { id: string; name: string; category: string; price: number; sold: number }[]
@@ -208,6 +268,7 @@ export interface ApiBlogPost {
   excerpt:    string
   content:    string
   tag:        string
+   image_url?: string | null 
   status:     'published' | 'draft'
   views:      number
   comments:   number
@@ -238,40 +299,44 @@ function parseShippingAddress(raw: string | null | undefined) {
   return { street, city, state, pincode }
 }
 
-export function normalizeOrder(raw: RawBackendOrder): ApiOrder {
-  const addr     = parseShippingAddress(raw.shipping_address)
-  const id       = raw.id ?? ''
-  const orderNum = id.slice(0, 8).toUpperCase()
+export function normalizeOrder(raw: any): ApiOrder {
+  const addr = parseShippingAddress(raw.shipping_address)
 
-  const items: OrderItem[] = (raw.order_items ?? []).map((i) => ({
-    product_id: i.product_id  ?? '',
-    name:       i.product?.name ?? (i as any).name ?? '—',
-    qty:        i.quantity    ?? 1,
-    price:      i.price       ?? 0,
-    color:      i.color       ?? i.product?.color     ?? null,
-    color_hex:  i.color_hex   ?? i.product?.color_hex ?? null,
-    image:      (i as any).image ?? i.product?.product_image?.[0]?.url ?? null,
+  const items: OrderItem[] = (raw.items ?? raw.order_items ?? []).map((i: any) => ({
+    product_id: i.product_id ?? i.id ?? '',
+    name:       i.name ?? i.product?.name ?? i.product_name ?? '—',
+    qty:        i.qty ?? i.quantity ?? 1,
+    price:      i.price ?? 0,
+    color:      i.color ?? i.product?.color ?? null,
+    color_hex:  i.color_hex ?? i.product?.color_hex ?? null,
+    image:      i.image ?? i.product?.product_image?.[0]?.url ?? null,
   }))
+
+  const id     = raw.id ?? ''
+  const userId = raw.user_id ? String(raw.user_id) : ''
 
   return {
     id,
-    user_id:        raw.user_id       ?? '',
-    order_number:   orderNum,
-    customer_name:  `#${(raw.user_id ?? '').slice(0, 8).toUpperCase()}`,
-    customer_email: '—',
-    customer_phone: '—',
+    user_id:        userId,
+    order_number:   raw.order_number ?? (id ? id.slice(0, 8).toUpperCase() : '—'),
+    // Real name from the Users join; id-hash fallback only when truly absent.
+    customer_name:  raw.customer_name || (userId ? `#${userId.slice(0, 8).toUpperCase()}` : '—'),
+    customer_email: raw.customer_email || '—',
+    customer_phone: raw.customer_phone || '—',
     address:        addr.street,
     city:           addr.city,
     state:          addr.state,
     pincode:        addr.pincode,
-    payment_method: '—',
-    payment_status: '—',
-    notes:          '',
+    payment_method: raw.payment_method || '',
+    payment_status: raw.payment_status || '',
+    razorpay_payment_id: raw.razorpay_payment_id ?? null,
+    paid_at:        raw.paid_at ?? null,
+    notes:          raw.notes ?? '',
     items,
-    total_amount:   raw.total_amount  ?? 0,
-    status:         raw.status        ?? 'pending',
-    created_at:     raw.created_at    ?? raw.order_date ?? new Date().toISOString(),
-    updated_at:     raw.updated_at    ?? raw.created_at ?? new Date().toISOString(),
+    total_amount:   raw.total_amount ?? raw.total ?? 0,
+    status:         raw.status ?? 'pending',
+    created_at:     raw.created_at ?? new Date().toISOString(),
+    updated_at:     raw.updated_at ?? raw.created_at ?? '',
   }
 }
 
@@ -328,7 +393,9 @@ async function adminFetch<T>(
     let message: string
     try {
       const json = JSON.parse(body)
-      message = json?.detail ?? json?.message ?? body
+      message = typeof json?.detail === 'object'
+        ? JSON.stringify(json.detail)
+        : (json?.detail ?? json?.message ?? body)
     } catch {
       message = body || res.statusText
     }
@@ -371,24 +438,36 @@ export async function fetchDashboardStats(): Promise<ApiDashboardStats> {
 // ════════════════════════════════════════════════════════════════
 
 export async function fetchAdminProducts(params: {
-  skip?:     number
-  limit?:    number
-  category?: string
-  search?:   string
-  in_stock?: boolean
-  on_sale?:  boolean
+  skip?:        number
+  limit?:       number
+  category?:    string
+  search?:      string
+  in_stock?:    boolean
+  on_sale?:     boolean
+  is_new?:      boolean
+  is_featured?: boolean
+  is_active?:   boolean          // explicit true/false (admin)
+  include_inactive?: boolean     // admin: show all incl. inactive
+  stock_status?: 'in_stock' | 'low_stock' | 'out_of_stock'
+  sort_by?:     'featured' | 'price_asc' | 'price_desc' | 'newest' | 'stock_asc' | 'stock_desc'
 } = {}): Promise<ApiProductListResponse> {
   const qs = new URLSearchParams()
-  if (params.skip     !== undefined) qs.set('skip',     String(params.skip))
-  if (params.limit    !== undefined) qs.set('limit',    String(params.limit))
-  if (params.category)               qs.set('category', params.category)
-  if (params.search)                 qs.set('search',   params.search)
-  if (params.in_stock)               qs.set('in_stock', 'true')
-  if (params.on_sale)                qs.set('on_sale',  'true')
+  if (params.skip        !== undefined) qs.set('skip',  String(params.skip))
+  if (params.limit       !== undefined) qs.set('limit', String(params.limit))
+  if (params.category)                  qs.set('category', params.category)
+  if (params.search)                    qs.set('search',   params.search)
+  if (params.in_stock)                  qs.set('in_stock', 'true')
+  if (params.on_sale)                   qs.set('on_sale',  'true')
+  if (params.is_new)                    qs.set('is_new',      'true')
+  if (params.is_featured)               qs.set('is_featured', 'true')
+  if (params.is_active !== undefined)   qs.set('is_active', String(params.is_active))
+  if (params.include_inactive)          qs.set('include_inactive', 'true')
+  if (params.stock_status)              qs.set('stock_status', params.stock_status)
+  if (params.sort_by)                   qs.set('sort_by', params.sort_by)
 
-  const url = `http://localhost:8000/api/product/all?${qs}`
-  const res = await fetch(url, { cache: 'no-store' })
-  return res.json()
+  // Routed through adminFetch → carries auth + goes through the Next proxy.
+  // (Was a hardcoded http://localhost:8000 fetch with no auth — broken in prod.)
+  return adminFetch<ApiProductListResponse>(`/api/product/all?${qs}`)
 }
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000'
@@ -407,9 +486,7 @@ export async function deleteProduct(id: string): Promise<void> {
 
 export async function fetchProductById(id: string): Promise<ApiProduct | null> {
   try {
-    const res = await fetch(`http://localhost:8000/api/product/${id}`, { cache: 'no-store' })
-    if (!res.ok) return null
-    return res.json()
+    return await adminFetch<ApiProduct>(`/api/product/${id}`)
   } catch {
     return null
   }
@@ -436,6 +513,19 @@ export async function fetchCategories(): Promise<ApiCategory[]> {
   return buildCategoryTree(flat)
 }
 
+/**
+ * Admin category list: ALL categories (incl. inactive) with product_count.
+ * Returns a flat array; the page rebuilds the tree via buildCategoryTree.
+ * (The public fetchCategories() stays active-only roots for the storefront.)
+ */
+export async function fetchAdminCategories(): Promise<ApiCategory[]> {
+  const res = await adminFetch<{ data: ApiCategory[]; totalCount: number }>(
+    '/api/categories/admin/list?include_inactive=true',
+  )
+  return buildCategoryTree(res.data ?? [])
+}
+
+
 export async function createCategory(data: {
   name:         string
   slug:         string
@@ -455,8 +545,39 @@ export async function updateCategory(id: string, data: Partial<ApiCategory>): Pr
   })
 }
 
-export async function deleteCategory(id: string): Promise<void> {
-  await adminFetch(`/api/categories/${id}`, { method: 'DELETE' })
+export interface CategoryDeleteBlocked {
+  blocked: true
+  reason: 'has_products' | 'has_children'
+  message: string
+  product_count: number
+  child_count: number
+}
+
+/**
+ * Delete a category. Resolves on success.
+ * Throws a CategoryDeleteBlocked-shaped error (via .blockedInfo) on 409 so the
+ * UI can show "reassign N products first" or confirm re-parenting children.
+ */
+export async function deleteCategory(id: string, force = false): Promise<void> {
+  try {
+    await adminFetch(`/api/categories/${id}?force=${force}`, { method: 'DELETE' })
+  } catch (err: any) {
+    // adminFetch throws `API 409: <detail>`. The detail is our structured object,
+    // JSON-stringified inside the message. Parse it back out for the UI.
+    const m = String(err?.message ?? '')
+    if (m.startsWith('API 409')) {
+      const jsonStart = m.indexOf('{')
+      if (jsonStart >= 0) {
+        try {
+          const info = JSON.parse(m.slice(jsonStart))
+          const e: any = new Error(info.message ?? 'Cannot delete category')
+          e.blockedInfo = { blocked: true, ...info } as CategoryDeleteBlocked
+          throw e
+        } catch { /* fall through to rethrow original */ }
+      }
+    }
+    throw err
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -474,41 +595,33 @@ const SORT_FIELD_MAP: Record<string, string> = {
 }
 
 export async function fetchAdminOrders(params: {
-  skip?:    number
-  limit?:   number
-  status?:  string
-  search?:  string
-  sortBy?:  string
-  sortDir?: 'asc' | 'desc'
+  skip?:     number
+  limit?:    number
+  status?:   string
+  search?:   string
+  dateFrom?: string
+  dateTo?:   string
+  sortBy?:   string           // 'created_at' | 'total_amount'
+  sortDir?:  'asc' | 'desc'
 } = {}): Promise<ApiOrdersResult> {
   const qs = new URLSearchParams()
-  if (params.skip  !== undefined) qs.set('skip',    String(params.skip))
-  if (params.limit !== undefined) qs.set('limit',   String(params.limit))
-  if (params.status)              qs.set('status',  params.status)
-  if (params.search)              qs.set('search',  params.search)
-
-  const backendSortBy = SORT_FIELD_MAP[params.sortBy ?? 'created_at'] ?? 'created_at'
-  qs.set('sortBy',  backendSortBy)
+  if (params.skip  !== undefined) qs.set('skip',  String(params.skip))
+  if (params.limit !== undefined) qs.set('limit', String(params.limit))
+  if (params.status && params.status !== 'All') qs.set('status', params.status)
+  if (params.search)   qs.set('search',    params.search)
+  if (params.dateFrom) qs.set('date_from', params.dateFrom)
+  if (params.dateTo)   qs.set('date_to',   params.dateTo)
+  qs.set('sortBy',  params.sortBy === 'total_amount' ? 'total_amount' : 'created_at')
   qs.set('sortDir', params.sortDir ?? 'desc')
 
-  const raw = await adminFetch<
-    RawBackendOrder[] | { data: RawBackendOrder[]; totalCount?: number }
-  >(`/api/admin/orders?${qs}`)
-
-  const rawList: RawBackendOrder[] = Array.isArray(raw)
-    ? raw
-    : (raw as any).data ?? (raw as any).orders ?? []
-
+  const raw = await adminFetch<any>(`/api/admin/orders?${qs}`)
+  const list: any[] = Array.isArray(raw) ? raw : (raw?.data ?? raw?.orders ?? [])
   const totalCount: number = Array.isArray(raw)
-    ? rawList.length
-    : ((raw as any).totalCount ?? (raw as any).total ?? rawList.length)
+    ? list.length
+    : (raw?.totalCount ?? raw?.total ?? list.length)
 
-  return {
-    orders:     rawList.map(normalizeOrder),
-    totalCount,
-  }
+  return { orders: list.map(normalizeOrder), totalCount }
 }
-
 // BUG FIX: backend returns 405 for PATCH /orders/{id}/status — use PUT instead
 export async function updateOrderStatus(id: string, status: string): Promise<void> {
   await adminFetch(`/api/admin/orders/${id}`, {
@@ -637,20 +750,21 @@ export async function deleteReview(id: string): Promise<void> {
 // ════════════════════════════════════════════════════════════════
 
 export async function fetchBlogPosts(): Promise<ApiBlogPost[]> {
-  return adminFetch<ApiBlogPost[]>('/api/admin/blog')
+  const res = await adminFetch<{ data: ApiBlogPost[]; totalCount: number }>('/api/admin/blog?limit=100')
+  return res.data ?? []
 }
 
-export async function createBlogPost(
-  data: Omit<ApiBlogPost, 'id' | 'views' | 'comments' | 'likes' | 'created_at' | 'updated_at'>,
-): Promise<ApiBlogPost> {
+export async function createBlogPost(data: Partial<ApiBlogPost>): Promise<ApiBlogPost> {
   return adminFetch<ApiBlogPost>('/api/admin/blog', {
-    method: 'POST', body: JSON.stringify(data),
+    method: 'POST',
+    body:   JSON.stringify(data),
   })
 }
 
 export async function updateBlogPost(id: string, data: Partial<ApiBlogPost>): Promise<ApiBlogPost> {
   return adminFetch<ApiBlogPost>(`/api/admin/blog/${id}`, {
-    method: 'PUT', body: JSON.stringify(data),
+    method: 'PUT',
+    body:   JSON.stringify(data),
   })
 }
 
@@ -662,14 +776,93 @@ export async function deleteBlogPost(id: string): Promise<void> {
 // ANALYTICS
 // ════════════════════════════════════════════════════════════════
 
-export async function fetchAnalytics(period: '7D' | '30D' | '1Y' = '30D'): Promise<{
-  kpis:    ApiDashboardStats
-  traffic: { source: string; visits: number; pct: number }[]
-  geo:     { city: string; visits: number }[]
-  funnel:  { step: string; count: number }[]
-  chart:   { label: string; revenue: number; orders: number; visitors: number }[]
-}> {
-  return adminFetch(`/api/admin/analytics?period=${period}`)
+// ════════════════════════════════════════════════════════════════
+// ANALYTICS  (Phase 11 — real-data endpoints)
+// ════════════════════════════════════════════════════════════════
+
+export type AnalyticsRange = 'today' | '7d' | '30d' | '6m' | '1y' | 'custom'
+
+export interface AnalyticsOverview {
+  total_revenue:       number
+  revenue_this_month:  number
+  revenue_trend:       number
+  total_orders:        number
+  orders_this_month:   number
+  orders_trend:        number
+  avg_order_value:     number
+  total_customers:     number
+  new_customers_month: number
+  returning_customers: number
+  cancelled_rate:      number
+  best_seller:         { id: string; name: string; units: number } | null
+  low_stock_count:     number
+  out_of_stock_count:  number
+}
+
+export interface AnalyticsRevenue {
+  range:           string
+  bucket:          'day' | 'week' | 'month'
+  series:          { label: string; revenue: number; orders: number; aov: number }[]
+  total_revenue:   number
+  total_orders:    number
+  avg_order_value: number
+  revenue_trend:   number
+  orders_trend:    number
+  prev_revenue:    number
+  prev_orders:     number
+}
+
+export interface AnalyticsProducts {
+  range:          string
+  top_products:   { id: string; name: string; category: string; units: number; revenue: number }[]
+  slow_products:  { id: string; name: string; category: string; units: number }[]
+  low_stock:      { id: string; name: string; count: number; category: string }[]
+  out_of_stock:   { id: string; name: string; category: string }[]
+  category_sales: { category: string; units: number; revenue: number }[]
+}
+
+export interface AnalyticsOrders {
+  range: string
+  status_counts: {
+    pending: number; processing: number; confirmed: number
+    shipped: number; delivered: number; cancelled: number
+  }
+  other_statuses:    Record<string, number>
+  trend:             { label: string; orders: number }[]
+  payment_breakdown: { status: string; count: number }[]
+  payment_available: boolean
+}
+
+export interface AnalyticsCustomers {
+  range:           string
+  new_in_window:   number
+  new_trend:       { label: string; customers: number }[]
+  order_frequency: { one: number; two: number; three_plus: number; repeat: number }
+  top_customers:   { id: string; name: string; email: string; spent: number; orders: number }[]
+  city_breakdown:  { city: string; customers: number }[]
+  city_coverage:   number
+}
+
+function rangeQS(range: AnalyticsRange, start?: string, end?: string): string {
+  const qs = new URLSearchParams({ range })
+  if (range === 'custom' && start && end) { qs.set('start', start); qs.set('end', end) }
+  return qs.toString()
+}
+
+export async function fetchAnalyticsOverview(): Promise<AnalyticsOverview> {
+  return adminFetch<AnalyticsOverview>('/api/admin/analytics/overview')
+}
+export async function fetchAnalyticsRevenue(range: AnalyticsRange = '30d', start?: string, end?: string): Promise<AnalyticsRevenue> {
+  return adminFetch<AnalyticsRevenue>(`/api/admin/analytics/revenue?${rangeQS(range, start, end)}`)
+}
+export async function fetchAnalyticsProducts(range: AnalyticsRange = '30d', start?: string, end?: string): Promise<AnalyticsProducts> {
+  return adminFetch<AnalyticsProducts>(`/api/admin/analytics/products?${rangeQS(range, start, end)}`)
+}
+export async function fetchAnalyticsOrders(range: AnalyticsRange = '30d', start?: string, end?: string): Promise<AnalyticsOrders> {
+  return adminFetch<AnalyticsOrders>(`/api/admin/analytics/orders?${rangeQS(range, start, end)}`)
+}
+export async function fetchAnalyticsCustomers(range: AnalyticsRange = '30d', start?: string, end?: string): Promise<AnalyticsCustomers> {
+  return adminFetch<AnalyticsCustomers>(`/api/admin/analytics/customers?${rangeQS(range, start, end)}`)
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -686,4 +879,76 @@ export async function updateStoreSettings(
   return adminFetch('/api/admin/settings', {
     method: 'PUT', body: JSON.stringify(data),
   })
+}
+
+// ════════════════════════════════════════════════════════════════
+// ADMIN PROFILE  (Phase 12)
+// ════════════════════════════════════════════════════════════════
+
+export interface AdminProfile {
+  id:              string
+  name:            string | null
+  email:           string | null
+  phone:           string | null
+  profile_picture: string | null
+  role?:           number | null
+}
+
+export async function fetchProfile(): Promise<AdminProfile> {
+  return adminFetch<AdminProfile>('/api/user/profile')
+}
+
+export async function updateProfile(data: { name?: string; phone?: string }): Promise<AdminProfile> {
+  return adminFetch<AdminProfile>('/api/user/profile', {
+    method: 'PUT',
+    body:   JSON.stringify(data),
+  })
+}
+
+export async function uploadAvatar(file: File): Promise<{ url: string; profile_picture?: string }> {
+  const fd = new FormData()
+  fd.append('file', file)
+  return adminFormFetch<{ url: string; profile_picture?: string }>('/api/user/avatar', fd, 'POST')
+}
+
+export async function changePassword(oldPassword: string, newPassword: string): Promise<{ message: string }> {
+  return adminFetch<{ message: string }>('/api/user/change-password', {
+    method: 'POST',
+    body:   JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+  })
+}
+
+// ── Store settings extras ──
+export interface IntegrationsStatus {
+  razorpay:   boolean
+  cloudinary: boolean
+}
+
+export async function fetchIntegrationsStatus(): Promise<IntegrationsStatus> {
+  return adminFetch<IntegrationsStatus>('/api/admin/settings/integrations-status')
+}
+
+export async function uploadStoreLogo(file: File): Promise<{ url: string }> {
+  const fd = new FormData()
+  fd.append('file', file)
+  return adminFormFetch<{ url: string }>('/api/admin/settings/upload-logo', fd, 'POST')
+}
+
+// ════════════════════════════════════════════════════════════════
+// LOW STOCK  (Phase 3 — item 11)
+// ════════════════════════════════════════════════════════════════
+
+export interface ApiLowStockItem {
+  id:       string
+  name:     string
+  count:    number
+  category: string | null
+}
+
+/**
+ * Products at or below `threshold` units (active products only).
+ * Backed by GET /api/admin/low-stock — see app/admin/routers.py.
+ */
+export async function fetchLowStock(threshold = 10): Promise<ApiLowStockItem[]> {
+  return adminFetch<ApiLowStockItem[]>(`/api/admin/low-stock?threshold=${threshold}`)
 }

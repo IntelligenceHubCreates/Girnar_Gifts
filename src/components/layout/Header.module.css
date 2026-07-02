@@ -762,3 +762,127 @@
   .drawer  { padding-bottom: env(safe-area-inset-bottom); }
   .topbar  { padding-left: max(40px, env(safe-area-inset-left)); padding-right: max(40px, env(safe-area-inset-right)); }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   MOBILE HEADER — search-only, full-width premium bar (≤768px)
+   Everything here is inside the 768px query, so desktop/tablet
+   (≥769px) are completely untouched.
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Hide every header-row item except the search */
+  .hamburger,
+  .logo,
+  .iconActions { display: none !important; }
+
+  /* The right group becomes the entire row */
+  .rightGroup {
+    width: 100%;
+    margin-left: 0;
+    gap: 0;
+  }
+
+  /* Search fills the full width, inline — no icon-collapse, no overlay */
+  .searchWrap {
+    width: 100% !important;
+    flex: 1 1 auto;
+  }
+  .searchTriggerMobile { display: none !important; }      /* remove the icon trigger */
+  .searchBar.searchBarDesktop,
+  .searchBar:not(.searchBarDesktop) { display: flex; }    /* always show the bar inline */
+
+  /* Premium bar: white, soft shadow, rounded pill */
+  .searchBar {
+    background: #fff;
+    border: 1.5px solid #EBEBEB;
+    border-radius: 50px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .searchBar:focus-within {
+    border-color: #F47C20;
+    box-shadow: 0 0 0 3px rgba(244,124,32,0.12);
+  }
+  .searchBar input {
+    font-size: 16px;        /* ≥16px stops iOS from zooming on focus */
+    padding: 12px 16px;
+  }
+
+  /* Coral search button — on-brand premium accent */
+  .searchBtn {
+    background: #F47C20;
+    color: #fff;
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Dropdown anchors under the inline bar (not a fixed top overlay) */
+  .searchDrop {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+  }
+
+  /* A touch more height for the larger bar */
+  .headerInner { min-height: 64px; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MOBILE CATEGORY CHIP STRIP (≤768px only)
+   Horizontally-scrollable, one-tap category links. Desktop keeps the
+   hover .categoryBar, so this stays hidden ≥769px.
+   ════════════════════════════════════════════════════════════════ */
+.catStripMobile { display: none; }
+
+@media (max-width: 768px) {
+  .catStripMobile {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    background: #FDF8F3;
+    border-top: 1px solid #F0EAE0;
+    border-bottom: 1px solid #F0EAE0;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;   /* momentum scroll on iOS */
+    scrollbar-width: none;               /* Firefox */
+    scroll-snap-type: x proximity;
+
+    /* Sticks just under the sticky search header.
+       64px = your mobile .headerInner min-height — adjust if yours differs. */
+    position: sticky;
+    top: 64px;
+    z-index: 190;                        /* below header (300), above page */
+  }
+  .catStripMobile::-webkit-scrollbar { display: none; }  /* Chrome/Safari */
+
+  .catChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;                      /* don't squash — let them scroll */
+    scroll-snap-align: start;
+    padding: 7px 14px;
+    border-radius: 50px;
+    background: #fff;
+    border: 1.5px solid #EFE7DD;
+    color: #3A3A3A;
+    font-family: var(--font-nunito, 'Nunito', sans-serif);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .catChip:active { background: #FFF5EB; border-color: #F47C20; }
+  .catChipEmoji { font-size: 15px; line-height: 1; }
+
+  .catChipActive {
+    background: #F47C20;
+    border-color: #F47C20;
+    color: #fff;
+  }
+}

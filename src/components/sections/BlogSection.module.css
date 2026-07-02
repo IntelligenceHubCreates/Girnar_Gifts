@@ -7,7 +7,7 @@
 .section {
   padding: 40px 40px 44px;
   font-family: var(--font-nunito, 'Nunito', sans-serif);
-  background: #fff;
+  background: transparent;
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
@@ -91,8 +91,7 @@
 
 .imgBox {
   width: 100%;
-  /* Tall-ish ratio matching reference ~4:3 */
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: 14px;
   background: #f0ece8;
@@ -191,7 +190,7 @@
   /* On mobile show 1 full card + peek */
   .card     { width: calc(100vw - 16px - 16px - 60px); min-width: 240px; }
   .title    { font-size: 20px; }
-  .imgBox   { aspect-ratio: 16 / 10; }
+  .imgBox   { aspect-ratio: 16 / 9; }
 }
 
 @media (max-width: 380px) {

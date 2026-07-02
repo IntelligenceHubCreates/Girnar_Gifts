@@ -1,4 +1,7 @@
+
+
 :root {
+
   --sun: #FFD336;
   --coral: #FF6B5B;
   --mint: #3ECFB2;
@@ -12,6 +15,32 @@
   --soft: #F7F3EC;
   --radius: 24px;
   --radius-sm: 14px;
+  --ll-accent:      #FF6B35;
+  --ll-accent-dark: #e55a25;
+  --ll-accent-soft: #fff5f2;
+  --ll-ink:    #1a1a2e;
+  --ll-body:   #5b5b72;
+  --ll-muted:  #9b9bb0;
+  --ll-faint:  #b9b9c7;
+  --ll-line:   #eef0f4;
+  --ll-line2:  #f5f6f8;
+  --ll-bg:     #f7f8fa;
+  --ll-card:   #ffffff;
+
+  --ll-blue:   #3b82f6;  --ll-blue-bg:   #eff6ff;
+  --ll-green:  #10b981;  --ll-green-bg:  #ecfdf5;
+  --ll-purple: #7c3aed;  --ll-purple-bg: #f5f3ff;
+  --ll-pink:   #f43f5e;  --ll-pink-bg:   #fff1f2;
+  --ll-amber:  #f59e0b;  --ll-amber-bg:  #fffbeb;
+
+  --r-xl: 20px; --r-lg: 16px; --r: 13px; --r-sm: 10px; --r-pill: 999px;
+
+  --shadow-card:  0 1px 2px rgba(16,24,40,.04), 0 6px 18px rgba(16,24,40,.05);
+  --shadow-hover: 0 2px 6px rgba(16,24,40,.06), 0 14px 30px rgba(16,24,40,.10);
+  --shadow-pop:   0 18px 48px rgba(16,24,40,.18);
+
+  --font-head: var(--font-baloo), 'Baloo 2', system-ui, sans-serif;
+  --font-body: var(--font-nunito), 'Nunito', system-ui, sans-serif;
 }
 
 *,

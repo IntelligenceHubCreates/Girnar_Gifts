@@ -59,33 +59,43 @@ function getPrice(p: DBProduct) {
 }
 
 /* ─── Component ───────────────────────────────────────────────── */
-export default async function MiniProductList({ title, sort = 'featured', limit = 5, categorySlug }: Props) {
+export default async function MiniProductList({
+  title,
+  sort        = 'featured',
+  limit       = 5,
+  categorySlug,
+}: Props) {
   const products   = await fetchProducts(sort, limit, categorySlug);
-  const seeAllHref = categorySlug ? `/category/${categorySlug}?sort_by=${sort}` : `/products?sort_by=${sort}`;
+  const seeAllHref = categorySlug
+    ? `/category/${categorySlug}?sort_by=${sort}`
+    : `/products?sort_by=${sort}`;
 
   return (
     <section className={styles.section}>
 
-      {/* Header */}
+      {/* ── Header — styled to match FeaturedProducts ── */}
       <div className={styles.header}>
+
+        {/* Left: star + title + orange underline bar */}
         <div className={styles.titleGroup}>
-          <span className={styles.starIcon} aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="#F97316">
-              <path d="M10 1l2.39 4.84 5.34.78-3.87 3.77.91 5.32L10 13.27l-4.77 2.44.91-5.32L2.27 6.62l5.34-.78L10 1z"/>
-            </svg>
-          </span>
-          <h2 className={styles.title}>{title}</h2>
+          <div className={styles.titleRow}>
+            <h2 className={styles.title}>{title}</h2>
+          </div>
+          {/* Orange underline bar — matches FeaturedProducts .titleUnderline */}
+          <span className={styles.titleUnderline} />
         </div>
+
+        {/* Right: View All link */}
         <Link href={seeAllHref} className={styles.viewAll}>
           View All
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <path d="M5 12h14M13 6l6 6-6 6"/>
           </svg>
         </Link>
       </div>
 
-      {/* Cards */}
+      {/* ── Cards (logic unchanged) ── */}
       {products.length === 0 ? (
         <p className={styles.empty}>No products found.</p>
       ) : (
@@ -97,10 +107,8 @@ export default async function MiniProductList({ title, sort = 'featured', limit 
             return (
               <Link key={p.id} href={`/product/${p.id}`} className={styles.card}>
 
-                {/* Discount badge */}
                 {orig && <span className={styles.badge}>{pct}% off</span>}
 
-                {/* Image — LEFT */}
                 <div className={styles.imgWrap}>
                   {img
                     ? <img src={img} alt={p.name} className={styles.img} loading="lazy" draggable={false} />
@@ -108,7 +116,6 @@ export default async function MiniProductList({ title, sort = 'featured', limit 
                   }
                 </div>
 
-                {/* Text — RIGHT */}
                 <div className={styles.info}>
                   <p className={styles.name}>{p.name}</p>
                   <div className={styles.priceRow}>

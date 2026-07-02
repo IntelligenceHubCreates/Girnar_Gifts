@@ -97,9 +97,18 @@ export default function CheckoutPage() {
   const SUBTOTAL        = orderItems.reduce((s, i) => s + i.price * i.qty, 0);
   const ORIGINAL_TOTAL  = orderItems.reduce((s, i) => s + i.originalPrice * i.qty, 0);
   const SAVINGS         = ORIGINAL_TOTAL - SUBTOTAL;
-  const DELIVERY        = SUBTOTAL >= 499 ? 0 : 49;
-  const COUPON_DISCOUNT = Math.round(SUBTOTAL * 0.1);
-  const TOTAL           = SUBTOTAL + DELIVERY - COUPON_DISCOUNT;
+  const DELIVERY = SUBTOTAL >= 499 ? 0 : 49;
+
+  // Real applied coupon (persisted by the cart). Server recomputes the charged
+  // amount at create-order — this is display only.
+  const applied = (() => {
+    try { return JSON.parse(localStorage.getItem('appliedCoupon') || 'null'); }
+    catch { return null; }
+  })();
+  const COUPON_CODE     = applied?.code || null;
+  const COUPON_DISCOUNT = Math.max(0, Math.min(SUBTOTAL, Number(applied?.discountAmount) || 0));
+
+  const TOTAL = Math.max(0, SUBTOTAL + DELIVERY - COUPON_DISCOUNT);
 
   useEffect(() => {
     if (step === 'confirmation' && confirmRef.current) {
@@ -468,6 +477,10 @@ export default function CheckoutPage() {
                   disabled={false}
                   onSuccess={async (paymentId, orderId) => {
                     await clearCartAfterPayment();
+                        try {
+                          localStorage.removeItem('appliedCoupon');
+                          localStorage.removeItem('littleloot_gift_message');
+                        } catch {}
                     console.log('Payment success — cart cleared:', paymentId, orderId);
                   }}
                   onFailure={(msg) => {
@@ -548,18 +561,24 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-            <div className={styles.summaryDivider} />
-            <div className={styles.couponApplied}>
-              <span className={styles.couponAppliedIcon}>🎟️</span>
-              <span className={styles.couponAppliedText}><strong>LITTLE10</strong> applied</span>
-              <span className={styles.couponAppliedSaving}>−₹{COUPON_DISCOUNT.toLocaleString('en-IN')}</span>
-            </div>
+              {COUPON_CODE && (
+              <>
+                <div className={styles.summaryDivider} />
+                <div className={styles.couponApplied}>
+                  <span className={styles.couponAppliedIcon}>🎟️</span>
+                  <span className={styles.couponAppliedText}><strong>{COUPON_CODE}</strong> applied</span>
+                  <span className={styles.couponAppliedSaving}>−₹{COUPON_DISCOUNT.toLocaleString('en-IN')}</span>
+                </div>
+              </>
+            )}
             <div className={styles.summaryDivider} />
 
             <div className={styles.priceLines}>
               <div className={styles.priceLine}><span>Subtotal</span><span>₹{SUBTOTAL.toLocaleString('en-IN')}</span></div>
               <div className={`${styles.priceLine} ${styles.priceLineSaving}`}><span>Product discount</span><span>−₹{SAVINGS.toLocaleString('en-IN')}</span></div>
-              <div className={`${styles.priceLine} ${styles.priceLineSaving}`}><span>Coupon (LITTLE10)</span><span>−₹{COUPON_DISCOUNT.toLocaleString('en-IN')}</span></div>
+              {COUPON_CODE && (
+                <div className={`${styles.priceLine} ${styles.priceLineSaving}`}><span>Coupon ({COUPON_CODE})</span><span>−₹{COUPON_DISCOUNT.toLocaleString('en-IN')}</span></div>
+              )}
               <div className={styles.priceLine}><span>Delivery</span><span className={styles.freeTag}>{DELIVERY === 0 ? 'FREE' : `₹${DELIVERY}`}</span></div>
             </div>
 

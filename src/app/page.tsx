@@ -13,6 +13,7 @@ import TestimonialsSection from '@/components/sections/TestimonialsSection';
 import BlogSection from '@/components/sections/BlogSection';
 import BrandsSection from '@/components/sections/BrandsSection';
 import NewsletterSection from '@/components/sections/NewsletterSection';
+import WhatsAppButton from '@/components/ui/WhatsAppButton';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
@@ -33,6 +34,8 @@ export default function HomePage() {
         <NewsletterSection />
       </main>
       <Footer />
+            {/* Floating WhatsApp button — renders above everything */}
+      <WhatsAppButton />
     </>
   );
 }

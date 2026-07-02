@@ -1,0 +1,21 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   account.module.css  —  co-located with the account route's page.tsx
+   Controls footer visibility + bottom-nav clearance WITHOUT touching
+   AccountPage.tsx or AccountPage.module.css.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Matches the account background (--ll-bg) so the bottom-nav clearance area
+   below the page blends seamlessly on mobile. */
+.pageMain { background: #f7f8fa; }
+
+/* Footer is shown on desktop … */
+.footerWrap { display: block; }
+
+@media (max-width: 1024px) {
+  /* … and hidden on tablet + mobile. */
+  .footerWrap { display: none; }
+
+  /* Reserve space so page content never hides behind the fixed bottom nav
+     (≈64px bar + iPhone safe-area inset). */
+  .pageMain { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+}

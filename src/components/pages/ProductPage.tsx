@@ -5,646 +5,690 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './ProductPage.module.css';
-import { _get, _post } from '@/shared/fetchwrapper';
+import { _get, _post, _delete } from '@/shared/fetchwrapper';
 import { useCart } from '@/context/CartContext';
+import CustomerReviews from './CustomerReviews';
 
-/* ═══════════════════════════════════════════════════════
-   TYPES
-   ═══════════════════════════════════════════════════════ */
+/* ─── Types ─────────────────────────────────── */
 interface ProductImage { url: string; public_id?: string; }
-
 interface BackendProduct {
-  id: string | number;
-  name: string;
-  category: string;
-  sub_category_name?: string;
-  sub_category_slug?: string;
-  description: string;
-  original_price: number;
-  amount_discount: number;
-  percentage_discount: number;
-  count: number;
-  details: string[];
+  id: string | number; name: string; category: string;
+  sub_category_name?: string; sub_category_slug?: string;
+  description: string; original_price: number; amount_discount: number;
+  percentage_discount: number; count: number; details: string[];
   product_image: ProductImage[] | string[];
-  rating?: number;
-  review_count?: number;
-  offer_expiration_date?: string;
+  rating?: number; review_count?: number;
   color_variants?: Array<{ name: string; hex: string; images: string[] }>;
   product_video?: string;
+  variant_group_id?: string;  
 }
-
-interface ColorVariantItem { name: string; hex: string; images: string[]; }
-
-interface MappedProduct {
-  id: string | number;
-  name: string;
-  category: string;
-  subcategory: string;
-  description: string;
-  price: number;
-  originalPrice: number;
-  discount: number;
-  stars: number;
-  reviewCount: number;
-  inStock: boolean;
-  stockCount: number;
-  images: string[];
-  highlights: string[];
+interface ColorVariant { name: string; hex: string; images: string[]; }
+interface Product {
+  id: string | number; name: string; category: string; subcategory: string;
+  subcategorySlug: string;
+  description: string; price: number; originalPrice: number; discount: number;
+  stars: number; reviewCount: number; inStock: boolean; stockCount: number;
+  images: string[]; highlights: string[];
   badges: { label: string; type: string }[];
-  colorVariants: ColorVariantItem[];
-  videoUrl: string;
+  colorVariants: ColorVariant[]; videoUrl: string;
+  variantGroupId: string; 
+  categoryId: string;
 }
+type CartState = 'idle'|'loading'|'added'|'error';
+type WishState = 'idle'|'loading';
 
-type CartState = 'idle' | 'loading' | 'added' | 'error';
-type WishState = 'idle' | 'loading';
+/* ─── Helpers ───────────────────────────────── */
+const PLACEHOLDER = '/images/placeholder-product.png';
+const GAP = 14;
+const AUTOPLAY = 3500;
 
-/* ═══════════════════════════════════════════════════════
-   CONSTANTS
-   ═══════════════════════════════════════════════════════ */
-const PLACEHOLDER_IMG = '/images/placeholder-product.png';
-const GAP = 16;
-const AUTOPLAY_MS = 3200;
-
-const HIGHLIGHT_ICONS = ['🛡️', '📦', '🎒', '💧', '⭐', '🔧', '🎨', '🌟'];
-
-const OFFERS = [
-  { icon: '🏷️', text: 'Get 10% off up to ₹150 on first prepaid order', code: 'HELLO10' },
-  { icon: '💸', text: 'Extra 5% off on orders above ₹1999', code: 'EXTRAS' },
-];
-
-const REVIEWS_DATA = [
-  { name: 'Ananya Mehta', avatar: '👩', verified: true, stars: 5, date: '2 days ago', text: 'Amazing quality! My son loves the space design and uses it every day. Very spacious and comfortable.', photos: [] },
-  { name: 'Priya S.', avatar: '👩', verified: true, stars: 5, date: 'March 2026', text: 'Absolutely worth every rupee! The quality exceeded my expectations and my child has not put it down since it arrived.', photos: [] },
-  { name: 'Rahul M.', avatar: '👨', verified: true, stars: 5, date: 'February 2026', text: 'Delivery was super fast — reached in 2 days! Packaging was beautiful and the product looks exactly like the photos.', photos: [] },
-];
-
-const RATING_DIST = [
-  { stars: 5, pct: 86, count: 102 },
-  { stars: 4, pct: 11, count: 13 },
-  { stars: 3, pct: 2,  count: 2 },
-  { stars: 2, pct: 1,  count: 1 },
-  { stars: 1, pct: 0,  count: 0 },
-];
-
-/* ═══════════════════════════════════════════════════════
-   HELPERS
-   ═══════════════════════════════════════════════════════ */
-function extractImageUrls(raw: ProductImage[] | string[] | undefined): string[] {
+function extractUrls(raw: ProductImage[]|string[]|undefined): string[] {
   if (!raw || !Array.isArray(raw)) return [];
-  return raw.map((img) => (typeof img === 'string' ? img : img?.url ?? '')).filter(Boolean);
+  return raw.map(img => typeof img === 'string' ? img : img?.url ?? '').filter(Boolean);
 }
+function mapProduct(p: BackendProduct): Product {
+  const imgs = extractUrls(p.product_image);
+  const orig = Math.max(0, p.original_price ?? 0);
+  const amt  = Math.max(0, p.amount_discount ?? 0);
+  const pct  = Math.max(0, p.percentage_discount ?? 0);
+  
 
-function mapBackendProduct(p: BackendProduct): MappedProduct {
-  const images        = extractImageUrls(p.product_image);
-  const originalPrice = p.original_price   ?? 0;
-  const amtDisc       = p.amount_discount  ?? 0;
-  const pctDisc       = p.percentage_discount ?? 0;
+  // Effective sale price.
+  // Precedence: a flat amount discount wins; otherwise apply the percentage.
+  // (Previously the percentage was ignored whenever amount_discount was 0.)
+  let price = orig;
+  if (amt > 0)       price = orig - amt;
+  else if (pct > 0)  price = Math.round(orig - (orig * pct) / 100);
+  if (!Number.isFinite(price) || price < 0) price = 0;
 
-  let price = originalPrice - amtDisc;
-  if (price <= 0 && pctDisc > 0) price = Math.round(originalPrice - (originalPrice * pctDisc) / 100);
-  if (price <= 0) price = originalPrice;
-
-  const badges = pctDisc > 0 ? [{ label: `${pctDisc}% OFF`, type: 'sale' }]
-    : amtDisc > 0 ? [{ label: `Save ₹${amtDisc}`, type: 'sale' }] : [];
+  const effDiscount = orig > 0 && price < orig
+    ? Math.round(((orig - price) / orig) * 100)
+    : 0;
+  const badges = effDiscount > 0 ? [{ label: `${effDiscount}% OFF`, type: 'sale' }] : [];
 
   const rawCv = Array.isArray(p.color_variants) ? p.color_variants : [];
-  const colorVariants: ColorVariantItem[] = rawCv
+  const colorVariants = rawCv
     .map((cv: any) => ({ name: String(cv.name ?? ''), hex: String(cv.hex ?? '#ccc'), images: Array.isArray(cv.images) ? cv.images : [] }))
-    .filter((cv) => cv.name.length > 0);
+    .filter(cv => cv.name);
 
   return {
-    id:            p.id,
-    name:          p.name        ?? 'Unnamed Product',
-    category:      p.category    ?? '',
-    subcategory:   p.sub_category_name ?? p.sub_category_slug ?? p.category ?? '',
-    description:   p.description ?? '',
-    price,
-    originalPrice,
-    discount:      pctDisc,
-    stars:         Math.min(5, Math.max(0, p.rating ?? 4)),
-    reviewCount:   p.review_count ?? 0,
-    inStock:       (p.count ?? 0) > 0,
-    stockCount:    p.count ?? 0,
-    images:        images.length > 0 ? images : [],
-    highlights:    Array.isArray(p.details) ? p.details : [],
-    badges,
-    colorVariants,
-    videoUrl:      p.product_video ?? '',
+    id: p.id,
+    name: p.name ?? 'Product',
+    category: p.category ?? '',
+    subcategory: p.sub_category_name ?? p.sub_category_slug ?? p.category ?? '',
+    subcategorySlug: p.sub_category_slug ?? '',
+    description: p.description ?? '',
+    price, originalPrice: orig, discount: effDiscount,
+    stars: Math.min(5, Math.max(0, p.rating ?? 0)),
+    reviewCount: p.review_count ?? 0,
+    inStock: (p.count ?? 0) > 0, stockCount: p.count ?? 0,
+    images: imgs.length ? imgs : [],
+    highlights: Array.isArray(p.details) ? p.details : [],
+    badges, colorVariants, videoUrl: p.product_video ?? '',
+    variantGroupId: p.variant_group_id ?? '',
+    categoryId: (p as any).category_id ?? '',
   };
 }
-
 const fmt = (n: number) => Number.isFinite(n) && n > 0 ? n.toLocaleString('en-IN') : '0';
 
-/* ═══════════════════════════════════════════════════════
-   CAROUSEL HOOK
-   ═══════════════════════════════════════════════════════ */
-function useCarousel(itemCount: number) {
-  const viewportRef  = useRef<HTMLDivElement>(null);
-  const [visibleCount, setVisibleCount] = useState(4);
-  const [cardWidth,    setCardWidth]    = useState(0);
-  const [rawIndex,     setRawIndex]     = useState(itemCount);
-  const [animate,      setAnimate]      = useState(true);
-  const [isDragging,   setIsDragging]   = useState(false);
+/* ─── Highlight icons (SVG line-art style like reference) */
+const HL_SVG = [
+  <svg key="a" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>,
+  <svg key="b" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>,
+  <svg key="c" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><path d="M12 2L2 19h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  <svg key="d" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  <svg key="e" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  <svg key="f" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>,
+];
+const HL_LABELS = ['Water Resistant','Ergonomic Design','BIS Certified','1 Year Warranty','Child Safe','Premium Quality'];
 
-  const isHovered  = useRef(false);
-  const dragActive = useRef(false);
-  const dragStartX = useRef(0);
-  const dragCurrX  = useRef(0);
-  const autoTimer  = useRef<ReturnType<typeof setInterval> | null>(null);
+/* ─── Carousel hook ──────────────────────────── */
+function useCarousel(count: number) {
+  const vpRef = useRef<HTMLDivElement>(null);
+  const [vc, setVC] = useState(5);
+  const [cw, setCW] = useState(0);
+  const [ri, setRI] = useState(count);
+  const [an, setAN] = useState(true);
+  const [drag, setDrag] = useState(false);
+  const hov = useRef(false), da = useRef(false), sx = useRef(0), cx = useRef(0);
+  const timer = useRef<ReturnType<typeof setInterval>|null>(null);
 
-  const measure = useCallback((node: HTMLDivElement | null) => {
-    (viewportRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
-    if (!node) return;
-    const w = node.offsetWidth;
-    const ww = typeof window !== 'undefined' ? window.innerWidth : w;
-    const count = ww < 640 ? 2 : 4;
-    setVisibleCount(count);
-    setCardWidth((w - GAP * (count - 1)) / count);
+  const calc = useCallback((node?: HTMLDivElement|null) => {
+    const el = node ?? vpRef.current; if (!el) return;
+    (vpRef as any).current = el;
+    const w = el.offsetWidth, ww = window?.innerWidth ?? w;
+    const n = ww < 400 ? 2 : ww < 640 ? 3 : ww < 900 ? 4 : ww < 1200 ? 5 : 6;
+    setVC(n); setCW((w - GAP*(n-1))/n);
   }, []);
 
-  const recalc = useCallback(() => {
-    if (!viewportRef.current) return;
-    const w = viewportRef.current.offsetWidth;
-    const ww = typeof window !== 'undefined' ? window.innerWidth : w;
-    const count = ww < 640 ? 2 : 4;
-    setVisibleCount(count);
-    setCardWidth((w - GAP * (count - 1)) / count);
-  }, []);
+  useEffect(() => { const ro = new ResizeObserver(() => calc()); if (vpRef.current) ro.observe(vpRef.current); window.addEventListener('resize', () => calc()); return () => { ro.disconnect(); window.removeEventListener('resize', () => calc()); }; }, [calc]);
+  useEffect(() => { if (count < 2) return; if (ri >= count*2) { const t = setTimeout(() => { setAN(false); setRI(p => p-count); }, 420); return () => clearTimeout(t); } if (ri < count) { const t = setTimeout(() => { setAN(false); setRI(p => p+count); }, 420); return () => clearTimeout(t); } }, [ri, count]);
+  useEffect(() => { if (!an) { const id = requestAnimationFrame(() => setAN(true)); return () => cancelAnimationFrame(id); } }, [an]);
 
-  useEffect(() => {
-    const ro = new ResizeObserver(recalc);
-    if (viewportRef.current) ro.observe(viewportRef.current);
-    window.addEventListener('resize', recalc);
-    return () => { ro.disconnect(); window.removeEventListener('resize', recalc); };
-  }, [recalc]);
+  const stopA = useCallback(() => { if (timer.current) { clearInterval(timer.current); timer.current = null; } }, []);
+  const startA = useCallback(() => { if (count < 2) return; stopA(); timer.current = setInterval(() => { if (!hov.current && !da.current) { setAN(true); setRI(p => p+1); } }, AUTOPLAY); }, [count, stopA]);
+  useEffect(() => { startA(); return stopA; }, [startA, stopA]);
 
-  useEffect(() => {
-    if (itemCount < 2) return;
-    if (rawIndex >= itemCount * 2) {
-      const t = setTimeout(() => { setAnimate(false); setRawIndex(p => p - itemCount); }, 430);
-      return () => clearTimeout(t);
-    }
-    if (rawIndex < itemCount) {
-      const t = setTimeout(() => { setAnimate(false); setRawIndex(p => p + itemCount); }, 430);
-      return () => clearTimeout(t);
-    }
-  }, [rawIndex, itemCount]);
-
-  useEffect(() => { if (!animate) { const id = requestAnimationFrame(() => setAnimate(true)); return () => cancelAnimationFrame(id); } }, [animate]);
-
-  const stopAuto = useCallback(() => { if (autoTimer.current) { clearInterval(autoTimer.current); autoTimer.current = null; } }, []);
-  const startAuto = useCallback(() => {
-    if (itemCount < 2) return;
-    stopAuto();
-    autoTimer.current = setInterval(() => {
-      if (!isHovered.current && !dragActive.current) { setAnimate(true); setRawIndex(p => p + 1); }
-    }, AUTOPLAY_MS);
-  }, [itemCount, stopAuto]);
-
-  useEffect(() => { startAuto(); return stopAuto; }, [startAuto, stopAuto]);
-
-  const go = useCallback((delta: number) => { stopAuto(); setAnimate(true); setRawIndex(p => p + delta); setTimeout(startAuto, AUTOPLAY_MS + 600); }, [startAuto, stopAuto]);
+  const go = useCallback((d: number) => { stopA(); setAN(true); setRI(p => p+d); setTimeout(startA, AUTOPLAY+600); }, [startA, stopA]);
   const prev = useCallback(() => go(-1), [go]);
   const next = useCallback(() => go(1), [go]);
-  const goToPage = useCallback((pageIdx: number) => {
-    stopAuto(); setAnimate(true); setRawIndex(itemCount + pageIdx * visibleCount); setTimeout(startAuto, AUTOPLAY_MS + 600);
-  }, [itemCount, visibleCount, startAuto, stopAuto]);
+  const goPage = useCallback((pi: number) => { stopA(); setAN(true); setRI(count + pi*vc); setTimeout(startA, AUTOPLAY+600); }, [count, vc, startA, stopA]);
 
-  const trackOffset = -(rawIndex * (cardWidth + GAP));
-  const dotCount    = itemCount > 0 ? Math.ceil(itemCount / visibleCount) : 0;
-  const normalised  = itemCount > 0 ? ((rawIndex % itemCount) + itemCount) % itemCount : 0;
-  const activeDot   = Math.floor(normalised / visibleCount);
+  const off = -(ri*(cw+GAP));
+  const dots = count > 0 ? Math.ceil(count/vc) : 0;
+  const norm = count > 0 ? ((ri%count)+count)%count : 0;
+  const activeDot = Math.floor(norm/vc);
 
-  const onTouchStart = (e: React.TouchEvent) => { dragStartX.current = dragCurrX.current = e.touches[0].clientX; dragActive.current = true; stopAuto(); };
-  const onTouchMove  = (e: React.TouchEvent) => { if (!dragActive.current) return; dragCurrX.current = e.touches[0].clientX; };
-  const onTouchEnd   = () => { if (!dragActive.current) return; dragActive.current = false; const diff = dragStartX.current - dragCurrX.current; if (Math.abs(diff) > 40) diff > 0 ? next() : prev(); else startAuto(); };
-  const onMouseDown  = (e: React.MouseEvent) => { dragStartX.current = dragCurrX.current = e.clientX; dragActive.current = true; setIsDragging(false); stopAuto(); };
-  const onMouseMove  = (e: React.MouseEvent) => { if (!dragActive.current) return; dragCurrX.current = e.clientX; if (Math.abs(e.clientX - dragStartX.current) > 6) setIsDragging(true); };
-  const onMouseUp    = () => { if (!dragActive.current) return; dragActive.current = false; const diff = dragStartX.current - dragCurrX.current; if (Math.abs(diff) > 40) diff > 0 ? next() : prev(); else startAuto(); setTimeout(() => setIsDragging(false), 0); };
-  const onMouseEnter = () => { isHovered.current = true; };
-  const onMouseLeave = () => { isHovered.current = false; if (dragActive.current) { dragActive.current = false; setIsDragging(false); startAuto(); } };
-
-  return { viewportRef: measure, visibleCount, cardWidth, trackOffset, animate, isDragging, prev, next, goToPage, dotCount, activeDot, dragHandlers: { onTouchStart, onTouchMove, onTouchEnd, onMouseDown, onMouseMove, onMouseUp, onMouseEnter, onMouseLeave } };
+  const dh = {
+    onTouchStart: (e: React.TouchEvent) => { sx.current = cx.current = e.touches[0].clientX; da.current = true; stopA(); },
+    onTouchMove:  (e: React.TouchEvent) => { if (!da.current) return; cx.current = e.touches[0].clientX; },
+    onTouchEnd:   () => { if (!da.current) return; da.current = false; const d = sx.current - cx.current; if (Math.abs(d) > 40) d > 0 ? next() : prev(); else startA(); },
+    onMouseDown:  (e: React.MouseEvent) => { sx.current = cx.current = e.clientX; da.current = true; setDrag(false); stopA(); },
+    onMouseMove:  (e: React.MouseEvent) => { if (!da.current) return; cx.current = e.clientX; if (Math.abs(e.clientX-sx.current) > 6) setDrag(true); },
+    onMouseUp:    () => { if (!da.current) return; da.current = false; const d = sx.current - cx.current; if (Math.abs(d) > 40) d > 0 ? next() : prev(); else startA(); setTimeout(() => setDrag(false), 0); },
+    onMouseEnter: () => { hov.current = true; },
+    onMouseLeave: () => { hov.current = false; if (da.current) { da.current = false; setDrag(false); startA(); } },
+  };
+  return { ref: calc, vc, cw, off, an, drag, prev, next, goPage, dots, activeDot, dh };
 }
 
-/* ═══════════════════════════════════════════════════════
-   PRODUCT IMAGE COMPONENT
-   ═══════════════════════════════════════════════════════ */
-function ProductImg({ src, alt, className }: { src: string; alt: string; className: string }) {
-  const [err, setErr] = useState(false);
-  const safe = !err && src && (src.startsWith('http') || src.startsWith('/')) ? src : null;
-  return <Image src={safe ?? PLACEHOLDER_IMG} alt={alt} fill sizes="25vw" className={className} onError={() => setErr(true)} />;
+/* ─── Sub-components ─────────────────────────── */
+function SI({ src, alt, cls }: { src: string; alt: string; cls: string }) {
+  const [e, setE] = useState(false);
+  return <Image src={!e && src?.startsWith('http') ? src : PLACEHOLDER} alt={alt} fill sizes="25vw" className={cls} onError={() => setE(true)} />;
 }
-
-/* ═══════════════════════════════════════════════════════
-   RELATED CARD
-   ═══════════════════════════════════════════════════════ */
-function RelatedCard({ product, wishlisted, wishPending, cartState, onWishlist, onAddToCart, onQuickView }: any) {
-  const router = useRouter();
-  const stars  = Math.min(5, Math.max(0, Math.round(product.stars)));
-  const hasSave = product.originalPrice > product.price;
-  const discPct = product.discount > 0 ? product.discount : hasSave ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
-
+function Stars({ n, size=14 }: { n: number; size?: number }) {
+  const s = Math.min(5, Math.max(0, Math.round(n)));
+  return <span className={styles.stars} style={{ fontSize: size }}>{'★'.repeat(s)}<span className={styles.starsEmpty}>{'★'.repeat(5-s)}</span></span>;
+}
+function VP({ src, poster }: { src: string; poster?: string }) {
+  const [p, setP] = useState(false);
+  const ref = useRef<HTMLVideoElement>(null);
+  const t = () => {
+    const v = ref.current; if (!v) return;
+    if (p) { v.pause(); setP(false); }
+    else {
+      const pr = v.play();
+      if (pr && typeof (pr as any).then === 'function') (pr as Promise<void>).then(() => setP(true)).catch(() => setP(false));
+      else setP(true);
+    }
+  };
   return (
-    <article className={styles.relCard}>
-      <button className={[styles.relWishBtn, wishlisted ? styles.relWishlisted : ''].filter(Boolean).join(' ')}
-        onClick={(e) => { e.stopPropagation(); onWishlist(); }} type="button">
-        {wishPending ? '⏳' : wishlisted ? '❤️' : '🤍'}
-      </button>
-      <div className={styles.relCardImg} onClick={() => router.push(`/product/${product.id}`)} style={{ cursor: 'pointer' }}>
-        {product.images.length > 0
-          ? <ProductImg src={product.images[0]} alt={product.name} className={styles.relCardImageTag} />
-          : <div className={styles.relCardEmoji}>🎁</div>}
-        {!product.inStock && <div className={styles.relOutOfStock}>Out of Stock</div>}
-        <button type="button" className={styles.relCardOverlay} onClick={(e) => { e.stopPropagation(); onQuickView(); }}>
-          <span className={styles.relQuickView}>Quick View</span>
-        </button>
+    <div className={styles.vp} onClick={t}>
+      <video ref={ref} src={src} poster={poster} className={styles.vpVideo} onEnded={() => setP(false)} playsInline />
+      {!p && <div className={styles.vpOverlay}><div className={styles.vpBtn}><svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg></div><span className={styles.vpLabel}>Watch Video</span></div>}
+    </div>
+  );
+}
+
+/* ─── Related card ───────────────────────────── */
+function RC({ p, wl, wp, cs, ow, oc, oq }: any) {
+  const router = useRouter();
+  const s = Math.min(5, Math.max(0, Math.round(p.stars)));
+  const save = p.originalPrice > p.price;
+  const d = p.discount > 0 ? p.discount : save ? Math.round((p.originalPrice-p.price)/p.originalPrice*100) : 0;
+  return (
+    <article className={styles.rc}>
+      <button className={[styles.rcW, wl?styles.rcWOn:''].filter(Boolean).join(' ')} onClick={e=>{e.stopPropagation();ow();}} type="button">{wp?'⌛':wl?'❤️':'🤍'}</button>
+      <div className={styles.rcImg} onClick={() => router.push(`/product/${p.id}`)} style={{cursor:'pointer'}}>
+        {p.images.length ? <SI src={p.images[0]} alt={p.name} cls={styles.rcImgTag} /> : <div className={styles.rcEmoji}>🎁</div>}
+        {!p.inStock && <div className={styles.rcOos}>Out of Stock</div>}
+        <button type="button" className={styles.rcOvr} onClick={e=>{e.stopPropagation();oq();}}><span className={styles.rcQv}>Quick View</span></button>
       </div>
-      <div className={styles.relCardBody}>
-        <Link href={`/product/${product.id}`} className={styles.relCardNameLink}>
-          <h3 className={styles.relCardName}>{product.name}</h3>
-        </Link>
-        <div className={styles.relCardStars}>
-          {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
-          <span className={styles.relCardReviews}>({product.reviewCount})</span>
+      <div className={styles.rcBody}>
+        <Link href={`/product/${p.id}`} className={styles.rcNL}><h3 className={styles.rcN}>{p.name}</h3></Link>
+        <div className={styles.rcS}>{'★'.repeat(s)}{'☆'.repeat(5-s)}<span className={styles.rcSc}>({p.reviewCount})</span></div>
+        <div className={styles.rcPR}>
+          <span className={styles.rcP}>₹{fmt(p.price)}</span>
+          {save&&<span className={styles.rcO}>₹{fmt(p.originalPrice)}</span>}
+          {d>0&&<span className={styles.rcD}>{d}% off</span>}
         </div>
-        <div className={styles.relCardPriceRow}>
-          <span className={styles.relPriceNow}>₹{fmt(product.price)}</span>
-          {hasSave && <span className={styles.relPriceWas}>₹{fmt(product.originalPrice)}</span>}
-          {discPct > 0 && <span className={styles.relPriceSave}>{discPct}% OFF</span>}
-        </div>
-        <button className={[styles.relAddBtn, !product.inStock ? styles.relAddBtnDisabled : '', cartState === 'added' ? styles.relAddBtnAdded : ''].filter(Boolean).join(' ')}
-          type="button" disabled={!product.inStock || cartState === 'loading'} onClick={(e) => { e.stopPropagation(); onAddToCart(); }}>
-          {cartState === 'loading' ? 'Adding…' : cartState === 'added' ? '✓ Added!' : product.inStock ? 'Add to Cart' : 'Notify Me'}
+        <button className={[styles.rcBtn,!p.inStock?styles.rcBtnOos:'',cs==='added'?styles.rcBtnAdded:''].filter(Boolean).join(' ')} type="button" disabled={!p.inStock||cs==='loading'} onClick={e=>{e.stopPropagation();oc();}}>
+          {cs==='loading'?'…':cs==='added'?'✓ Added':p.inStock?'Add to Cart':'Notify Me'}
         </button>
       </div>
     </article>
   );
 }
 
-/* ═══════════════════════════════════════════════════════
-   VIDEO PLAYER COMPONENT
-   ═══════════════════════════════════════════════════════ */
-function VideoPlayer({ src, poster }: { src: string; poster?: string }) {
-  const [playing, setPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  function toggle() {
-    const v = videoRef.current;
-    if (!v) return;
-    if (playing) { v.pause(); setPlaying(false); }
-    else { v.play(); setPlaying(true); }
-  }
-
+/* ─── Quick View ─────────────────────────────── */
+function QV({ p, onClose, onAdd, cs }: any) {
+  const [qi, setQi] = useState(0);
+  const [qty, setQty] = useState(1);
+  useEffect(() => { const h = (e: KeyboardEvent) => { if (e.key==='Escape') onClose(); }; window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h); }, [onClose]);
   return (
-    <div className={styles.videoWrap} onClick={toggle}>
-      <video ref={videoRef} src={src} poster={poster} className={styles.videoEl}
-        onEnded={() => setPlaying(false)} playsInline />
-      {!playing && (
-        <div className={styles.videoOverlay}>
-          <div className={styles.videoPlayBtn}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
-              <polygon points="5,3 19,12 5,21" />
-            </svg>
+    <div className={styles.qvO} onClick={onClose}>
+      <div className={styles.qvM} onClick={e=>e.stopPropagation()}>
+        <button className={styles.qvCls} onClick={onClose} type="button">✕</button>
+        <div className={styles.qvG}>
+          <div className={styles.qvL}>
+            <div className={styles.qvMI}>{p.images[qi]?<Image src={p.images[qi]} alt={p.name} fill sizes="40vw" style={{objectFit:'contain',padding:12}}/>:<span style={{fontSize:64}}>🎁</span>}</div>
+            {p.images.length>1&&<div className={styles.qvTs}>{p.images.map((u:string,i:number)=><button key={i} type="button" className={`${styles.qvT} ${i===qi?styles.qvTA:''}`} onClick={()=>setQi(i)}><Image src={u} alt="" fill sizes="48px" style={{objectFit:'contain'}}/></button>)}</div>}
           </div>
-          <span className={styles.videoLabel}>Watch Video</span>
+          <div className={styles.qvR}>
+            <div className={styles.qvCat}>{p.subcategory||p.category}</div>
+            <h2 className={styles.qvName}>{p.name}</h2>
+            <div className={styles.qvSR}><Stars n={p.stars} size={13}/><span className={styles.qvRC}>({p.reviewCount})</span></div>
+            <div className={styles.qvPR}>
+              <span className={styles.qvP}>₹{fmt(p.price)}</span>
+              {p.originalPrice>p.price&&<><span className={styles.qvPO}>₹{fmt(p.originalPrice)}</span><span className={styles.qvPS}>Save ₹{fmt(p.originalPrice-p.price)}</span></>}
+            </div>
+            <div className={p.inStock?styles.qvIS:styles.qvOS}>{p.inStock?'✅ In Stock':'❌ Out of Stock'}</div>
+            {p.description&&<p className={styles.qvD}>{p.description}</p>}
+            <div className={styles.qvA}>
+              <div className={styles.qvQ}>
+                <button type="button" className={styles.qvQB} onClick={()=>setQty(q=>Math.max(1,q-1))} disabled={qty<=1}>−</button>
+                <span className={styles.qvQN}>{qty}</span>
+                <button type="button" className={styles.qvQB} onClick={()=>setQty(q=>q+1)} disabled={!p.inStock}>+</button>
+              </div>
+              <button type="button" className={`${styles.qvAB} ${cs==='added'?styles.qvABOk:cs==='error'?styles.qvABErr:''}`} disabled={!p.inStock||cs==='loading'} onClick={()=>onAdd(qty)}>
+                {cs==='loading'?'Adding…':cs==='added'?'✓ Added!':cs==='error'?'✗ Retry':'🛒 Add to Cart'}
+              </button>
+            </div>
+            <Link href={`/product/${p.id}`} className={styles.qvFL} onClick={onClose}>View full details →</Link>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════════════════
-   STAR RENDER
-   ═══════════════════════════════════════════════════════ */
-function Stars({ count, size = 14 }: { count: number; size?: number }) {
-  const n = Math.min(5, Math.max(0, Math.round(count)));
-  return (
-    <span className={styles.starsRow} style={{ fontSize: size }}>
-      {'★'.repeat(n)}<span className={styles.starEmpty}>{'★'.repeat(5 - n)}</span>
-    </span>
-  );
+// Category tree is small and rarely changes — cache it for the session so
+// navigating product→product doesn't refetch it.
+let _catTreeCache: any[] | null = null;
+
+/* ─── Hover-pan zoom (desktop only) ──────────── */
+function useZoom() {
+  const [zoom, setZoom] = useState(false);
+  const [pos, setPos] = useState({ x: 50, y: 50 });   // % origin for transform-origin
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * 100;
+    const y = ((e.clientY - r.top) / r.height) * 100;
+    setPos({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+  };
+  return { zoom, setZoom, pos, onMove };
 }
 
-/* ═══════════════════════════════════════════════════════
-   MAIN PAGE COMPONENT
-   ═══════════════════════════════════════════════════════ */
-export default function ProductPage({ productId }: { productId: string | number }) {
+/* ═══════════════════════════════════════════════
+   MAIN PAGE
+   ═══════════════════════════════════════════════ */
+export default function ProductPage({ productId }: { productId: string|number }) {
   const router = useRouter();
+  // Cast loosely so this stays correct regardless of your exact CartContext value type.
+  const cart: any = useCart();
+  const dispatch = cart?.dispatch;
+  const addItem = cart?.addItem as (input: any) => Promise<{ ok: boolean; error?: string }>;
+  const pushToast = cart?.pushToast as (m: string, k?: 'error' | 'success') => void;
+  // Cart count for the mobile bottom-nav badge (defensive about the context shape).
+  const cartItems: any[] = Array.isArray(cart?.state?.items) ? cart.state.items : [];
+  const cartCount = cartItems.reduce((n: number, it: any) => n + (Number(it?.quantity) || 0), 0);
 
-  const [product,    setProduct]    = useState<MappedProduct | null>(null);
-  const [loading,    setLoading]    = useState(true);
-  const [notFound,   setNotFound]   = useState(false);
-  const [activeImg,  setActiveImg]  = useState(0);
-  const [qty,        setQty]        = useState(1);
-  const [activeTab,  setActiveTab]  = useState<'details' | 'specs' | 'reviews' | 'qa' | 'delivery'>('details');
-  const [imgError,   setImgError]   = useState<Record<number, boolean>>({});
-  const [cartState,  setCartState]  = useState<CartState>('idle');
-  const [cartMsg,    setCartMsg]    = useState('');
-  const [buyState,   setBuyState]   = useState<CartState>('idle');
-  const [wishlisted, setWishlisted] = useState(false);
-  const [wishState,  setWishState]  = useState<WishState>('idle');
-  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
-  const [showOffers, setShowOffers] = useState(false);
-  const [copiedCode, setCopiedCode] = useState('');
-  const [pincode,    setPincode]    = useState('');
-  const [pincodeMsg, setPincodeMsg] = useState('');
-  const [pincodeOk,  setPincodeOk]  = useState<boolean | null>(null);
-  const [copyToast,  setCopyToast]  = useState(false);
+  const [product,   setProduct]   = useState<Product|null>(null);
+  const [loading,   setLoading]   = useState(true);
+  const [notFound,  setNotFound]  = useState(false);
+  const [activeImg, setActiveImg] = useState(0);
+  const [qty,       setQty]       = useState(1);
+  const [imgErr,    setImgErr]    = useState<Record<number,boolean>>({});
+  const [cartSt,    setCartSt]    = useState<CartState>('idle');
+  const [cartMsg,   setCartMsg]   = useState('');
+  const [buySt,     setBuySt]     = useState<CartState>('idle');
+  const [wished,    setWished]    = useState(false);
+  const [wishSt,    setWishSt]    = useState<WishState>('idle');
+  const [selColor,  setSelColor]  = useState(0);
+  const [showMore,  setShowMore]  = useState(false);
+  const [copied,    setCopied]    = useState('');
+  const [pin,       setPin]       = useState('');
+  const [pinMsg,    setPinMsg]    = useState('');
+  const [pinOk,     setPinOk]     = useState<boolean|null>(null);
+  const [pinLoading,setPinLoading]= useState(false);
+  const [activeTab, setActiveTab] = useState<'details'|'specs'|'reviews'|'qa'>('details');
+  const [openSec,   setOpenSec]   = useState<string|null>(null);
 
-  const [related,       setRelated]       = useState<MappedProduct[]>([]);
-  const [relWishlist,   setRelWishlist]   = useState<Set<string>>(new Set());
-  const [relWishPend,   setRelWishPend]   = useState<Set<string>>(new Set());
-  const [relCartStates, setRelCartStates] = useState<Record<string, CartState>>({});
+  const [related,   setRelated]   = useState<Product[]>([]);
+  const [relWish,   setRelWish]   = useState<Set<string>>(new Set());
+  const [relWP,     setRelWP]     = useState<Set<string>>(new Set());
+  const [relCS,     setRelCS]     = useState<Record<string,CartState>>({});
+  const [qvP,       setQvP]       = useState<Product|null>(null);
+  const [qvCS,      setQvCS]      = useState<CartState>('idle');
 
-  const [qvProduct,   setQvProduct]   = useState<MappedProduct | null>(null);
-  const [qvActiveImg, setQvActiveImg] = useState(0);
-  const [qvQty,       setQvQty]       = useState(1);
-  const [qvCartState, setQvCartState] = useState<CartState>('idle');
+  const car = useCarousel(related.length);
+  const zoomImg = useZoom();
+  const cloned = [...related, ...related, ...related];
+  const OFFERS = [
+    { text: 'Get 10% off up to ₹150 on first prepaid order\nUse code: HELLO10', color: '#22c55e', code: 'HELLO10' },
+    { text: 'Extra 5% off on orders above ₹1999\nUse code: EXTRAS', color: '#f59e0b', code: 'EXTRAS' },
+    { text: 'Free gift wrap on orders above ₹999\nUse code: GIFTWRAP', color: '#3b82f6', code: 'GIFTWRAP' },
+  ];
 
-  const carousel      = useCarousel(related.length);
-  const clonedRelated = [...related, ...related, ...related];
-  const { dispatch }  = useCart();
+  function openQv(p: Product) { setQvP(p); setQvCS('idle'); document.body.style.overflow='hidden'; }
+  function closeQv() { setQvP(null); document.body.style.overflow=''; }
+  function toggleSec(k: string) { setOpenSec(o => o===k ? null : k); }
 
-  function openQv(p: MappedProduct) { setQvProduct(p); setQvActiveImg(0); setQvQty(1); setQvCartState('idle'); document.body.style.overflow = 'hidden'; }
-  function closeQv() { setQvProduct(null); document.body.style.overflow = ''; }
-  useEffect(() => { const h = (e: KeyboardEvent) => { if (e.key === 'Escape') closeQv(); }; if (qvProduct) window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h); }, [qvProduct]);
-
-  /* Fetch */
+  /* ── Fetches ───────────────────── */
   useEffect(() => {
     if (!productId) return;
-    setLoading(true); setNotFound(false); setActiveImg(0); setImgError({}); setCartState('idle'); setCartMsg(''); setSelectedColorIdx(0);
+    setLoading(true); setNotFound(false); setActiveImg(0); setImgErr({}); setCartSt('idle'); setCartMsg(''); setSelColor(0); setQty(1);
     _get(`/api/product/${productId}`)
-      .then((res: any) => {
-        const raw: BackendProduct = res?.product_details ?? res?.product ?? res;
-        if (!raw?.name) { setNotFound(true); return; }
-        setProduct(mapBackendProduct(raw));
-      })
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
+      .then((res: any) => { const r: BackendProduct = res?.product_details ?? res?.product ?? res; if (!r?.name) { setNotFound(true); return; } setProduct(mapProduct(r)); })
+      .catch(() => setNotFound(true)).finally(() => setLoading(false));
   }, [productId]);
 
   useEffect(() => {
     if (!productId) return;
     _get('/api/favorite').then((res: any) => {
       const items: any[] = Array.isArray(res) ? res : (res?.data ?? []);
-      const ids = items.map((i: any) => typeof i === 'string' ? i : String(i.product_id ?? i.id ?? ''));
-      setWishlisted(ids.includes(String(productId)));
-      setRelWishlist(new Set(ids));
+      const ids = items.map((i: any) => typeof i==='string' ? i : String(i.product_id ?? i.id ?? ''));
+      setWished(ids.includes(String(productId))); setRelWish(new Set(ids));
     }).catch(() => {});
   }, [productId]);
 
+  // Collapse variant families (and any accidental dupes) to one card each.
+function dedupeFamilies(list: Product[], excludeId: string): Product[] {
+  const seen = new Set<string>();
+  const out: Product[] = [];
+  for (const p of list) {
+    if (String(p.id) === excludeId) continue;
+    const key = p.variantGroupId || String(p.id);  // group if linked, else self
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(p);
+  }
+  return out;
+}
+
+ /* Related products: same PARENT category — i.e. all sibling sub-categories. */
   useEffect(() => {
-    _get('/api/product/featured').then((res: any) => {
-      const raw: BackendProduct[] = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
-      setRelated(raw.filter((p) => String(p.id) !== String(productId)).slice(0, 8).map(mapBackendProduct));
-    }).catch(() => {});
-  }, [productId]);
+    if (!product) return;
+    const prod = product; 
+    let cancelled = false;
+    const RAIL_SIZE = 10;
+    const selfId = String(prod.id);
 
-  /* Cart */
-  async function handleCart() {
-    if (!product || cartState === 'loading') return;
-    setCartState('loading');
-    const cv = product.colorVariants[selectedColorIdx] ?? null;
+    const toList = (res: any): BackendProduct[] =>
+      Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
+
+    async function load() {
+      // 1) Get the category tree (roots[] each with children[]).
+      let tree = _catTreeCache;
+      if (!tree) {
+        try { tree = toList(await _get('/api/categories/')) as any[]; _catTreeCache = tree; }
+        catch { tree = []; }   // not cached on failure → retried next navigation
+      }
+
+      // 2) Resolve the PARENT slug from this product's sub-category.
+      //    The sub-category is either a child of a root, or is itself a root.
+      // 2) Resolve the PARENT slug from this product's category via parent_id.
+      //    /api/categories/ returns a FLAT array (no nesting) — each node has
+      //    parent_id, so we look up the product's category, then walk up once.
+      const byId = new Map((tree ?? []).map((c: any) => [String(c.id), c]));
+
+      let parentSlug = '';
+      const own = prod.categoryId ? byId.get(String(prod.categoryId)) : undefined;
+      if (own) {
+        parentSlug = own.parent_id
+          ? (byId.get(String(own.parent_id))?.slug ?? own.slug)  // parent's slug
+          : own.slug;                                             // already a root
+      } else if (prod.subcategorySlug) {
+        // Fallback: match the sub-category by slug, then climb to its parent.
+        const subCat = (tree ?? []).find((c: any) => c.slug === prod.subcategorySlug);
+        parentSlug = subCat?.parent_id
+          ? (byId.get(String(subCat.parent_id))?.slug ?? prod.subcategorySlug)
+          : (subCat?.slug ?? '');
+      }
+
+      const finish = (res: any) =>
+        dedupeFamilies(toList(res).map(mapProduct), selfId).slice(0, RAIL_SIZE);
+
+      // 3) Query the whole parent category. limit+1 backfills after self-exclusion.
+      try {
+        let res: any = null;
+        if (parentSlug) {
+          res = await _get(`/api/product/all?category_slug=${encodeURIComponent(parentSlug)}&limit=${RAIL_SIZE + 1}&in_stock=true`);
+        } else if (prod.category) {
+          // Legacy fallback: products with no category_id have no sub-category slug.
+          // Match by category NAME — still same-category, NOT featured.
+          res = await _get(`/api/product/all?category=${encodeURIComponent(prod.category)}&limit=${RAIL_SIZE + 1}&in_stock=true`);
+        }
+        if (!cancelled) setRelated(res ? finish(res) : []);
+      } catch {
+        if (!cancelled) setRelated([]);
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
+  }, [product]);
+
+  /* ── Cart / wishlist ────────────── */
+async function handleCart() {
+    if (!product || cartSt==='loading') return; setCartSt('loading');
+    const cv = product.colorVariants[selColor] ?? null;
     const col = cv?.name ?? '', hex = cv?.hex ?? '', img = cv?.images[0] ?? product.images[0] ?? '';
-    dispatch({ type: 'ADD_ITEM', payload: { id: product.id, name: col ? `${product.name} – ${col}` : product.name, price: product.price, originalPrice: product.originalPrice, quantity: qty, image: img, emoji: '🎁', bgGradient: '', category: product.category, color: col, color_hex: hex, product_count: product.stockCount, is_available: product.inStock } });
-    try {
-      await _post('/api/cart/items', { product_id: product.id, quantity: qty, color: col, color_hex: hex, image: img });
-      setCartState('added'); setCartMsg(`✓ ${product.name}${col ? ` (${col})` : ''} added to cart!`);
-      setTimeout(() => { setCartState('idle'); setCartMsg(''); }, 3000);
-    } catch {
-      dispatch({ type: 'REMOVE_ITEM', payload: { id: product.id, color: col } });
-      setCartState('error'); setCartMsg('Could not add to cart. Please try again.');
-      setTimeout(() => { setCartState('idle'); setCartMsg(''); }, 3000);
+    const res = await addItem({
+      id: product.id, name: col ? `${product.name} – ${col}` : product.name,
+      price: product.price, originalPrice: product.originalPrice, quantity: qty,
+      image: img, category: product.category, color: col, color_hex: hex,
+      product_count: product.stockCount, is_available: product.inStock,
+    });
+    if (res.ok) {
+      setCartSt('added'); setCartMsg(`${product.name}${col?` (${col})`:''}  added!`);
+      setTimeout(() => { setCartSt('idle'); setCartMsg(''); }, 3000);
+    } else {
+      setCartSt('error'); setCartMsg(res.error || 'Could not add. Try again.');
+      setTimeout(() => { setCartSt('idle'); setCartMsg(''); }, 3000);
     }
   }
 
-  async function handleBuyNow() {
-    if (!product || buyState === 'loading') return;
-    setBuyState('loading');
-    const cv = product.colorVariants[selectedColorIdx] ?? null;
+async function handleBuy() {
+    if (!product || buySt==='loading') return; setBuySt('loading');
+    const cv = product.colorVariants[selColor] ?? null;
     const col = cv?.name ?? '', hex = cv?.hex ?? '', img = cv?.images[0] ?? product.images[0] ?? '';
-    dispatch({ type: 'ADD_ITEM', payload: { id: product.id, name: col ? `${product.name} – ${col}` : product.name, price: product.price, originalPrice: product.originalPrice, quantity: qty, image: img, emoji: '🎁', bgGradient: '', category: product.category, color: col, color_hex: hex, product_count: product.stockCount, is_available: product.inStock } });
-    try { await _post('/api/cart/items', { product_id: product.id, quantity: qty, color: col, color_hex: hex, image: img }); router.push('/cart'); }
-    catch { dispatch({ type: 'REMOVE_ITEM', payload: { id: product.id, color: col } }); setBuyState('error'); setTimeout(() => setBuyState('idle'), 3000); }
+    const res = await addItem({
+      id: product.id, name: col ? `${product.name} – ${col}` : product.name,
+      price: product.price, originalPrice: product.originalPrice, quantity: qty,
+      image: img, category: product.category, color: col, color_hex: hex,
+      product_count: product.stockCount, is_available: product.inStock,
+    });
+    if (res.ok) router.push('/cart');
+    else { setBuySt('error'); pushToast?.(res.error || 'Could not proceed. Try again.', 'error'); setTimeout(() => setBuySt('idle'), 3000); }
   }
 
-  async function handleWishlist() {
-    if (!product || wishState === 'loading') return;
-    const was = wishlisted; setWishlisted(!was); setWishState('loading');
-    try { await fetch(`/api/favorite/${product.id}`, { method: was ? 'DELETE' : 'POST' }); }
-    catch { setWishlisted(was); }
-    finally { setWishState('idle'); }
-  }
-
-  const toggleRelWishlist = useCallback(async (id: string) => {
-    if (relWishPend.has(id)) return;
-    const was = relWishlist.has(id);
-    setRelWishlist((prev) => { const n = new Set(prev); was ? n.delete(id) : n.add(id); return n; });
-    setRelWishPend((prev) => new Set(prev).add(id));
-    try { await fetch(`/api/favorite/${id}`, { method: was ? 'DELETE' : 'POST' }); }
-    catch { setRelWishlist((prev) => { const n = new Set(prev); was ? n.add(id) : n.delete(id); return n; }); }
-    finally { setRelWishPend((prev) => { const n = new Set(prev); n.delete(id); return n; }); }
-  }, [relWishlist, relWishPend]);
-
-  const addRelToCart = useCallback(async (p: MappedProduct) => {
-    const id = String(p.id);
-    if (relCartStates[id] === 'loading') return;
-    setRelCartStates((prev) => ({ ...prev, [id]: 'loading' }));
-    dispatch({ type: 'ADD_ITEM', payload: { id: p.id, name: p.name, price: p.price, originalPrice: p.originalPrice, quantity: 1, image: p.images[0] ?? '', emoji: '🎁', bgGradient: '', category: p.category, color: '', product_count: p.stockCount, is_available: p.inStock } });
+  async function handleWish() {
+    if (!product || wishSt==='loading') return;
+    const was = wished; setWished(!was); setWishSt('loading');
     try {
-      await _post('/api/cart/items', { product_id: p.id, quantity: 1 });
-      setRelCartStates((prev) => ({ ...prev, [id]: 'added' }));
-      setTimeout(() => setRelCartStates((prev) => ({ ...prev, [id]: 'idle' })), 2000);
-    } catch {
-      setRelCartStates((prev) => ({ ...prev, [id]: 'error' }));
-      setTimeout(() => setRelCartStates((prev) => ({ ...prev, [id]: 'idle' })), 2500);
-    }
-  }, [relCartStates, dispatch]);
+      if (was) await _delete(`/api/favorite/${product.id}`);
+      else     await _post(`/api/favorite/${product.id}`, {});
+    } catch { setWished(was); }
+    finally { setWishSt('idle'); }
+  }
+  /* Mobile swipe through gallery images */
+  const galTouch = useRef({ x: 0, active: false });
+  const onGalTouchStart = (e: React.TouchEvent) => { galTouch.current = { x: e.touches[0].clientX, active: true }; };
+  const onGalTouchEnd = (e: React.TouchEvent) => {
+    if (!galTouch.current.active) return;
+    galTouch.current.active = false;
+    const dx = galTouch.current.x - (e.changedTouches[0]?.clientX ?? galTouch.current.x);
+    if (Math.abs(dx) < 40) return;                        // ignore taps / tiny drags
+    const total = allTh.length;
+    if (total < 2) return;
+    setActiveImg(i => dx > 0 ? (i + 1) % total : (i - 1 + total) % total);  // wraps both ways
+  };
 
-  async function handleQvAddToCart() {
-    if (!qvProduct || qvCartState === 'loading') return;
-    setQvCartState('loading');
-    dispatch({ type: 'ADD_ITEM', payload: { id: qvProduct.id, name: qvProduct.name, price: qvProduct.price, originalPrice: qvProduct.originalPrice, quantity: qvQty, image: qvProduct.images[0] ?? '', emoji: '🎁', bgGradient: '', category: qvProduct.category, color: '', product_count: qvProduct.stockCount, is_available: qvProduct.inStock } });
+  const toggleRelWish = useCallback(async (id: string) => {
+    if (relWP.has(id)) return; const was = relWish.has(id);
+    setRelWish(p => { const n=new Set(p); was?n.delete(id):n.add(id); return n; });
+    setRelWP(p => new Set(p).add(id));
     try {
-      await _post('/api/cart/items', { product_id: qvProduct.id, quantity: qvQty });
-      setQvCartState('added'); setTimeout(() => setQvCartState('idle'), 2000);
-    } catch {
-      dispatch({ type: 'REMOVE_ITEM', payload: { id: qvProduct.id } });
-      setQvCartState('error'); setTimeout(() => setQvCartState('idle'), 2500);
-    }
+      if (was) await _delete(`/api/favorite/${id}`);
+      else     await _post(`/api/favorite/${id}`, {});
+    } catch { setRelWish(p => { const n=new Set(p); was?n.add(id):n.delete(id); return n; }); }
+    finally { setRelWP(p => { const n=new Set(p); n.delete(id); return n; }); }
+  }, [relWish, relWP]);
+
+const addRelToCart = useCallback(async (p: Product) => {
+    const id = String(p.id); if (relCS[id]==='loading') return;
+    setRelCS(prev => ({ ...prev, [id]:'loading' }));
+    const res = await addItem({
+      id: p.id, name: p.name, price: p.price, originalPrice: p.originalPrice,
+      quantity: 1, image: p.images[0]??'', category: p.category,
+      product_count: p.stockCount, is_available: p.inStock,
+    });
+    if (res.ok) { setRelCS(prev => ({ ...prev, [id]:'added' })); setTimeout(() => setRelCS(prev => ({ ...prev, [id]:'idle' })), 2000); }
+    else { pushToast?.(res.error || 'Could not add to cart', 'error'); setRelCS(prev => ({ ...prev, [id]:'error' })); setTimeout(() => setRelCS(prev => ({ ...prev, [id]:'idle' })), 2500); }
+  }, [relCS, addItem, pushToast]);
+
+async function handleQvAdd(qty: number) {
+    if (!qvP || qvCS==='loading') return; setQvCS('loading');
+    const res = await addItem({
+      id: qvP.id, name: qvP.name, price: qvP.price, originalPrice: qvP.originalPrice,
+      quantity: qty, image: qvP.images[0]??'', category: qvP.category,
+      product_count: qvP.stockCount, is_available: qvP.inStock,
+    });
+    if (res.ok) { setQvCS('added'); setTimeout(() => setQvCS('idle'), 2000); }
+    else { pushToast?.(res.error || 'Could not add', 'error'); setQvCS('error'); setTimeout(() => setQvCS('idle'), 2500); }
   }
 
-  function copyCode(code: string) {
-    navigator.clipboard.writeText(code).catch(() => {});
-    setCopiedCode(code);
-    setTimeout(() => setCopiedCode(''), 2000);
-  }
+  function copyCode(code: string) { navigator.clipboard.writeText(code).catch(()=>{}); setCopied(code); setTimeout(()=>setCopied(''), 2500); }
 
-  async function checkPincode() {
-    const p = pincode.trim();
-    if (p.length !== 6 || isNaN(Number(p))) { setPincodeMsg('Enter a valid 6-digit pincode'); setPincodeOk(false); return; }
-    setPincodeMsg('Checking…'); setPincodeOk(null);
-    await new Promise(r => setTimeout(r, 600));
+  async function checkPin() {
+    const p = pin.trim(); if (p.length!==6||isNaN(Number(p))) { setPinMsg('Enter a valid 6-digit pincode.'); setPinOk(false); return; }
+    setPinLoading(true); setPinMsg(''); setPinOk(null);
+    await new Promise(r => setTimeout(r, 700));
     const n = Number(p);
-    const serviceable = [[110001,110096],[400001,400104],[560001,560100],[500001,500098],[600001,600119],[700001,700157],[411001,411062],[380001,380061],[302001,302040],[522001,522034],[520001,520015]];
-    const ok = serviceable.some(([s,e]) => n >= s && n <= e) || (n % 10) <= 7;
-    setPincodeOk(ok);
-    setPincodeMsg(ok ? `✅ Delivery available — arrives in 3–5 business days. Free shipping on orders above ₹499.` : `❌ Delivery not available to ${p} yet.`);
+    const ok = [[110001,110096],[400001,400104],[560001,560100],[500001,500098],[600001,600119],[700001,700157],[411001,411062],[380001,380061],[522001,522034],[520001,520015]].some(([s,e])=>n>=s&&n<=e) || (n%10)<=7;
+    setPinOk(ok); setPinLoading(false);
+    setPinMsg(ok ? '✅ Delivery available · arrives in 3–5 business days · Free shipping above ₹499' : `❌ Delivery unavailable to ${p}. Try a nearby pincode.`);
   }
 
-  /* Loading */
+  /* ── Loading / 404 ─────────────── */
   if (loading) return (
     <div className={styles.page}>
-      <div className={styles.mainGrid}>
-        <div className={styles.skeletonGallery}><div className={styles.skeletonMainImg} /></div>
-        <div className={styles.skeletonInfo}>
-          {[80,200,100,120,160,200].map((w,i) => <div key={i} className={styles.skeletonBlock} style={{ width: w, height: i===1?32:i===5?52:16 }} />)}
-        </div>
+      <div className={styles.skelWrap}>
+        <div className={styles.skelGal}><div className={styles.skelImg}/></div>
+        <div className={styles.skelInfo}>{[220,100,60,80,52,100,52].map((h,i)=><div key={i} className={styles.skelB} style={{height:h,width:i===0?'80%':i===2?'40%':'100%'}}/>)}</div>
       </div>
     </div>
   );
-
   if (notFound || !product) return (
-    <div className={styles.page} style={{ textAlign: 'center', padding: '80px 20px' }}>
-      <div style={{ fontSize: 64 }}>🔍</div>
-      <h2 style={{ fontFamily: 'var(--font-baloo)', fontSize: 28, color: 'var(--navy)', margin: '16px 0 8px' }}>Product not found</h2>
-      <Link href="/" style={{ color: 'var(--coral)', fontWeight: 700 }}>← Back to Home</Link>
+    <div className={styles.page} style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'60vh',flexDirection:'column',gap:16,padding:24}}>
+      <span style={{fontSize:56}}>🔍</span>
+      <h2 style={{fontFamily:'var(--font-baloo)',fontSize:24,color:'#1a2540',margin:0}}>Product not found</h2>
+      <Link href="/" style={{color:'#f4623a',fontWeight:700,fontSize:14}}>← Back to home</Link>
     </div>
   );
 
-  const activeCV   = product.colorVariants[selectedColorIdx] ?? null;
-  const activeImgs = (activeCV && activeCV.images.length > 0) ? activeCV.images : product.images;
-  const allThumbs  = product.videoUrl ? [...activeImgs, 'VIDEO'] : activeImgs;
-  const currentImg = activeImg < activeImgs.length ? (imgError[activeImg] ? PLACEHOLDER_IMG : (activeImgs[activeImg] ?? PLACEHOLDER_IMG)) : PLACEHOLDER_IMG;
-  const discountPct = product.originalPrice > 0 ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : product.discount ?? 0;
+  const cv      = product.colorVariants[selColor] ?? null;
+  const aImgs   = (cv?.images.length ?? 0) > 0 ? cv!.images : product.images;
+  const allTh   = product.videoUrl ? [...aImgs, 'VIDEO'] : aImgs;
+  const curImg  = activeImg < aImgs.length ? (imgErr[activeImg] ? PLACEHOLDER : (aImgs[activeImg] ?? PLACEHOLDER)) : PLACEHOLDER;
+  const discPct = product.originalPrice > 0 ? Math.round((product.originalPrice - product.price)/product.originalPrice*100) : product.discount;
+  const saving  = product.originalPrice - product.price;
 
+  /* ── Render ─────────────────────── */
   return (
     <div className={styles.page}>
 
-      {/* Breadcrumb */}
-      <div className={styles.breadcrumb}>
-        <Link href="/" className={styles.breadLink}>Home</Link>
-        <span className={styles.breadSep}>›</span>
-        <Link href={`/category/${product.subcategory}`} className={styles.breadLink}>{product.category}</Link>
-        <span className={styles.breadSep}>›</span>
-        <span className={styles.breadCurrent}>{product.name}</span>
-      </div>
+      {/* BREADCRUMB */}
+      <nav className={styles.bc}>
+        <Link href="/" className={styles.bcL}>Home</Link>
+        <span className={styles.bcS}>›</span>
+        {product.subcategorySlug ? (
+          <Link href={`/category/${product.subcategorySlug}`} className={styles.bcL}>{product.subcategory || product.category}</Link>
+        ) : (
+          <span className={styles.bcL}>{product.subcategory || product.category}</span>
+        )}
+        <span className={styles.bcS}>›</span>
+        <span className={styles.bcC}>{product.name}</span>
+      </nav>
 
-      {/* Main Grid */}
+      {/* MAIN GRID */}
       <div className={styles.mainGrid}>
 
         {/* ── GALLERY ── */}
         <div className={styles.gallery}>
-          {/* Thumbs */}
-          <div className={styles.galleryThumbs}>
-            {allThumbs.map((src, i) => (
-              <button key={i}
-                className={`${styles.thumb} ${i === activeImg ? styles.thumbActive : ''}`}
-                onClick={() => setActiveImg(i)} type="button">
-                {src === 'VIDEO' ? (
-                  <div className={styles.thumbVideoIcon}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--coral)"><polygon points="5,3 19,12 5,21"/></svg>
-                  </div>
-                ) : (
-                  <Image src={imgError[i] ? PLACEHOLDER_IMG : src} alt={`view ${i+1}`} fill sizes="76px" className={styles.thumbImage} onError={() => setImgError(p => ({...p,[i]:true}))} />
-                )}
+          {/* Desktop thumbnail strip */}
+          <div className={styles.thumbs}>
+            {allTh.map((src, i) => (
+              <button key={i} type="button"
+                className={`${styles.thumb} ${i===activeImg?styles.thumbOn:''}`}
+                onClick={() => setActiveImg(i)}>
+                {src==='VIDEO'
+                  ? <div className={styles.thumbVid}><svg width="14" height="14" viewBox="0 0 24 24" fill="#f4623a"><polygon points="5,3 19,12 5,21"/></svg></div>
+                  : <Image src={imgErr[i]?PLACEHOLDER:src} alt="" fill sizes="62px" className={styles.thumbImg} onError={() => setImgErr(p=>({...p,[i]:true}))}/>}
               </button>
             ))}
           </div>
 
-          {/* Main */}
-          <div className={styles.galleryMain}>
-            {product.badges.length > 0 && (
-              <div className={styles.galleryBadges}>
-                {product.badges.map((b) => <span key={b.label} className={styles.badgeSale}>{b.label}</span>)}
+          {/* Main image area */}
+          <div className={styles.mainImg} onTouchStart={onGalTouchStart} onTouchEnd={onGalTouchEnd}>
+            <span className={styles.spark1} aria-hidden>✦</span>
+            <span className={styles.spark2} aria-hidden>✦</span>
+            <span className={styles.spark3} aria-hidden>✦</span>
+            <span className={styles.stageShadow} aria-hidden/>
+            {/* Badge: show discount when on sale, otherwise Bestseller */}
+            {discPct > 0
+              ? <span className={styles.badgeSale}>{discPct}% OFF</span>
+              : <span className={styles.badgeSale}>Bestseller</span>}
+
+            {/* Wishlist */}
+            <button type="button" className={[styles.wishBtn, wished?styles.wishOn:''].filter(Boolean).join(' ')} onClick={handleWish} disabled={wishSt==='loading'} aria-label="Wishlist">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill={wished?'#f4623a':'none'} stroke={wished?'#f4623a':'#888'} strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+
+{/* Video or image (with desktop hover-pan zoom on images) */}
+            {activeImg >= aImgs.length && product.videoUrl ? (
+              <VP src={product.videoUrl} poster={product.images[0]}/>
+            ) : (
+              <div
+                className={styles.zoomStage}
+                onMouseEnter={() => zoomImg.setZoom(true)}
+                onMouseLeave={() => zoomImg.setZoom(false)}
+                onMouseMove={zoomImg.onMove}
+              >
+                <Image
+                  src={curImg}
+                  alt={product.name}
+                  fill
+                  priority
+                  sizes="(max-width:900px)100vw,50vw"
+                  className={styles.mainImgTag}
+                  style={zoomImg.zoom ? { transform: 'scale(2)', transformOrigin: `${zoomImg.pos.x}% ${zoomImg.pos.y}%` } : undefined}
+                  onError={() => setImgErr(p=>({...p,[activeImg]:true}))}
+                />
+                {zoomImg.zoom && <span className={styles.zoomHint} aria-hidden>🔍 Hover to zoom</span>}
               </div>
             )}
-            {product.inStock && product.badges.length === 0 && (
-              <div className={styles.galleryBadges}><span className={styles.badgeBestSeller}>Bestseller</span></div>
+
+            {/* 360 view */}
+            {!(activeImg >= aImgs.length && product.videoUrl) && (
+              <div className={styles.viewTag}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                360° View
+              </div>
             )}
 
-            {/* Show video player or image */}
-            {activeImg >= activeImgs.length && product.videoUrl ? (
-              <VideoPlayer src={product.videoUrl} poster={product.images[0]} />
-            ) : (
-              <>
-                <Image src={currentImg} alt={product.name} fill priority sizes="(max-width:900px) 100vw, 50vw" className={styles.galleryMainImage} onError={() => setImgError(p => ({...p,[activeImg]:true}))} />
-                <button className={styles.viewBtn} type="button">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                  360° View
-                </button>
-              </>
+            {/* Mobile image dots */}
+            {allTh.length > 1 && (
+              <div className={styles.imgDots}>
+                {allTh.map((_,i) => <button key={i} type="button" className={`${styles.imgDot} ${i===activeImg?styles.imgDotOn:''}`} onClick={()=>setActiveImg(i)}/>)}
+              </div>
             )}
-
-            {/* Wishlist on gallery */}
-            <button className={[styles.galleryWishBtn, wishlisted ? styles.galleryWishlisted : ''].filter(Boolean).join(' ')} onClick={handleWishlist} type="button">
-              {wishState === 'loading' ? '⏳' : wishlisted ? '❤️' : '🤍'}
-            </button>
           </div>
         </div>
 
         {/* ── INFO PANEL ── */}
         <div className={styles.info}>
-          <div className={styles.categoryPill}>{product.subcategory || product.category}</div>
-          <h1 className={styles.productTitle}>{product.name}</h1>
+          <p className={styles.catLabel}>{product.subcategory || product.category}</p>
+          <h1 className={styles.title}>{product.name}</h1>
 
-          {/* Rating row */}
+          {/* Rating row — real data, honest empty state */}
           <div className={styles.ratingRow}>
-            <Stars count={product.stars} size={16} />
-            <span className={styles.ratingNum}>{product.stars}.0</span>
-            <button className={styles.reviewCountBtn} type="button" onClick={() => setActiveTab('reviews')}>
-              ({product.reviewCount} reviews)
-            </button>
-            {product.inStock && product.badges.length > 0 && (
-              <span className={styles.bestsellerTag}>⭐ Bestseller</span>
+            {product.reviewCount > 0 ? (
+              <>
+                <Stars n={product.stars} size={16}/>
+                <span className={styles.ratingVal}>{product.stars.toFixed(1)}</span>
+                <button type="button" className={styles.ratingCnt} onClick={()=>setActiveTab('reviews')}>
+                  ({product.reviewCount} {product.reviewCount === 1 ? 'review' : 'reviews'})
+                </button>
+              </>
+            ) : (
+              <button type="button" className={styles.ratingCnt} onClick={()=>setActiveTab('reviews')}>
+                No reviews yet — be the first
+              </button>
             )}
+            <span className={styles.bestPill}>Bestseller</span>
           </div>
 
           {/* Price */}
-          <div className={styles.priceBlock}>
+          <div className={styles.priceRow}>
             <span className={styles.priceNow}>₹{fmt(product.price)}</span>
             {product.originalPrice !== product.price && (
-              <>
-                <span className={styles.priceWas}>₹{fmt(product.originalPrice)}</span>
-                {discountPct > 0 && <span className={styles.discPill}>{discountPct}% OFF</span>}
-              </>
+              <><span className={styles.priceOld}>MRP ₹{fmt(product.originalPrice)}</span>
+              {discPct > 0 && <span className={styles.priceOff}>{discPct}% OFF</span>}</>
             )}
           </div>
-          <div className={styles.taxNote}>Inclusive of all taxes</div>
+          <p className={styles.taxNote}>Inclusive of all taxes</p>
 
-          {/* Short desc */}
-          <p className={styles.shortDesc}>{product.description}</p>
+          {/* Description */}
+          <p className={styles.desc}>{product.description}</p>
 
-          {/* Highlight icons — 4 per row */}
-          {product.highlights.length > 0 && (
-            <div className={styles.highlightGrid}>
-              {product.highlights.slice(0, 4).map((h, i) => (
-                <div key={i} className={styles.highlightCell}>
-                  <span className={styles.highlightCellIcon}>{HIGHLIGHT_ICONS[i % HIGHLIGHT_ICONS.length]}</span>
-                  <span className={styles.highlightCellText}>{h}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Color swatches */}
+          {/* Color */}
           {product.colorVariants.length > 0 && (
-            <div className={styles.colorSection}>
-              <div className={styles.colorLabel}>
-                Color: <span className={styles.colorName}>{activeCV?.name ?? product.colorVariants[0]?.name}</span>
-              </div>
+            <div className={styles.colorBlock}>
+              <p className={styles.colorLabel}>Color: <strong>{cv?.name ?? product.colorVariants[0]?.name}</strong></p>
               <div className={styles.colorSwatches}>
-                {product.colorVariants.map((cv, idx) => {
-                  const isWhite = cv.hex.toLowerCase() === '#ffffff';
+                {product.colorVariants.map((v,i) => {
+                  const white = v.hex.toLowerCase()==='#ffffff';
                   return (
-                    <button key={cv.name} type="button" title={cv.name}
-                      className={[styles.colorSwatch, idx === selectedColorIdx ? styles.colorSwatchSelected : '', isWhite ? styles.colorSwatchWhite : ''].filter(Boolean).join(' ')}
-                      style={{ background: cv.hex }}
-                      onClick={() => { setSelectedColorIdx(idx); setActiveImg(0); setImgError({}); }}>
-                      {idx === selectedColorIdx && (
-                        <svg className={styles.colorSwatchCheck} viewBox="0 0 12 12" fill="none" stroke={isWhite ? '#555' : '#fff'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="2,6 5,9 10,3" />
+                    <button key={v.name} type="button" title={v.name}
+                      className={[styles.swatch, i===selColor?styles.swatchOn:'', white?styles.swatchW:''].filter(Boolean).join(' ')}
+                      style={{ background: v.hex }}
+                      onClick={() => { setSelColor(i); setActiveImg(0); setImgErr({}); }}>
+                      {i===selColor && (
+                        <svg viewBox="0 0 12 12" fill="none" stroke={white?'#555':'#fff'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{width:10,height:10}}>
+                          <polyline points="2,6 5,9 10,3"/>
                         </svg>
                       )}
                     </button>
@@ -656,384 +700,233 @@ export default function ProductPage({ productId }: { productId: string | number 
 
           {/* Available Offers */}
           <div className={styles.offersBox}>
-            <div className={styles.offersTitle}>Available Offers</div>
-            {OFFERS.slice(0, showOffers ? OFFERS.length : 2).map((o, i) => (
+            <p className={styles.offersHead}>Available Offers</p>
+            {OFFERS.slice(0, showMore ? 3 : 2).map((o,i) => (
               <div key={i} className={styles.offerRow}>
-                <span className={styles.offerIcon}>🏷️</span>
-                <span className={styles.offerText}>{o.text}</span>
-                <button className={styles.offerApplyBtn} type="button" onClick={() => copyCode(o.code)}>
-                  {copiedCode === o.code ? 'Copied!' : 'Apply'}
+                <span className={styles.offerDot} style={{ background: o.color }}/>
+                <span className={styles.offerTxt}>{o.text.split('\n').map((t,j) => <span key={j} style={j===1?{color:'#555',fontSize:'11.5px',display:'block',marginTop:1}:{}}>{t}</span>)}</span>
+                <button type="button" className={styles.offerApply} onClick={() => copyCode(o.code)}>
+                  {copied===o.code ? '✓ Copied' : 'Apply'}
                 </button>
               </div>
             ))}
-            {OFFERS.length > 2 && (
-              <button className={styles.moreOffersBtn} type="button" onClick={() => setShowOffers(p => !p)}>
-                {showOffers ? 'Show less' : `+ ${OFFERS.length - 2} More Offer`}
-              </button>
-            )}
-          </div>
-
-          {/* Stock warning */}
-          {product.inStock && product.stockCount < 10 && (
-            <div className={styles.stockLow}>⚡ Only {product.stockCount} left — order soon!</div>
-          )}
-
-          {/* Qty + Add to Cart */}
-          <div className={styles.ctaRow}>
-            <div className={styles.qtyControl}>
-              <button className={styles.qtyBtn} type="button" onClick={() => setQty(Math.max(1, qty-1))} disabled={qty <= 1}>−</button>
-              <span className={styles.qtyNum}>{qty}</span>
-              <button className={styles.qtyBtn} type="button" onClick={() => setQty(Math.min(product.stockCount||99, qty+1))} disabled={qty >= (product.stockCount||99)}>+</button>
-            </div>
-            <button className={[styles.addToCartBtn, cartState==='added'?styles.addedToCart:'', cartState==='error'?styles.cartError:''].filter(Boolean).join(' ')}
-              onClick={handleCart} type="button" disabled={!product.inStock || cartState==='loading'}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-              {cartState==='loading'?'Adding…':cartState==='added'?'Added to Cart!':cartState==='error'?'Try Again':'Add to Cart'}
+            <button type="button" className={styles.offersMore} onClick={()=>setShowMore(p=>!p)}>
+              {showMore ? '▲ Show less' : `+ 1 More Offer`}
             </button>
           </div>
 
-          <button className={[styles.buyNowBtn, buyState==='loading'?styles.buyNowLoading:''].filter(Boolean).join(' ')}
-            onClick={handleBuyNow} type="button" disabled={!product.inStock || buyState==='loading'}>
-            {buyState==='loading'?'Please wait…':'Buy Now →'}
-          </button>
+          {/* Stock warning */}
+          {product.inStock && product.stockCount > 0 && product.stockCount < 8 && (
+            <div className={styles.stockWarn}>⚡ Only {product.stockCount} left in stock — order soon!</div>
+          )}
+
+          {/* Desktop quantity selector */}
+          <div className={styles.qtyBlock}>
+            <span className={styles.qtyLabel}>Quantity</span>
+            <div className={styles.qtyStepper}>
+              <button type="button" className={styles.qtyBtn} onClick={()=>setQty(q=>Math.max(1,q-1))} disabled={qty<=1} aria-label="Decrease quantity">−</button>
+              <span className={styles.qtyNum}>{qty}</span>
+              <button type="button" className={styles.qtyBtn}
+                onClick={()=>setQty(q=>Math.min(product.stockCount||99,q+1))}
+                disabled={!product.inStock || qty >= (product.stockCount||99)} aria-label="Increase quantity">+</button>
+            </div>
+            {product.inStock && product.stockCount>0 && qty >= product.stockCount && (
+              <span className={styles.qtyMax}>Max available</span>
+            )}
+          </div>
+
+          {/* CTA */}
+          <div className={styles.ctaWrap}>
+            <button type="button"
+              className={[styles.btnAddCart, cartSt==='added'?styles.btnAdded:'', cartSt==='error'?styles.btnErr:'', !product.inStock?styles.btnDis:''].filter(Boolean).join(' ')}
+              onClick={handleCart} disabled={!product.inStock||cartSt==='loading'}>
+              {cartSt==='loading' ? '…Adding' : cartSt==='added' ? '✓ Added to Cart!' : cartSt==='error' ? 'Try Again' : (
+                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" style={{marginRight:6}}><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Add to Cart</>
+              )}
+            </button>
+            <button type="button"
+              className={[styles.btnBuyNow, buySt==='loading'?styles.btnBuyLoading:'', !product.inStock?styles.btnDis:''].filter(Boolean).join(' ')}
+              onClick={handleBuy} disabled={!product.inStock||buySt==='loading'}>
+              {buySt==='loading' ? '…Processing' : buySt==='error' ? 'Try Again' : (
+                <><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" style={{marginRight:6}}><polygon points="5,3 19,12 5,21"/></svg>Buy Now</>
+              )}
+            </button>
+          </div>
 
           {cartMsg && (
-            <div className={`${styles.cartFeedback} ${cartState==='error'?styles.cartFeedbackError:styles.cartFeedbackSuccess}`}>
+            <div className={`${styles.cartFb} ${cartSt==='error'?styles.cartFbErr:styles.cartFbOk}`}>
               {cartMsg}
-              {cartState==='added' && <Link href="/cart" className={styles.viewCartLink}>View Cart →</Link>}
+              {cartSt==='added' && <Link href="/cart" className={styles.cartLink}>View Cart →</Link>}
             </div>
           )}
 
           {/* Trust strip */}
           <div className={styles.trustStrip}>
             {[
-              { icon: '🚚', title: 'Free Delivery',   sub: 'On orders above ₹499' },
-              { icon: '🔄', title: '7 Days Returns',  sub: 'Hassle-free returns' },
-              { icon: '🔒', title: 'Secure Payment',  sub: '100% safe checkout' },
-              { icon: '❤️', title: 'Made for Kids',   sub: 'Child-safe materials' },
-            ].map((t) => (
-              <div key={t.title} className={styles.trustItem}>
-                <span className={styles.trustIcon}>{t.icon}</span>
-                <div><div className={styles.trustTitle}>{t.title}</div><div className={styles.trustSub}>{t.sub}</div></div>
+              {icon:'🚚',t:'Free Delivery',s:'On orders above ₹499'},
+              {icon:'🔄',t:'7 Days Returns',s:'Hassle-free returns'},
+              {icon:'🔒',t:'Secure Payment',s:'100% safe checkout'},
+              {icon:'❤️',t:'Made for Kids',s:'Child-safe materials'},
+            ].map(x => (
+              <div key={x.t} className={styles.trustItem}>
+                <span className={styles.trustIcon}>{x.icon}</span>
+                <div><div className={styles.trustT}>{x.t}</div><div className={styles.trustS}>{x.s}</div></div>
               </div>
             ))}
           </div>
 
-          {/* Pincode checker */}
-          <div className={styles.pincodeBox}>
-            <div className={styles.pincodeHeader}>
-              <span>📍</span>
-              <span className={styles.pincodeTitle}>Check Delivery</span>
+          {/* Pincode */}
+          <div className={styles.pinBox}>
+            <p className={styles.pinHead}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Check Delivery</p>
+            <div className={styles.pinRow}>
+              <input type="text" inputMode="numeric" maxLength={6} className={styles.pinInput} placeholder="Enter pincode" value={pin}
+                onChange={e=>{setPin(e.target.value.replace(/\D/g,'').slice(0,6));setPinMsg('');setPinOk(null);}}
+                onKeyDown={e=>e.key==='Enter'&&checkPin()}/>
+              <button type="button" className={styles.pinBtn} onClick={checkPin} disabled={pin.length<6||pinLoading}>
+                {pinLoading ? <span className={styles.pinSpin}/> : 'Check'}
+              </button>
             </div>
-            <div className={styles.pincodeRow}>
-              <input type="text" inputMode="numeric" maxLength={6} className={styles.pincodeInput}
-                placeholder="Enter 6-digit pincode" value={pincode}
-                onChange={(e) => { setPincode(e.target.value.replace(/\D/g,'').slice(0,6)); setPincodeMsg(''); setPincodeOk(null); }}
-                onKeyDown={(e) => e.key==='Enter' && checkPincode()} />
-              <button className={styles.pincodeBtn} onClick={checkPincode} type="button" disabled={pincode.length<6}>Check</button>
-            </div>
-            {pincodeMsg && <p className={`${styles.pincodeResult} ${pincodeOk===true?styles.pincodeResultOk:pincodeOk===false?styles.pincodeResultErr:''}`}>{pincodeMsg}</p>}
+            {pinMsg && <p className={`${styles.pinMsg} ${pinOk===true?styles.pinOk:pinOk===false?styles.pinErr:''}`}>{pinMsg}</p>}
           </div>
         </div>
       </div>
 
-      {/* ── TABS SECTION ── */}
-      <div className={styles.tabSection}>
-        <div className={styles.tabs}>
-          {([
-            { key: 'details',  label: 'Product Details' },
-            { key: 'specs',    label: 'Specifications' },
-            { key: 'reviews',  label: `Reviews (${product.reviewCount})` },
-            { key: 'qa',       label: 'Q&A' },
-            { key: 'delivery', label: 'Delivery & Returns' },
-          ] as const).map((t) => (
-            <button key={t.key} type="button"
-              className={`${styles.tab} ${activeTab===t.key?styles.tabActive:''}`}
-              onClick={() => setActiveTab(t.key)}>{t.label}</button>
-          ))}
-        </div>
-
-        <div className={styles.tabContent}>
-          {/* DETAILS TAB — description left, video right */}
-          {activeTab === 'details' && (
-            <div className={styles.detailsTabGrid}>
-              <div className={styles.detailsLeft}>
-                <p className={styles.detailsDesc}>{product.description}</p>
-                {product.highlights.length > 0 && (
-                  <ul className={styles.detailsList}>
-                    {product.highlights.map((h, i) => (
-                      <li key={i}><span className={styles.detailsBullet}>•</span>{h}</li>
-                    ))}
-                  </ul>
-                )}
-                {/* Cert badges */}
-                <div className={styles.certBadges}>
-                  {['🏅 BIS Certified','🌿 Non Toxic Materials','💧 Water Resistant','⭐ Premium Quality'].map((c) => (
-                    <span key={c} className={styles.certBadge}>{c}</span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Video */}
-              {product.videoUrl && (
-                <div className={styles.detailsRight}>
-                  <VideoPlayer src={product.videoUrl} poster={product.images[0]} />
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'specs' && (
-            <div className={styles.specsGrid}>
-              {[
-                ['Category', product.category], ['Sub Category', product.subcategory],
-                ['In Stock', product.inStock ? 'Yes' : 'No'], ['Stock Count', String(product.stockCount)],
-                ['Price', `₹${fmt(product.price)}`], ['Discount', discountPct > 0 ? `${discountPct}%` : 'None'],
-              ].map(([k, v]) => (
-                <div key={k} className={styles.specRow}><span className={styles.specKey}>{k}</span><span className={styles.specVal}>{v}</span></div>
-              ))}
-            </div>
-          )}
-
-          {activeTab === 'reviews' && (
-            <div className={styles.reviewsLayout}>
-              {/* Summary */}
-              <div className={styles.reviewSummary}>
-                <div className={styles.bigScore}>{product.stars}.0</div>
-                <Stars count={product.stars} size={18} />
-                <div className={styles.bigReviewCount}>Based on {product.reviewCount} reviews</div>
-                <div className={styles.ratingBars}>
-                  {RATING_DIST.map((r) => (
-                    <div key={r.stars} className={styles.ratingBarRow}>
-                      <span className={styles.ratingBarLabel}>{r.stars} ★</span>
-                      <div className={styles.barTrack}><div className={styles.barFill} style={{ width: `${r.pct}%` }} /></div>
-                      <span className={styles.ratingBarPct}>{r.pct}% ({r.count})</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Reviews list */}
-              <div className={styles.reviewsList}>
-                {REVIEWS_DATA.map((r, i) => (
-                  <div key={i} className={styles.reviewCard}>
-                    <div className={styles.reviewHeader}>
-                      <div className={styles.reviewAvatar}>{r.avatar}</div>
-                      <div>
-                        <div className={styles.reviewName}>{r.name} {r.verified && <span className={styles.verifiedBadge}>✓ Verified Purchase</span>}</div>
-                        <div className={styles.reviewMeta}>{r.date}</div>
-                      </div>
-                      <Stars count={r.stars} size={13} />
-                    </div>
-                    <p className={styles.reviewText}>{r.text}</p>
-                  </div>
-                ))}
-                <button className={styles.viewAllReviewsBtn} type="button">View all reviews →</button>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'qa' && (
-            <div className={styles.qaEmpty}>
-              <div style={{ fontSize: 48 }}>💬</div>
-              <p>No questions yet. Be the first to ask!</p>
-              <button className={styles.askBtn} type="button">Ask a Question</button>
-            </div>
-          )}
-
-          {activeTab === 'delivery' && (
-            <div className={styles.deliveryGrid}>
-              <div className={styles.deliveryCard}>
-                <h3>🚚 Shipping Policy</h3>
-                <ul>
-                  <li><strong>Free shipping</strong> on all orders above ₹499</li>
-                  <li>Standard delivery: <strong>3–5 business days</strong></li>
-                  <li>Express delivery: <strong>1–2 days</strong></li>
-                  <li>Same-day delivery in major cities</li>
-                  <li>Track via SMS & email after dispatch</li>
-                </ul>
-              </div>
-              <div className={styles.deliveryCard}>
-                <h3>🔄 Return Policy</h3>
-                <ul>
-                  <li><strong>7-day hassle-free returns</strong></li>
-                  <li>Product must be unused & in original packaging</li>
-                  <li>Raise return via My Account or WhatsApp</li>
-                  <li>Refund in <strong>3–5 business days</strong></li>
-                  <li>Free pickup for all returns</li>
-                </ul>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── YOU MAY ALSO LIKE ── */}
-      {related.length > 0 && (
-        <div className={styles.relatedSection}>
-          <div className={styles.relatedHeader}>
-            <h2 className={styles.relatedTitle}>You May Also Like</h2>
-            <div className={styles.relatedControls}>
-              <button className={styles.carouselNavBtn} onClick={carousel.prev} type="button">‹</button>
-              <button className={styles.carouselNavBtn} onClick={carousel.next} type="button">›</button>
-              <Link href="/products" className={styles.relatedViewAll}>View all →</Link>
-            </div>
-          </div>
-
-          <div className={styles.carouselViewport} ref={carousel.viewportRef}>
-            {carousel.cardWidth > 0 && (
-              <div
-                className={`${styles.carouselTrack} ${carousel.isDragging ? styles.carouselTrackDragging : ''}`}
-                style={{ transform: `translateX(${carousel.trackOffset}px)`, transition: carousel.animate ? 'transform 0.42s cubic-bezier(0.25,0.46,0.45,0.94)' : 'none' }}
-                {...carousel.dragHandlers}
-              >
-                {clonedRelated.map((p, idx) => {
-                  const id = String(p.id);
-                  return (
-                    <div key={`${id}-${idx}`} style={{ width: `${carousel.cardWidth}px`, minWidth: `${carousel.cardWidth}px`, flexShrink: 0, boxSizing: 'border-box' }}>
-                      <RelatedCard product={p} wishlisted={relWishlist.has(id)} wishPending={relWishPend.has(id)} cartState={relCartStates[id] ?? 'idle'}
-                        onWishlist={() => !carousel.isDragging && toggleRelWishlist(id)}
-                        onAddToCart={() => !carousel.isDragging && addRelToCart(p)}
-                        onQuickView={() => !carousel.isDragging && openQv(p)} />
-                    </div>
-                  );
-                })}
-              </div>
+      {/* ── TABS ── */}
+  <div className={styles.tabsWrap}>
+    <div className={styles.tabsBar}>
+      {([
+        {k:'details',l:'Product Details'},
+        {k:'specs',  l:'Specifications'},
+        {k:'reviews',l:`Reviews (${product.reviewCount})`},
+        {k:'qa',     l:'Q&A'},
+      ] as const).map(t=>(
+        <button key={t.k} type="button" className={`${styles.tabBtn} ${activeTab===t.k?styles.tabOn:''}`} onClick={()=>setActiveTab(t.k)}>{t.l}</button>
+      ))}
+    </div>
+    <div className={styles.tabBody}>
+      {activeTab==='details' && (
+        <div className={styles.detailsGrid}>
+          <div>
+            <p className={styles.detailsDesc}>{product.description}</p>
+            {product.highlights.length>0 && (
+              <ul className={styles.detailsList}>
+                {product.highlights.map((h,i)=><li key={i}><strong>{h.split(':')[0]}{h.includes(':')?':':''}</strong>{h.includes(':')?h.split(':').slice(1).join(':'):''}</li>)}
+              </ul>
             )}
-          </div>
-
-          {carousel.dotCount > 1 && (
-            <div className={styles.carouselDots}>
-              {Array.from({ length: carousel.dotCount }).map((_, i) => (
-                <span key={i} role="button" tabIndex={0}
-                  className={`${styles.carouselDot} ${i===carousel.activeDot?styles.carouselDotActive:''}`}
-                  onClick={() => carousel.goToPage(i)} />
-              ))}
+            <div className={styles.certRow}>
+              {['🏅 BIS Certified','🌿 Non-Toxic','💧 Water Resistant','⭐ Premium Quality'].map(c=><span key={c} className={styles.certChip}>{c}</span>)}
             </div>
+          </div>
+          {product.videoUrl && (
+            <div className={styles.detailsVideoWrap}><VP src={product.videoUrl} poster={product.images[0]}/></div>
           )}
         </div>
       )}
-
-      {/* ── BOTTOM TRUST BAR ── */}
-      <div className={styles.bottomTrustBar}>
-        {[
-          { icon: '🏅', title: '100% Original Products', sub: 'Sourced from trusted brands' },
-          { icon: '🌿', title: 'Safe & Non-Toxic',       sub: 'Child-safe and eco-friendly' },
-          { icon: '🔄', title: 'Easy Returns',           sub: '7 days hassle-free returns' },
-          { icon: '🔒', title: 'Secure Payments',        sub: 'Multiple safe payment options' },
-        ].map((t) => (
-          <div key={t.title} className={styles.bottomTrustItem}>
-            <span className={styles.bottomTrustIcon}>{t.icon}</span>
-            <div><div className={styles.bottomTrustTitle}>{t.title}</div><div className={styles.bottomTrustSub}>{t.sub}</div></div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── FOOTER ── */}
-      <footer className={styles.footer}>
-        <div className={styles.footerTop}>
-          <div className={styles.footerBrand}>
-            <div className={styles.footerLogo}>
-              <span className={styles.footerLogoIcon}>🙂</span>
-              <span className={styles.footerLogoText}>Little Loot</span>
-            </div>
-            <p className={styles.footerDesc}>Premium quality products for happy learning, creativity and joyful childhood memories.</p>
-            <div className={styles.footerSocials}>
-              {['📘','📸','▶️','📌'].map((s,i) => <a key={i} href="#" className={styles.footerSocialBtn}>{s}</a>)}
-            </div>
-          </div>
-
-          {[
-            { title: 'Shop', links: ['School Bags','Lunch & Bottles','Toys & Games','Stationery','Gift Sets','New Arrivals'] },
-            { title: 'Customer Care', links: ['Contact Us','Track Order','Returns & Refunds','Shipping Policy','FAQs'] },
-            { title: 'Company', links: ['About Us','Our Story','Careers','Press','Blog'] },
-          ].map((col) => (
-            <div key={col.title} className={styles.footerCol}>
-              <h4 className={styles.footerColTitle}>{col.title}</h4>
-              <ul className={styles.footerLinks}>
-                {col.links.map((l) => <li key={l}><Link href="#" className={styles.footerLink}>{l}</Link></li>)}
-              </ul>
-            </div>
-          ))}
-
-          <div className={styles.footerNewsletterCol}>
-            <h4 className={styles.footerColTitle}>Newsletter</h4>
-            <p className={styles.footerNewsletterSub}>Subscribe to get special offers, free giveaways, and new arrivals.</p>
-            <div className={styles.footerNewsletterForm}>
-              <input type="email" className={styles.footerNewsletterInput} placeholder="Enter your email" />
-              <button className={styles.footerNewsletterBtn} type="button">Subscribe</button>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.footerBottom}>
-          <p className={styles.footerCopy}>© 2024 Little Loot. All rights reserved.</p>
-          <div className={styles.footerLinks2}>
-            <Link href="#" className={styles.footerLink2}>Terms & Conditions</Link>
-            <Link href="#" className={styles.footerLink2}>Privacy Policy</Link>
-          </div>
-          <div className={styles.footerPayments}>
-            {['VISA','MC','UPI','RuPay','G-Pay'].map((p) => <span key={p} className={styles.footerPayBadge}>{p}</span>)}
-          </div>
-        </div>
-      </footer>
-
-      {/* Copy toast */}
-      {copyToast && <div className={styles.copyToast}>🔗 Link copied!</div>}
-
-      {/* ── QUICK VIEW MODAL ── */}
-      {qvProduct && (
-        <div className={styles.qvOverlay} onClick={closeQv} role="dialog" aria-modal="true">
-          <div className={styles.qvModal} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.qvClose} onClick={closeQv} type="button">✕</button>
-            <div className={styles.qvGrid}>
-              <div className={styles.qvImgCol}>
-                <div className={styles.qvMainImg}>
-                  {qvProduct.images[qvActiveImg]
-                    ? <Image src={qvProduct.images[qvActiveImg]} alt={qvProduct.name} fill sizes="45vw" className={styles.qvMainImgTag} />
-                    : <div className={styles.qvEmojiThumb}>🎁</div>}
-                </div>
-                {qvProduct.images.length > 1 && (
-                  <div className={styles.qvThumbs}>
-                    {qvProduct.images.map((img, i) => (
-                      <button key={i} type="button" className={`${styles.qvThumb} ${i===qvActiveImg?styles.qvThumbActive:''}`} onClick={() => setQvActiveImg(i)}>
-                        <Image src={img} alt={`View ${i+1}`} fill sizes="56px" className={styles.qvThumbImg} />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className={styles.qvInfoCol}>
-                <div className={styles.qvCategory}>{qvProduct.subcategory || qvProduct.category}</div>
-                <h2 className={styles.qvName}>{qvProduct.name}</h2>
-                <div className={styles.qvStars}><Stars count={qvProduct.stars} size={14} /> <span className={styles.qvReviews}>({qvProduct.reviewCount})</span></div>
-                <div className={styles.qvPrice}>
-                  <span className={styles.qvPriceNow}>₹{fmt(qvProduct.price)}</span>
-                  {qvProduct.originalPrice > qvProduct.price && <>
-                    <span className={styles.qvPriceWas}>₹{fmt(qvProduct.originalPrice)}</span>
-                    <span className={styles.qvPriceSave}>Save ₹{fmt(qvProduct.originalPrice-qvProduct.price)}</span>
-                  </>}
-                </div>
-                <div className={qvProduct.inStock ? styles.qvInStock : styles.qvOutStock}>{qvProduct.inStock ? '✅ In Stock' : '❌ Out of Stock'}</div>
-                {qvProduct.description && <p className={styles.qvDesc}>{qvProduct.description}</p>}
-                <div className={styles.qvActions}>
-                  <div className={styles.qvQty}>
-                    <button type="button" className={styles.qvQtyBtn} onClick={() => setQvQty(q => Math.max(1,q-1))} disabled={qvQty<=1}>−</button>
-                    <span className={styles.qvQtyNum}>{qvQty}</span>
-                    <button type="button" className={styles.qvQtyBtn} onClick={() => setQvQty(q => q+1)} disabled={!qvProduct.inStock}>+</button>
-                  </div>
-                  <button type="button"
-                    className={`${styles.qvAddBtn} ${qvCartState==='added'?styles.qvAddBtnAdded:qvCartState==='error'?styles.qvAddBtnError:''}`}
-                    disabled={!qvProduct.inStock || qvCartState==='loading'} onClick={handleQvAddToCart}>
-                    {qvCartState==='loading'?'Adding…':qvCartState==='added'?'✓ Added!':qvCartState==='error'?'✗ Retry':'🛒 Add to Cart'}
-                  </button>
-                </div>
-                <Link href={`/product/${qvProduct.id}`} className={styles.qvFullLink} onClick={closeQv}>View Full Details →</Link>
-              </div>
-            </div>
-          </div>
+      {activeTab==='specs' && (
+        <table className={styles.specsTable}>
+          <tbody>
+            {[['Category',product.category],['Sub-Category',product.subcategory],['Availability',product.inStock?`In Stock (${product.stockCount})`:'Out of Stock'],['Price',`₹${fmt(product.price)}`],['Discount',discPct>0?`${discPct}% (Save ₹${fmt(saving)})`:'None'],['Colors',product.colorVariants.length>0?product.colorVariants.map(c=>c.name).join(', '):'Single']].map(([k,v])=>(
+              <tr key={k}><td className={styles.specK}>{k}</td><td className={styles.specV}>{v}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      {activeTab==='reviews' && <div className={styles.tabNote}><CustomerReviews productId={productId} productName={product.name}/></div>}
+      {activeTab==='qa' && (
+        <div className={styles.qaEmpty}>
+          <span style={{fontSize:40}}>💬</span>
+          <p>No questions yet. Be the first to ask!</p>
+          <button type="button" className={styles.qaBtn}>Ask a Question</button>
         </div>
       )}
     </div>
-  );
+  </div>
+
+  {/* ── YOU MAY ALSO LIKE (only render when there's something to show) ── */}
+  {related.length > 0 && (
+    <div className={styles.relSection}>
+      <div className={styles.relHeader}>
+        <h2 className={styles.relTitle}>You May Also Like</h2>
+        {related.length > car.vc && (
+          <div className={styles.relCtrl}>
+            <button className={styles.navBtn} onClick={car.prev} type="button" aria-label="Prev"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+            <button className={styles.navBtn} onClick={car.next} type="button" aria-label="Next"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+          </div>
+        )}
+      </div>
+      <div className={styles.carVP} ref={car.ref}>
+        {car.cw > 0 && (
+          <div className={`${styles.carTrack} ${car.drag?styles.carDrag:''}`}
+            style={{ transform:`translateX(${car.off}px)`, transition:car.an?'transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94)':'none' }}
+            {...car.dh}>
+            {cloned.map((p,idx) => {
+              const id = String(p.id);
+              return (
+                <div key={`${id}-${idx}`} style={{ width:`${car.cw}px`, minWidth:`${car.cw}px`, flexShrink:0, boxSizing:'border-box' }}>
+                  <RC p={p} wl={relWish.has(id)} wp={relWP.has(id)} cs={relCS[id]??'idle'} ow={()=>!car.drag&&toggleRelWish(id)} oc={()=>!car.drag&&addRelToCart(p)} oq={()=>!car.drag&&openQv(p)}/>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      {car.dots > 1 && (
+        <div className={styles.carDots}>
+          {Array.from({length:car.dots}).map((_,i)=>(
+            <button key={i} type="button" className={`${styles.dot} ${i===car.activeDot?styles.dotOn:''}`} onClick={()=>car.goPage(i)}/>
+          ))}
+        </div>
+      )}
+    </div>
+  )}
+
+  {/* ── TRUST BAR ── */}
+  <div className={styles.trustBar}>
+    {[{i:'🏅',t:'100% Original',s:'Sourced from trusted brands'},{i:'🌿',t:'Safe & Non-Toxic',s:'Child-safe & eco-friendly'},{i:'🔄',t:'Easy Returns',s:'7-day hassle-free'},{i:'🔒',t:'Secure Payments',s:'Multiple safe options'}].map(x=>(
+      <div key={x.t} className={styles.trustBarItem}><span className={styles.trustBarI}>{x.i}</span><div><div className={styles.trustBarT}>{x.t}</div><div className={styles.trustBarS}>{x.s}</div></div></div>
+    ))}
+  </div>
+
+  {/* ── MOBILE STICKY BAR ── */}
+  <div className={styles.stickyBar}>
+    <div className={styles.stickyLeft}>
+      <span className={styles.stickyP}>₹{fmt(product.price)}</span>
+      {product.originalPrice > product.price && <span className={styles.stickyO}>₹{fmt(product.originalPrice)}</span>}
+      {discPct > 0 && <span className={styles.stickyD}>{discPct}% OFF</span>}
+    </div>
+    <div className={styles.stickyQty}>
+      <button type="button" className={styles.stickyQB} onClick={()=>setQty(q=>Math.max(1,q-1))} disabled={qty<=1}>−</button>
+      <span className={styles.stickyQN}>{qty}</span>
+      <button type="button" className={styles.stickyQB} onClick={()=>setQty(q=>Math.min(product.stockCount||99,q+1))} disabled={!product.inStock || qty >= (product.stockCount||99)}>+</button>
+    </div>
+    <button type="button" className={[styles.stickyCart, cartSt==='added'?styles.stickyCartAdded:''].filter(Boolean).join(' ')} onClick={handleCart} disabled={!product.inStock||cartSt==='loading'}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      {cartSt==='loading'?'…':cartSt==='added'?'Added':'Add to Cart'}
+    </button>
+    <button type="button" className={styles.stickyBuy} onClick={handleBuy} disabled={!product.inStock||buySt==='loading'}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg>
+      {buySt==='loading'?'…':'Buy Now'}
+    </button>
+  </div>
+
+  {/* ── MOBILE BOTTOM NAV ── */}
+  <nav className={styles.mobileNav}>
+    <Link href="/" className={styles.mobileNavItem}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></Link>
+    <Link href="/categories" className={styles.mobileNavItem}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Categories</span></Link>
+    <Link href="/wishlist" className={styles.mobileNavItem}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>Wishlist</span></Link>
+    <Link href="/cart" className={styles.mobileNavItem}>
+      <span className={styles.mobileCartIcon}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        {cartCount > 0 && <span className={styles.mobileCartBadge}>{cartCount > 99 ? '99+' : cartCount}</span>}
+      </span>
+      <span>Cart</span>
+    </Link>
+    <Link href="/account" className={styles.mobileNavItem}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Account</span></Link>
+  </nav>
+
+  {/* ── QUICK VIEW ── */}
+  {qvP && <QV p={qvP} onClose={closeQv} onAdd={handleQvAdd} cs={qvCS}/>}
+</div>
+);
+
 }
