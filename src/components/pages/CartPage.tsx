@@ -914,7 +914,6 @@ async function applyCoupon() {
             <h2 className={styles.summaryTitle}>Order Summary</h2>
             <div className={styles.summaryLines}>
               <div className={styles.summaryLine}><span>Subtotal ({items.reduce((s, i) => s + i.quantity, 0)} items)</span><span>₹{subtotal.toLocaleString('en-IN')}</span></div>
-              {itemSavings > 0 && <div className={`${styles.summaryLine} ${styles.savingsLine}`}><span>Product Discount</span><span>− ₹{itemSavings.toLocaleString('en-IN')}</span></div>}
               {couponSavings > 0 && <div className={`${styles.summaryLine} ${styles.savingsLine}`}><span>Coupon ({coupon.code})</span><span>− ₹{couponSavings.toLocaleString('en-IN')}</span></div>}
               <div className={styles.summaryLine}><span>Delivery</span><span className={isDeliveryFree ? styles.freeDeliveryTag : ''}>{isDeliveryFree || items.length === 0 ? 'FREE' : `₹${DELIVERY_FEE}`}</span></div>
             </div>

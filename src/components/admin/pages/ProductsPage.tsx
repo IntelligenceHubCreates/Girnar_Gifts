@@ -296,8 +296,11 @@ function ProductForm({ product, categories, onClose, onSaved }: ProductFormProps
         if (!vRes.ok) { let detail = `Video upload failed (HTTP ${vRes.status})`; try { const er = await vRes.json(); if (er?.detail) detail = er.detail } catch {} ; throw new Error(detail) }
         const vData = await vRes.json()
         form.append('productVideo', vData.url ?? '')
-      } else if (removeVideo) { form.append('productVideo', '') }
-      else if (existingVideoUrl) { form.append('productVideo', existingVideoUrl) }
+      } else if (removeVideo) {
+        // Send an explicit delete flag — empty string is coerced to None by FastAPI/Pydantic v2
+        // before the `if productVideo is not None` guard runs, so the video never gets cleared.
+        form.append('deleteVideo', 'true')
+      } else if (existingVideoUrl) { form.append('productVideo', existingVideoUrl) }
 
       const finalVariants = colorVariants.filter((cv) => cv.name.trim()).map((cv, i) => {
         const existingUrls = cv.images.filter((url) => url.startsWith('http') || url.startsWith('//'))

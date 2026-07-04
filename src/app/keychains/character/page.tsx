@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -12,9 +12,9 @@ export default function Page() {
       <main>
         <CategoryPage
           title="Character Charms"
-          emoji="🧸"
+          emoji="🐱"
           description="Anime, cartoon & novelty character charms"
-          bgEmojis={["🧸","🎭","⭐","✨","🌟","💫"]}
+          bgEmojis={["🐱","🐻","✨","🌟","🦊","🐼"]}
           subcategories={[{ label: "Character Add Ons", slug: "character-add-ons" }, { label: "Chibi Charm Sticky", slug: "chibi-charm-sticky" }, { label: "Bear Sticky Roll", slug: "bear-sticky-roll" }]}
           tags={["Fun Characters","Kids Love Them","Great Gifts"]}
           categorySlug="character"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/keychains"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

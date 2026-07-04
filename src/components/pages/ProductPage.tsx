@@ -346,12 +346,17 @@ export default function ProductPage({ productId }: { productId: string|number })
   // Collapse variant families (and any accidental dupes) to one card each.
 function dedupeFamilies(list: Product[], excludeId: string): Product[] {
   const seen = new Set<string>();
+  const seenNames = new Set<string>();
   const out: Product[] = [];
   for (const p of list) {
     if (String(p.id) === excludeId) continue;
-    const key = p.variantGroupId || String(p.id);  // group if linked, else self
+    const key = p.variantGroupId || String(p.id);
     if (seen.has(key)) continue;
+    // Fallback: dedupe by name when variant_group_id is absent (same-named variants)
+    const nameKey = p.name.trim().toLowerCase();
+    if (seenNames.has(nameKey)) continue;
     seen.add(key);
+    seenNames.add(nameKey);
     out.push(p);
   }
   return out;

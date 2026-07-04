@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Stationery Sets"
           emoji="🎒"
           description="Complete kits, combo packs & gift sets"
-          bgEmojis={["🎒","📚","✏️","📒","🎨","🖊️"]}
+          bgEmojis={["🎒","✏️","📚","🎨","📓","🖍️"]}
           subcategories={[{ label: "Back to School Sets", slug: "back-to-school-sets" }, { label: "Art Sets", slug: "art-sets" }, { label: "Gift Packs", slug: "gift-packs" }, { label: "Combo Kits", slug: "combo-kits" }]}
           tags={["Value for Money","Complete Kits","Great Gifts"]}
           categorySlug="stationery-sets"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/stationery"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

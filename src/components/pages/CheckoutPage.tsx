@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import styles from './CheckoutPage.module.css';
 import { _get, _post } from '@/shared/fetchwrapper';
@@ -76,8 +77,9 @@ function extractFirstImage(productImage: any): string {
 export default function CheckoutPage() {
   const { data: session } = useSession();
   const userEmail = session?.user?.email ?? '';
-  const { dispatch: cartDispatch } = useCart();
-
+  const { state: cartState, dispatch: cartDispatch } = useCart();
+  const router = useRouter();
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code?: string; discountAmount?: number } | null>(null);
   const [step,          setStep]          = useState<Step>('address');
   const [selectedSaved, setSelectedSaved] = useState<number | null>(null);
   const [showNewForm,   setShowNewForm]   = useState(false);
@@ -89,7 +91,23 @@ export default function CheckoutPage() {
   const [paymentError,    setPaymentError]    = useState<string | null>(null);
   const [addressSaving,   setAddressSaving]   = useState(false);
   const [addressError,    setAddressError]    = useState<string | null>(null);
-  const [orderItems,      setOrderItems]      = useState<OrderItem[]>(DEFAULT_ORDER_ITEMS);
+  const orderItems: OrderItem[] = useMemo(
+    () => cartState.items.map((ci, idx) => ({
+      id:            ci.id,
+      backendItemId: ci.cartItemId,
+      name:          ci.name,
+      category:      ci.category ?? 'General',
+      price:         ci.price,
+      originalPrice: ci.originalPrice ?? ci.price,
+      qty:           ci.quantity,
+      emoji:         ci.emoji ?? EMOJIS.default,
+      bg:            ci.bgGradient ?? GRADIENTS[idx % GRADIENTS.length],
+      image:         ci.image ?? '',
+      color:         ci.color || undefined,
+      color_hex:     ci.color_hex || undefined,
+    })),
+    [cartState.items],
+  );
   const [savedAddresses,  setSavedAddresses]  = useState<SavedAddress[]>([]);
   const [backendAddressId,setBackendAddressId]= useState<string | null>(null);
   const confirmRef = useRef<HTMLDivElement>(null);
@@ -101,12 +119,9 @@ export default function CheckoutPage() {
 
   // Real applied coupon (persisted by the cart). Server recomputes the charged
   // amount at create-order — this is display only.
-  const applied = (() => {
-    try { return JSON.parse(localStorage.getItem('appliedCoupon') || 'null'); }
-    catch { return null; }
-  })();
-  const COUPON_CODE     = applied?.code || null;
-  const COUPON_DISCOUNT = Math.max(0, Math.min(SUBTOTAL, Number(applied?.discountAmount) || 0));
+  
+  const COUPON_CODE     = appliedCoupon?.code || null;
+  const COUPON_DISCOUNT = Math.max(0, Math.min(SUBTOTAL, Number(appliedCoupon?.discountAmount) || 0));
 
   const TOTAL = Math.max(0, SUBTOTAL + DELIVERY - COUPON_DISCOUNT);
 
@@ -116,26 +131,21 @@ export default function CheckoutPage() {
     }
   }, [step]);
 
+  // Read the applied coupon after mount (hydration-safe)
+  useEffect(() => {
+    try { setAppliedCoupon(JSON.parse(localStorage.getItem('appliedCoupon') || 'null')); } catch {}
+  }, []);
+
+  // Empty cart on entry → back to /cart. Never render an empty/mock checkout.
+  useEffect(() => {
+    if (cartState.hydrated && cartState.items.length === 0 && step === 'address') {
+      router.replace('/cart');
+    }
+  }, [cartState.hydrated, cartState.items.length, step, router]);
+
   useEffect(() => {
     // FIX: read color and color_hex from cart API response
-    _get('/api/cart').then((res: any) => {
-      const items: OrderItem[] = (res?.cart_items || []).map((ci: any, idx: number) => ({
-        id:            ci.product?.id ?? idx,
-        backendItemId: ci.id,
-        name:          ci.product?.name     ?? 'Product',
-        category:      ci.product?.category ?? 'General',
-        price:         (ci.product?.original_price ?? 0) - (ci.product?.amount_discount ?? 0),
-        originalPrice: ci.product?.original_price ?? 0,
-        qty:           ci.quantity ?? 1,
-        emoji:         EMOJIS[ci.product?.category] ?? EMOJIS.default,
-        bg:            GRADIENTS[idx % GRADIENTS.length],
-        image:         extractFirstImage(ci.product?.product_image),
-        // FIX: read color fields from cart item (saved when user selected variant)
-        color:         ci.color     ?? ci.product?.color     ?? null,
-        color_hex:     ci.color_hex ?? ci.product?.color_hex ?? null,
-      }));
-      if (items.length > 0) setOrderItems(items);
-    }).catch(() => {});
+   
 
     _get('/api/address/addresses').then((res: any) => {
       const addrs: any[] = Array.isArray(res) ? res : (res?.addresses || res?.data || []);

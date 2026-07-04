@@ -1,8 +1,31 @@
+/* ================================================================
+   Homepage — page-level background and section rhythm
+   Each main section has its own bg via component CSS;
+   this file handles the overall page canvas.
+   ================================================================ */
+
 .pageBackground {
+  /* Smooth transition: cream hero → pure white mid-page → soft close */
   background: linear-gradient(
-    160deg,
-    #FDF8F3 0%,
-    #FEF0E4 45%,
-    #FDE8D4 100%
+    180deg,
+    #FDF8F3 0%,      /* hero cream */
+    #FDF8F3 18%,
+    #FEFCF9 35%,     /* gentle fade to near-white */
+    #FFFFFF 52%,     /* pure white centre — products / promo pop on this */
+    #FEFCF9 72%,
+    #FDF8F3 88%,     /* warm cream again toward newsletter */
+    #FDF5EE 100%
   );
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+/* Footer: visible on desktop, hidden on tablet + mobile */
+.footerWrap { display: block; }
+
+@media (max-width: 1024px) {
+  .footerWrap { display: none; }
+
+  /* Keep page content clear of the fixed bottom nav bar */
+  .pageBackground { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
 }

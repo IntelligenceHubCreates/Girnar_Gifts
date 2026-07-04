@@ -1,6 +1,16 @@
-// Suppress TS error for side-effect CSS import when no .d.ts is provided
+import { getServerSession } from 'next-auth';
+import { notFound } from 'next/navigation';
+import { authOptions } from '@/lib/auth';
 // @ts-ignore
 import '@/styles/admin.css';
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
+
+  // Double-check: if somehow middleware was bypassed, block non-admins here
+  if (!session?.isAdmin) {
+    notFound();
+  }
+
+  return <>{children}</>;
 }

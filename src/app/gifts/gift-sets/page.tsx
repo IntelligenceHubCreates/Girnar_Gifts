@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Gift Sets"
           emoji="🎁"
           description="Classic hampers & themed gift boxes"
-          bgEmojis={["🎁","🎀","🌟","✨","💝","🎊"]}
+          bgEmojis={["🎁","🎀","🎊","🌟","🎉","💝"]}
           subcategories={[{ label: "Stationery Sets", slug: "gift-stationery" }, { label: "Toy Bundles", slug: "toy-bundles" }, { label: "Hampers", slug: "hampers" }, { label: "Themed Boxes", slug: "themed-boxes" }]}
           tags={["Ready to Gift","Premium Packaging","Birthday Special"]}
           categorySlug="gift-sets"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/gifts"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

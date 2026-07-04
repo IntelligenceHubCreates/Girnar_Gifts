@@ -47,19 +47,12 @@ export default function OrderConfirmationClient() {
     if (!paymentId && !rzpOrderId) { setLoading(false); return; }
     let cancelled = false;
 
-    async function init() {
+   async function init() {
       try {
         let fetchedOrder: OrderData | null = null;
 
-        if (rzpOrderId) {
-          const res = await fetch(
-            `${BACKEND}/api/payments/create-order-after-payment/${rzpOrderId}`,
-            { method: 'POST', credentials: 'include' }
-          );
-          if (!cancelled && res.ok) fetchedOrder = await res.json();
-        }
-
-        if (!fetchedOrder && paymentId) {
+        // The order is already created server-side in /verify. Just read it.
+        if (paymentId) {
           const res = await fetch(
             `${BACKEND}/api/payments/order-by-payment/${paymentId}`,
             { credentials: 'include' }

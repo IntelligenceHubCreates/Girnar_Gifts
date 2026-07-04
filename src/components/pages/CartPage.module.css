@@ -884,11 +884,15 @@
 
 /* ═══ Mobile sticky checkout bar ═══ */
 .mobileCheckoutBar {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+  position: fixed; left: 14px; right: 14px;
+  /* Sit above the floating MobileBottomNav (66px tall + 12px gap + safe-area) */
+  bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  z-index: 901;
   display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  padding: 10px 14px;
   background: rgba(255,255,255,0.96); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border-top: 1.5px solid #f0ece5; box-shadow: 0 -6px 24px rgba(0,0,0,0.08);
+  border-radius: 22px;
+  border: 1.5px solid rgba(255,255,255,0.72); box-shadow: 0 -6px 24px rgba(0,0,0,0.08);
 }
 .mcbInfo   { display: flex; flex-direction: column; line-height: 1.15; flex-shrink: 0; }
 .mcbLabel  { font-size: 10px; color: #8a8a8a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -898,8 +902,8 @@
 .mcbBtnDisabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
 /* Desktop already has a sticky summary → hide the bar */
 @media (min-width: 960px) { .mobileCheckoutBar { display: none; } }
-/* Clear the bar on mobile */
-@media (max-width: 959px) { .page { padding-bottom: 104px; } }
+/* Clear BOTH bars: nav bottom (82px) + checkout bar height (~62px) + breathing room */
+@media (max-width: 959px) { .page { padding-bottom: calc(152px + env(safe-area-inset-bottom, 0px)); } }
 
 /* ═══ Skeleton loaders ═══ */
 .cartSkeleton { display: flex; flex-direction: column; gap: 14px; }

@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Scales & Rulers"
           emoji="📏"
           description="Rulers, set squares, protractors"
-          bgEmojis={["📏","📐","🔢","📒","✏️","🎯"]}
+          bgEmojis={["📏","📐","🔺","📋","✏️","🎓"]}
           subcategories={[{ label: "Rulers", slug: "rulers" }, { label: "Set Squares", slug: "set-squares" }, { label: "Protractors", slug: "protractors" }, { label: "Geometry Sets", slug: "geometry-sets" }]}
           tags={["Accurate Measurements","Durable","School Kit"]}
           categorySlug="scales"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/stationery"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

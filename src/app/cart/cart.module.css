@@ -1,0 +1,8 @@
+/* Footer: visible on desktop, hidden on tablet + mobile */
+.footerWrap { display: block; }
+
+@media (max-width: 1024px) {
+  .footerWrap { display: none; }
+  /* CartPage.module.css already handles bottom clearance for both the
+     mobile checkout bar and the MobileBottomNav — no padding needed here */
+}

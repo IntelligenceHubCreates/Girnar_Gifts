@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Lunch Bags"
           emoji="🍱"
           description="Insulated lunch bags for school"
-          bgEmojis={["🍱","🥪","🍎","🥤","🌟","❄️"]}
+          bgEmojis={["🍱","🥪","🥗","🧃","🍎","🎒"]}
           subcategories={[{ label: "Insulated", slug: "insulated" }, { label: "Character Print", slug: "character-print" }, { label: "Drawstring", slug: "drawstring" }]}
           tags={["Keeps Food Fresh","Leakproof","BPA Free"]}
           categorySlug="lunch-bags"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/bags"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

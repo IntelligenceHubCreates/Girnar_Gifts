@@ -1,8 +1,8 @@
-import TopBar from '@/components/layout/TopBar';
 import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import TrackOrderPage from '@/components/pages/TrackOrderPage';
+import styles from './track-order.module.css';
 
 export default function TrackOrder() {
   return (
@@ -11,7 +11,10 @@ export default function TrackOrder() {
       <main>
         <TrackOrderPage />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

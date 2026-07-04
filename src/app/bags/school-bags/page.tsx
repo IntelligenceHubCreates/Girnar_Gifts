@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="School Bags"
           emoji="🎒"
           description="Premium & standard school bags"
-          bgEmojis={["🎒","📚","✏️","🎨","📏","🧸"]}
+          bgEmojis={["🎒","📚","✏️","📓","🏫","⭐"]}
           subcategories={[{ label: "Premium School Bags", slug: "premium-school-bags" }, { label: "Standard Bags", slug: "standard-bags" }, { label: "Trolley Bags", slug: "trolley-bags" }]}
           tags={["Ergonomic Design","Water Resistant","Spacious","Free Shipping"]}
           categorySlug="school-bags"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/bags"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

@@ -1,6 +1,14 @@
 {
-  "shared\\fetchwrapper.ts -> next-auth/react": {
-    "id": "shared\\fetchwrapper.ts -> next-auth/react",
-    "files": []
+  "components\\pages\\AccountPage.tsx -> @/lib/notificationsApi": {
+    "id": "components\\pages\\AccountPage.tsx -> @/lib/notificationsApi",
+    "files": [
+      "static/chunks/_app-pages-browser_src_lib_notificationsApi_ts.js"
+    ]
+  },
+  "components\\pages\\Mobileaccounttabs.tsx -> @/lib/notificationsApi": {
+    "id": "components\\pages\\Mobileaccounttabs.tsx -> @/lib/notificationsApi",
+    "files": [
+      "static/chunks/_app-pages-browser_src_lib_notificationsApi_ts.js"
+    ]
   }
 }

@@ -1,25 +1,22 @@
 import Link from 'next/link';
+import { computePricing, fmtINR } from '@/lib/normalise';
 import styles from './MiniProductList.module.css';
 
-/* ─── Types ───────────────────────────────────────────────────── */
 interface DBProduct {
   id: string;
   name: string;
   emoji?: string;
   original_price: number;
   amount_discount?: number;
+  percentage_discount?: number;
   product_image?: { url: string }[];
   category?: string;
+  count?: number;
   is_featured?: boolean;
   is_active?: boolean;
 }
 
-interface ApiResponse {
-  data: DBProduct[];
-  totalCount: number;
-  page?: number;
-  limit?: number;
-}
+interface ApiResponse { data: DBProduct[]; totalCount: number; page?: number; limit?: number; }
 
 type SortBy = 'featured' | 'newest' | 'price_asc' | 'price_desc';
 
@@ -30,41 +27,41 @@ interface Props {
   categorySlug?: string;
 }
 
-/* ─── Fetch ───────────────────────────────────────────────────── */
-async function fetchProducts(
-  sort: SortBy = 'featured',
-  limit = 8,
-  categorySlug?: string,
-): Promise<DBProduct[]> {
+/**
+ * PRODUCTION SAFETY: no localhost fallback. If the API URL is missing,
+ * fail loudly at request time so misconfiguration is visible in logs,
+ * instead of silently rendering an empty homepage.
+ */
+function apiBase(): string {
+  const base = process.env.NEXT_PUBLIC_API_URL;
+  if (!base) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('[MiniProductList] NEXT_PUBLIC_API_URL is not set in production.');
+    }
+    return 'http://localhost:8000'; // dev convenience only
+  }
+  return base;
+}
+
+async function fetchProducts(sort: SortBy, limit: number, categorySlug?: string): Promise<DBProduct[]> {
   try {
-    const base   = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
     const params = new URLSearchParams({ sort_by: sort, limit: String(limit), skip: '0' });
     if (categorySlug) params.set('category_slug', categorySlug);
 
-    const res = await fetch(`${base}/api/product/all?${params}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${apiBase()}/api/product/all?${params}`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const json: ApiResponse = await res.json();
-    return Array.isArray(json) ? json : (json.data ?? []);
-  } catch {
+    const list = Array.isArray(json) ? json : (json.data ?? []);
+    // Defence in depth: never promote inactive products even if the
+    // backend forgets to filter. (Backend should also filter — see notes.)
+    return list.filter((p) => p.is_active !== false);
+  } catch (err) {
+    console.error('[MiniProductList] fetch failed:', err);
     return [];
   }
 }
 
-function getPrice(p: DBProduct) {
-  const discount = p.amount_discount ?? 0;
-  const now      = Math.max(0, p.original_price - discount);
-  const orig     = discount > 0 ? p.original_price : null;
-  const pct      = orig ? Math.round((discount / orig) * 100) : 0;
-  return { now, orig, pct };
-}
-
-/* ─── Component ───────────────────────────────────────────────── */
-export default async function MiniProductList({
-  title,
-  sort        = 'featured',
-  limit       = 5,
-  categorySlug,
-}: Props) {
+export default async function MiniProductList({ title, sort = 'featured', limit = 5, categorySlug }: Props) {
   const products   = await fetchProducts(sort, limit, categorySlug);
   const seeAllHref = categorySlug
     ? `/category/${categorySlug}?sort_by=${sort}`
@@ -72,20 +69,13 @@ export default async function MiniProductList({
 
   return (
     <section className={styles.section}>
-
-      {/* ── Header — styled to match FeaturedProducts ── */}
       <div className={styles.header}>
-
-        {/* Left: star + title + orange underline bar */}
         <div className={styles.titleGroup}>
           <div className={styles.titleRow}>
             <h2 className={styles.title}>{title}</h2>
           </div>
-          {/* Orange underline bar — matches FeaturedProducts .titleUnderline */}
           <span className={styles.titleUnderline} />
         </div>
-
-        {/* Right: View All link */}
         <Link href={seeAllHref} className={styles.viewAll}>
           View All
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
@@ -95,19 +85,21 @@ export default async function MiniProductList({
         </Link>
       </div>
 
-      {/* ── Cards (logic unchanged) ── */}
       {products.length === 0 ? (
         <p className={styles.empty}>No products found.</p>
       ) : (
         <div className={styles.track}>
           {products.map((p) => {
-            const { now, orig, pct } = getPrice(p);
+            // Same pricing rule as every other section (fixes C4).
+            const { original, selling, effectivePct } = computePricing(p);
+            const hasDiscount = selling < original;
             const img = p.product_image?.[0]?.url ?? null;
+            const outOfStock = (p.count ?? 1) <= 0;
 
             return (
               <Link key={p.id} href={`/product/${p.id}`} className={styles.card}>
-
-                {orig && <span className={styles.badge}>{pct}% off</span>}
+                {hasDiscount && <span className={styles.badge}>{effectivePct}% off</span>}
+                {outOfStock && <span className={styles.oosBadge}>Out of stock</span>}
 
                 <div className={styles.imgWrap}>
                   {img
@@ -119,17 +111,15 @@ export default async function MiniProductList({
                 <div className={styles.info}>
                   <p className={styles.name}>{p.name}</p>
                   <div className={styles.priceRow}>
-                    <span className={styles.price}>₹{now.toLocaleString('en-IN')}</span>
-                    {orig && <span className={styles.mrp}>₹{orig.toLocaleString('en-IN')}</span>}
+                    <span className={styles.price}>₹{fmtINR(selling)}</span>
+                    {hasDiscount && <span className={styles.mrp}>₹{fmtINR(original)}</span>}
                   </div>
                 </div>
-
               </Link>
             );
           })}
         </div>
       )}
-
     </section>
   );
 }

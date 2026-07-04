@@ -1077,24 +1077,33 @@ export default function AccountPage() {
   };
 
   const cancelOrder = useCallback(async (orderId: string) => {
-  setCancellingId(orderId);
-  try {
-    const r = await fetch(`/api/orders/${orderId}/cancel`, {
-      method: 'PATCH',
-      headers: jsonHeaders(token),
-    });
-    if (!r.ok) throw new Error('cancel failed');
-    setOrders(prev => prev.map(o =>
-      o.id === orderId ? { ...o, status: 'Cancelled' } : o
-    ));
-    showToast('✅ Order cancelled');
-  } catch {
-    showToast('⚠️ Could not cancel order — please try again.');
-  } finally {
-    setCancellingId(null);
-    setConfirmCancelId(null);
-  }
-}, [token, showToast]);
+    setCancellingId(orderId);
+    try {
+      const r = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: 'PATCH',
+        headers: jsonHeaders(token),
+      });
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}));
+        const detail = body?.detail || '';
+        showToast(
+          r.status === 400 && detail
+            ? `⚠️ ${detail}`
+            : '⚠️ Could not cancel order — please try again.'
+        );
+        return;
+      }
+      setOrders(prev => prev.map(o =>
+        o.id === orderId ? { ...o, status: 'Cancelled' } : o
+      ));
+      showToast('✅ Order cancelled successfully');
+    } catch {
+      showToast('⚠️ Could not cancel order — please try again.');
+    } finally {
+      setCancellingId(null);
+      setConfirmCancelId(null);
+    }
+  }, [token, showToast]);
 
  /* ── Wishlist add to cart ──────────────────────────────────────── */
   const addToCart = useCallback(async (e: React.MouseEvent, product: any) => {

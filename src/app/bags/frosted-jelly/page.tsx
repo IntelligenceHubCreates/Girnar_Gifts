@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -12,9 +12,9 @@ export default function Page() {
       <main>
         <CategoryPage
           title="Frosted & Jelly Bags"
-          emoji="🫙"
+          emoji="👜"
           description="Transparent PVC & frosted jelly bags"
-          bgEmojis={["🫙","✨","💎","🌈","💜","🎀"]}
+          bgEmojis={["👜","✨","🌸","💎","🫧","🪞"]}
           subcategories={[{ label: "Frosted Tote", slug: "frosted-tote" }, { label: "Jelly Crossbody", slug: "jelly-crossbody" }, { label: "Clear Pouches", slug: "clear-pouches" }]}
           tags={["On-trend","Waterproof PVC","Instagram Worthy"]}
           categorySlug="frosted-jelly"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/bags"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

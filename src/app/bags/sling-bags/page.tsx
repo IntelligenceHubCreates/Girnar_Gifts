@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Sling Bags"
           emoji="👝"
           description="Trendy sling bags for kids & teens"
-          bgEmojis={["👝","✨","🌟","🎀","💫","🎒"]}
+          bgEmojis={["👝","✨","🎀","💜","👜","🌸"]}
           subcategories={[{ label: "Mini Slings", slug: "mini-slings" }, { label: "Crossbody Bags", slug: "crossbody-bags" }, { label: "Zip Pockets", slug: "zip-pockets" }]}
           tags={["Trendy","Lightweight","Adjustable Strap"]}
           categorySlug="sling-bags"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/bags"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

@@ -12,11 +12,23 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/login/page": [
+    "/product/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/login/page.css",
-      "static/chunks/app/login/page.js"
+      "static/css/app/product/[id]/page.css",
+      "static/chunks/app/product/[id]/page.js"
+    ],
+    "/account/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/account/page.css",
+      "static/chunks/app/account/page.js"
+    ],
+    "/products/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/products/page.css",
+      "static/chunks/app/products/page.js"
     ],
     "/cart/page": [
       "static/chunks/webpack.js",
@@ -24,17 +36,70 @@
       "static/css/app/cart/page.css",
       "static/chunks/app/cart/page.js"
     ],
-    "/keychains/all/page": [
+    "/checkout/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/keychains/all/page.css",
-      "static/chunks/app/keychains/all/page.js"
+      "static/css/app/checkout/page.css",
+      "static/chunks/app/checkout/page.js"
     ],
-    "/beauty/page": [
+    "/order-confirmation/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/beauty/page.css",
-      "static/chunks/app/beauty/page.js"
+      "static/css/app/order-confirmation/page.css",
+      "static/chunks/app/order-confirmation/page.js"
+    ],
+    "/track-order/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/track-order/page.css",
+      "static/chunks/app/track-order/page.js"
+    ],
+    "/admin/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/page.js"
+    ],
+    "/admin/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/admin/layout.css",
+      "static/chunks/app/admin/layout.js"
+    ],
+    "/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/login/page.css",
+      "static/chunks/app/login/page.js"
+    ],
+    "/stationery/pens-pencils/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/stationery/pens-pencils/page.css",
+      "static/chunks/app/stationery/pens-pencils/page.js"
+    ],
+    "/wishlist/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/wishlist/page.css",
+      "static/chunks/app/wishlist/page.js"
+    ],
+    "/stationery/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/stationery/page.css",
+      "static/chunks/app/stationery/page.js"
+    ],
+    "/bottles/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/bottles/page.css",
+      "static/chunks/app/bottles/page.js"
+    ],
+    "/bags/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/bags/page.css",
+      "static/chunks/app/bags/page.js"
     ],
     "/_not-found/page": [
       "static/chunks/webpack.js",

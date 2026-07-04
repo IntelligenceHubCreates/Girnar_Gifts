@@ -3,13 +3,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { _get, _post } from '@/shared/fetchwrapper';
+import { _get, _post, _delete } from '@/shared/fetchwrapper';
 import type { UiProduct } from '@/types/product';
+import { normaliseProduct, unwrapList, fmtINR as fmt, PLACEHOLDER } from '@/lib/normalise';
 import styles from './FeaturedProducts.module.css';
 import { useCart } from '@/context/CartContext';
-
 // ─── Constants ────────────────────────────────────────────────────
-const PLACEHOLDER = '/images/placeholder-product.png';
+
 
 const BADGE_BG: Record<string, string> = {
   sale:       '#F4621A',
@@ -25,75 +25,6 @@ const BADGE_TEXT: Record<string, string> = {
 };
 
 // ─── Normalise raw API response to UiProduct ─────────────────────
-function normalise(p: any): UiProduct {
-  const price          = Number(p.original_price ?? p.price ?? 0);
-  const amountDiscount = Number(p.amount_discount ?? 0);
-  const pctDiscount    = Number(p.percentage_discount ?? 0);
-
-  let sellingPrice = price;
-  if (amountDiscount > 0) {
-    sellingPrice = price - amountDiscount;
-  } else if (pctDiscount > 0) {
-    sellingPrice = Math.round(price - (price * pctDiscount) / 100);
-  }
-  sellingPrice = Math.max(0, Math.min(sellingPrice, price));
-
-  const rawImages = p.product_image ?? p.images ?? [];
-  const images: string[] = Array.isArray(rawImages)
-    ? rawImages.map((img: any) =>
-        typeof img === 'string' ? img : (img?.url ?? img?.secure_url ?? '')
-      ).filter(Boolean)
-    : [];
-
-  const badges: { label: string; type: string }[] = Array.isArray(p.badges)
-    ? p.badges
-    : pctDiscount > 0
-    ? [{ label: `${pctDiscount}% OFF`, type: 'sale' }]
-    : amountDiscount > 0
-    ? [{ label: `Save ₹${amountDiscount}`, type: 'sale' }]
-    : [];
-
-  const stockCount = Number(p.count ?? p.stock ?? p.quantity ?? 0);
-
-  // Extract color swatches if present
-  const colors: string[] =
-  Array.isArray(p.color_variants) && p.color_variants.length > 0
-    ? p.color_variants
-        .map((variant: any) => variant.hex)
-        .filter(Boolean)
-    : p.color_hex
-    ? [p.color_hex]
-    : [];
-    console.log('RAW PRODUCT', p);
-
-  return {
-    id:              String(p.id   ?? ''),
-    name:            String(p.name ?? ''),
-    price:           sellingPrice > 0 ? sellingPrice : price,
-    originalPrice:   price,
-    images,
-    brand:           String(p.brand ?? p.brand_name ?? ''),
-    category:        String(p.category ?? ''),
-    subcategory:     String(p.sub_category_name ?? p.sub_category_slug ?? p.subcategory ?? p.category ?? ''),
-    subcategorySlug: String(p.sub_category_slug ?? p.subcategory_slug ?? ''),
-    ageRange:        String(p.age_range ?? p.ageRange ?? ''),
-    stars:           Math.min(5, Math.max(0, Number(p.stars ?? p.rating ?? 0))),
-    reviews:         Number(p.reviews ?? p.review_count ?? p.reviewCount ?? 0),
-    inStock:         stockCount > 0,
-    stockCount,
-    badges,
-    bgGradient:      Boolean(p.bg_gradient ?? p.bgGradient),
-    description:     String(p.description ?? ''),
-    emoji:           String(p.emoji ?? ''),
-    discountPct:     pctDiscount,
-    colors:         colors,
-    colorVariants:  p.color_variants ?? [],
-  } as UiProduct & { colors: string[] };
-  
-}
-
-const fmt = (n: number) =>
-  Number.isFinite(n) && n > 0 ? n.toLocaleString('en-IN') : '0';
 
 // ─── ProductImg with fallback ─────────────────────────────────────
 function ProductImg({ src, alt, className }: { src: string; alt: string; className: string }) {
@@ -314,23 +245,30 @@ export default function FeaturedProducts() {
     setQuickViewProduct(null);
     document.body.style.overflow = '';
   }
+  // Escape closes the modal; body scroll is always restored on unmount.
+useEffect(() => {
+  if (!quickViewProduct) return;
+  const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeQuickView(); };
+  window.addEventListener('keydown', onKey);
+  return () => {
+    window.removeEventListener('keydown', onKey);
+    document.body.style.overflow = '';
+  };
+}, [quickViewProduct]);
 
   // ── Fetch featured products ───────────────────────────────────
-  useEffect(() => {
-    setLoading(true); setFetchError(false);
-    _get('/api/product/featured')
-      .then((res) => {
-        const raw: any[] = Array.isArray(res) ? res
-          : Array.isArray((res as any)?.products) ? (res as any).products
-          : Array.isArray((res as any)?.data)     ? (res as any).data
-          : Array.isArray((res as any)?.items)    ? (res as any).items
-          : [];
-        if (raw.length === 0) { setFetchError(true); return; }
-        setProducts(raw.map(normalise));
-      })
-      .catch(() => setFetchError(true))
-      .finally(() => setLoading(false));
-  }, []);
+const loadFeatured = useCallback(() => {
+  setLoading(true); setFetchError(false);
+  _get('/api/product/featured')
+    .then((res) => {
+      setProducts(unwrapList(res).map(normaliseProduct));
+      // NOTE: empty array is a valid state, NOT an error.
+    })
+    .catch(() => setFetchError(true))
+    .finally(() => setLoading(false));
+}, []);
+
+useEffect(() => { loadFeatured(); }, [loadFeatured]);
 
   // ── Fetch wishlist ────────────────────────────────────────────
   useEffect(() => {
@@ -369,43 +307,59 @@ export default function FeaturedProducts() {
   };
 
   // ── Wishlist toggle ───────────────────────────────────────────
-  const toggleWishlist = useCallback(async (id: string) => {
-    if (wishPending.has(id)) return;
-    const already = wishlist.has(id);
-    setWishlist((prev) => { const n = new Set(prev); already ? n.delete(id) : n.add(id); return n; });
-    setWishPending((prev) => new Set(prev).add(id));
-    try {
-      await fetch(`/api/favorite/${id}`, { method: already ? 'DELETE' : 'POST' });
-    } catch {
-      setWishlist((prev) => { const n = new Set(prev); already ? n.add(id) : n.delete(id); return n; });
-    } finally {
-      setWishPending((prev) => { const n = new Set(prev); n.delete(id); return n; });
-    }
-  }, [wishlist, wishPending]);
+const toggleWishlist = useCallback(async (id: string) => {
+  if (wishPending.has(id)) return;
+  const already = wishlist.has(id);
+
+  // optimistic
+  setWishlist((prev) => { const n = new Set(prev); already ? n.delete(id) : n.add(id); return n; });
+  setWishPending((prev) => new Set(prev).add(id));
+
+  try {
+    // Goes through the fetch wrapper: correct FastAPI base URL + bearer token,
+    // and the wrapper throws on non-2xx so rollback actually runs.
+    if (already) await _delete(`/api/favorite/${id}`);
+    else         await _post(`/api/favorite/${id}`, {});
+  } catch {
+    // rollback
+    setWishlist((prev) => { const n = new Set(prev); already ? n.add(id) : n.delete(id); return n; });
+    // TODO (recommended): if the wrapper surfaces a 401 here, redirect to
+    // /login?next=/ instead of silently un-hearting.
+  } finally {
+    setWishPending((prev) => { const n = new Set(prev); n.delete(id); return n; });
+  }
+}, [wishlist, wishPending]);
 
   // ── Add to cart ───────────────────────────────────────────────
-  const addToCart = useCallback(async (product: UiProduct & { colors?: string[] }) => {
-    if (cartStates[product.id] === 'loading') return;
-    setCartStates((prev) => ({ ...prev, [product.id]: 'loading' }));
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: {
-        id: product.id, name: product.name, price: product.price,
-        originalPrice: product.originalPrice, quantity: 1,
-        image: product.images[0] ?? '', emoji: product.emoji || '🎁',
-        category: product.category, color: '', product_count: 0,
-        is_available: product.inStock,
-      },
-    });
-    try {
-      await _post('/api/cart/items', { product_id: product.id, quantity: 1 });
-      setCartStates((prev) => ({ ...prev, [product.id]: 'added' }));
-      setTimeout(() => setCartStates((prev) => ({ ...prev, [product.id]: 'idle' })), 2000);
-    } catch {
-      setCartStates((prev) => ({ ...prev, [product.id]: 'error' }));
-      setTimeout(() => setCartStates((prev) => ({ ...prev, [product.id]: 'idle' })), 2500);
-    }
-  }, [cartStates]);
+const addToCart = useCallback(async (product: UiProduct & { colors?: string[] }) => {
+  if (cartStates[product.id] === 'loading') return;
+  setCartStates((prev) => ({ ...prev, [product.id]: 'loading' }));
+
+  // optimistic — badge updates instantly
+  dispatch({
+    type: 'ADD_ITEM',
+    payload: {
+      id: product.id, name: product.name, price: product.price,
+      originalPrice: product.originalPrice, quantity: 1,
+      image: product.images[0] ?? '', emoji: product.emoji || '🎁',
+      category: product.category, color: '', product_count: 0,
+      is_available: product.inStock,
+    },
+  });
+
+  try {
+    await _post('/api/cart/items', { product_id: product.id, quantity: 1 });
+    setCartStates((prev) => ({ ...prev, [product.id]: 'added' }));
+    setTimeout(() => setCartStates((prev) => ({ ...prev, [product.id]: 'idle' })), 2000);
+  } catch {
+    // ROLLBACK the optimistic add so the badge matches the server cart.
+    // Use whatever your CartContext exposes — 'REMOVE_ITEM' or a
+    // quantity-decrement action. Adjust the type/payload to match.
+    dispatch({ type: 'REMOVE_ITEM', payload: { id: product.id } });
+    setCartStates((prev) => ({ ...prev, [product.id]: 'error' }));
+    setTimeout(() => setCartStates((prev) => ({ ...prev, [product.id]: 'idle' })), 2500);
+  }
+}, [cartStates, dispatch]);
 
   const dotCount = Math.max(1, Math.ceil(products.length / 4));
 

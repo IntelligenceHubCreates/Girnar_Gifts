@@ -1,8 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import React from 'react';
 import { motion, Transition } from 'framer-motion';
+import Image from 'next/image';
 import styles from './HeroSection.module.css';
 
 /* ── animation helpers ───────────────────────────────────── */
@@ -83,9 +85,12 @@ function BoyColumn() {
         animate={{ opacity: 1, scale: 1,    y: 0  }}
         transition={{ duration: 0.72, delay: 0.08, ease: 'easeOut' } as Transition}
       >
-        <img
+        <Image
           src="/boy.png"
           alt="Little Loot mascot"
+          width={520}      /* set to boy.png's actual intrinsic size */
+          height={560}
+          priority
           draggable={false}
           className={styles.charImg}
         />
@@ -122,24 +127,16 @@ export default function HeroSection() {
           </motion.p>
 
           <motion.div className={styles.ctaRow} {...up(0.18)}>
-            <motion.button
-              className={styles.btnPrimary}
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => router.push('/products')}
-            >
-              Shop Now
-              <span className={styles.btnArrow}>→</span>
-            </motion.button>
-            <motion.button
-              className={styles.btnSecondary}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => router.push('/categories')}
-            >
-              <span className={styles.btnGridIcon}>⊞</span>
-              Explore Categories
-            </motion.button>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+              <Link href="/products" className={styles.btnPrimary}>
+                Shop Now <span className={styles.btnArrow}>→</span>
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Link href="/categories" className={styles.btnSecondary}>
+                <span className={styles.btnGridIcon}>⊞</span> Explore Categories
+              </Link>
+            </motion.div>
           </motion.div>
 
           <motion.div className={styles.stats} {...up(0.24)}>

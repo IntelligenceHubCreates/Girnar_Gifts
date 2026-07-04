@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Nails & Jewellery"
           emoji="💅"
           description="Nail polish, rings, earrings & bracelets"
-          bgEmojis={["💅","💍","📿","✨","🌸","🌈"]}
+          bgEmojis={["💅","💍","✨","🌸","💎","📿"]}
           subcategories={[{ label: "Nail Polish", slug: "nail-polish" }, { label: "Nail Art Kits", slug: "nail-art-kits" }, { label: "Rings", slug: "rings" }, { label: "Earrings", slug: "earrings" }, { label: "Bracelets", slug: "bracelets" }]}
           tags={["Skin Safe","Water Based","Cute Designs"]}
           categorySlug="nails-jewellery"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/beauty"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

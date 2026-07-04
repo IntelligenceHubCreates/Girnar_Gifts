@@ -10,7 +10,6 @@ interface Category {
   image?: string;
   emoji?: string;
   name: string;
-  count: string;
   bg: string;
   dots?: boolean;
   href: string;
@@ -18,13 +17,13 @@ interface Category {
 }
 
 const CATEGORIES: Category[] = [
-  { image: '/stationery.png',     name: 'Stationery',      count: '186 Items', bg: 'linear-gradient(160deg,#FFDCC7 0%,#FFC6A4 100%)', txtclr: '#7A4322',  href: '/stationery' },
-  { image: '/bags.png',           name: 'Bags & Pouches',  count: '214 Items', bg: 'linear-gradient(160deg,#FFF1C7 0%,#FFE59A 100%)', txtclr: '#7B5A00',  href: '/bags' },
-  { image: '/Tumbler.png',        name: 'Bottles & Lunch', count: '97 Items',  bg: 'linear-gradient(160deg,#DDF6E8 0%,#BDECCC 100%)', txtclr: '#1F5C45', href: '/bottles', dots: true },
-  { image: '/toys.png',           name: 'Toys & Games',    count: '341 Items', bg: 'linear-gradient(160deg,#FFD8E2 0%,#FFBFD0 100%)', txtclr: '#8A3652', href: '/toys' },
-  { image: '/beauty.png',         name: 'Beauty & Hair',   count: '128 Items', bg: 'linear-gradient(160deg,#EEE0FF 0%,#DCC7FF 100%)', txtclr: '#5F3D99', href: '/beauty' },
-  { image: '/keychains.png',      name: 'Keychains',       count: '73 Items',  bg: 'linear-gradient(160deg,#FFF0D4 0%,#FFE2A8 100%)', txtclr: '#7A5715', href: '/keychains' },
-  { emoji: '🎁',                  name: 'Gift Sets',       count: '59 Items',  bg: 'linear-gradient(160deg,#E9ECF3 0%,#D8DDE8 100%)', txtclr: '#4A5568', href: '/gifts' },
+  { image: '/stationery.png',     name: 'Stationery',       bg: 'linear-gradient(160deg,#FFDCC7 0%,#FFC6A4 100%)', txtclr: '#7A4322',  href: '/stationery' },
+  { image: '/bags.png',           name: 'Bags & Pouches',   bg: 'linear-gradient(160deg,#FFF1C7 0%,#FFE59A 100%)', txtclr: '#7B5A00',  href: '/bags' },
+  { image: '/Tumbler.png',        name: 'Bottles & Lunch',   bg: 'linear-gradient(160deg,#DDF6E8 0%,#BDECCC 100%)', txtclr: '#1F5C45', href: '/bottles', dots: true },
+  { image: '/toys.png',           name: 'Toys & Games',     bg: 'linear-gradient(160deg,#FFD8E2 0%,#FFBFD0 100%)', txtclr: '#8A3652', href: '/toys' },
+  { image: '/beauty.png',         name: 'Beauty & Hair',    bg: 'linear-gradient(160deg,#EEE0FF 0%,#DCC7FF 100%)', txtclr: '#5F3D99', href: '/beauty' },
+  { image: '/keychains.png',      name: 'Keychains',         bg: 'linear-gradient(160deg,#FFF0D4 0%,#FFE2A8 100%)', txtclr: '#7A5715', href: '/keychains' },
+  { emoji: '🎁',                  name: 'Gift Sets',         bg: 'linear-gradient(160deg,#E9ECF3 0%,#D8DDE8 100%)', txtclr: '#4A5568', href: '/gifts' },
 ];
 
 const DOTS_COUNT    = 3;
@@ -212,7 +211,7 @@ export default function CategoriesSection() {
                   >
                     <div className={`${styles.cardBody}${cat.dots ? ` ${styles.cardBodyDots}` : ''}`}>
                       <p className={styles.cardName} style={{ color: cat.txtclr }}>{cat.name}</p>
-                      <p className={styles.cardCount} style={{ color: cat.txtclr }}>{cat.count}</p>
+                      
                       <div className={styles.cardArrow} style={{ color: cat.txtclr }} aria-hidden="true">→</div>
                     </div>
                   </div>

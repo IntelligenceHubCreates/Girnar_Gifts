@@ -119,9 +119,18 @@
 }
 
 /* ── Responsive ── */
+
+/* Lift above the fixed bottom nav (≈64px) on tablet + mobile */
+@media (max-width: 1024px) {
+  .fab {
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    right: 20px;
+  }
+}
+
 @media (max-width: 600px) {
   .fab {
-    bottom: 20px;
+    bottom: calc(72px + env(safe-area-inset-bottom));
     right: 16px;
     width: 52px;
     height: 52px;

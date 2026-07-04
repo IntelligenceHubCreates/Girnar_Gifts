@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
 import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import { Suspense } from 'react';
 import SearchClient from './SearchClient';
 
@@ -14,7 +14,10 @@ export default function SearchPage() {
           <SearchClient />
         </Suspense>
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

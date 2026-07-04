@@ -1,40 +1,34 @@
 /* ══════════════════════════════════════════════════════════════
-   MiniProductList — header styled to match FeaturedProducts
-   Core card/track logic unchanged
+   MiniProductList — premium redesign
+   Desktop  (≥769px): 2-col product grid, first 6 visible, no scroll
+   Mobile   (≤768px): horizontal snap-scroll carousel
    ══════════════════════════════════════════════════════════════ */
 
 .section {
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ───────────────── Header — matches FeaturedProducts ───────────────── */
-
+/* ── Header ──────────────────────────────────────────────────── */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
-/* Left group: star icon + title stacked with underline bar */
 .titleGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-/* Star icon sits on same line as title — use inner flex row */
-.titleGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .titleRow {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 
 .starIcon {
@@ -43,29 +37,24 @@
   flex-shrink: 0;
 }
 
-/* Title — matches .sectionTitle in FeaturedProducts */
 .title {
   margin: 0;
-  font-family: var(--font-nunito, 'Nunito', sans-serif);
-  font-size: clamp(16px, 2.2vw, 22px);
+  font-family: var(--font-baloo, 'Baloo 2', cursive);
+  font-size: clamp(18px, 1.8vw, 22px);
   font-weight: 900;
-  color: #1A1A1A;
+  color: #1A1A2E;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
-/* Orange underline bar — matches .titleUnderline in FeaturedProducts */
 .titleUnderline {
   display: block;
-  width: 38px;
-  height: 4px;
+  width: 34px;
+  height: 3.5px;
   background: #F47C20;
   border-radius: 4px;
-  /* indent to align under text, past the star icon */
-  margin-left: 2px;
 }
 
-/* View All — matches .viewAll in FeaturedProducts */
 .viewAll {
   display: inline-flex;
   align-items: center;
@@ -81,142 +70,207 @@
 }
 .viewAll:hover { opacity: 0.75; gap: 8px; }
 
-/* ───────────────── Product Track ───────────────── */
-
+/* ── Track ───────────────────────────────────────────────────── */
 .track {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   overflow-x: auto;
-  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 8px;
+  scrollbar-width: none;
+  padding-bottom: 6px;
+  /* min-width:0 prevents flex items from inflating to intrinsic content width,
+     which would make the track ~1600px wide and overflow the page on mobile */
+  min-width: 0;
 }
 .track::-webkit-scrollbar { display: none; }
 
-/* ───────────────── Product Tile ───────────────── */
+/* ── Desktop: 2-col grid, no scroll ─────────────────────────── */
+@media (min-width: 769px) {
+  .track {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    overflow: visible;
+    gap: 10px;
+    padding-bottom: 0;
+    scroll-snap-type: none;
+  }
 
+  /* Show only first 6 products (3 rows of 2) */
+  .card:nth-child(n+7) { display: none; }
+}
+
+/* ── Card ────────────────────────────────────────────────────── */
 .card {
-  width: 180px;
-  min-width: 157px;
-  background: #FDF5EC;
-  border-radius: 16px;
-  padding: 10px;
-  border: 1px solid #FDF5EC;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: all .25s ease;
+  flex-shrink: 0;
+  width: 130px;
+  min-width: 130px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #EDE8E2;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.22s ease;
   text-decoration: none;
   color: inherit;
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: hidden;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 @media (hover: hover) {
   .card:hover {
-    transform: translateY(-5px);
-    box-shadow:
-      0 12px 28px rgba(0, 0, 0, 0.12),
-      0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.10), 0 3px 8px rgba(0, 0, 0, 0.06);
   }
-  .card:hover .img { transform: scale(1.08); }
+  .card:hover .img { transform: scale(1.06); }
+}
+.card:active { transform: scale(0.97); }
+
+/* Desktop: full-width inside 2-col grid */
+@media (min-width: 769px) {
+  .card { width: auto; min-width: 0; }
 }
 
-.card:active { transform: scale(0.98); }
+/* ── Discount badge ─────────────────────────────────────────── */
+.badge {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  background: #F47C20;
+  color: #fff;
+  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 50px;
+  letter-spacing: 0.2px;
+  z-index: 2;
+  white-space: nowrap;
+}
 
-/* ───────────────── Badge (hidden) ───────────────── */
-.badge { display: none; }
+.oosBadge {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 50px;
+  z-index: 2;
+}
 
-/* ───────────────── Product Image ───────────────── */
-
+/* ── Image area ─────────────────────────────────────────────── */
 .imgWrap {
   width: 100%;
-  height: 110px;
+  height: 116px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #FDF5EC;
-  border-radius: 12px;
+  background: #F7F3EE;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  padding: 8px;
+  box-sizing: border-box;
   transition: transform 0.28s ease;
 }
 
-.emoji { font-size: 42px; }
+.emoji { font-size: 40px; }
 
-/* ───────────────── Product Info ───────────────── */
-
+/* ── Info area ──────────────────────────────────────────────── */
 .info {
-  margin-top: 6px;
+  padding: 9px 10px 11px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  flex: 1;
 }
 
 .name {
-  margin-top: 10px;
-  font-size: 12px;
-  font-weight: 650;
-  color: #25324a;
-  line-height: 1.3;
-  min-height: 38px;
+  margin: 0;
+  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.35;
+  min-height: 30px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* ───────────────── Price ───────────────── */
-
 .priceRow {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: baseline;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 1px;
 }
 
 .price {
+  font-family: var(--font-baloo, 'Baloo 2', cursive);
   font-size: 14px;
   font-weight: 800;
-  color: #1f2937;
+  color: #1a1a2e;
   line-height: 1;
 }
 
-.mrp { display: none; }
+.mrp {
+  font-size: 10.5px;
+  color: #bbb;
+  text-decoration: line-through;
+  font-weight: 400;
+}
 
-/* ───────────────── Empty State ───────────────── */
-
+/* ── Empty state ────────────────────────────────────────────── */
 .empty {
   text-align: center;
-  padding: 24px 0;
-  color: #999;
+  padding: 28px 0;
+  color: #b0aab5;
+  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-size: 13px;
 }
 
-/* ───────────────── Tablet ───────────────── */
+/* ══ RESPONSIVE ═════════════════════════════════════════════════
+   Mobile (≤768px) — horizontal snap carousel
+   ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
-  .track {
-    gap: 16px;
-    padding: 0 16px 8px 0;
-  }
-  .card      { width: 95px; min-width: 95px; }
-  .imgWrap   { width: 95px; height: 75px; }
-  .name      { font-size: 9px; min-height: 24px; }
-  .price     { font-size: 13px; }
-  .title     { font-size: 18px; }
+  .header  { margin-bottom: 12px; }
+  .title   { font-size: 18px; }
+  .viewAll { font-size: 12px; }
+  .card    { width: 124px; min-width: 124px; }
+  .imgWrap { height: 104px; }
+  .name    { font-size: 11px; min-height: 28px; }
+  .price   { font-size: 13px; }
+  .info    { padding: 8px 9px 10px; gap: 3px; }
 }
 
-/* ───────────────── Mobile ───────────────── */
-
 @media (max-width: 480px) {
-  .track     { gap: 12px; }
-  .card      { width: 88px; min-width: 88px; }
-  .imgWrap   { width: 88px; height: 70px; }
-  .name      { font-size: 8.5px; min-height: 22px; }
-  .price     { font-size: 12px; }
-  .title     { font-size: 16px; }
+  .title       { font-size: 17px; }
   .titleUnderline { width: 28px; height: 3px; }
+  .card        { width: 116px; min-width: 116px; }
+  .imgWrap     { height: 96px; }
+  .name        { font-size: 10.5px; min-height: 26px; }
+  .price       { font-size: 12.5px; }
+  .badge       { font-size: 8.5px; padding: 2px 6px; }
+  .info        { padding: 7px 8px 9px; }
+}
+
+@media (max-width: 380px) {
+  .card    { width: 108px; min-width: 108px; }
+  .imgWrap { height: 88px; }
 }

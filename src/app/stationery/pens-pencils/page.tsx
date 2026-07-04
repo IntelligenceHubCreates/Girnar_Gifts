@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -12,9 +12,9 @@ export default function Page() {
       <main>
         <CategoryPage
           title="Pens & Pencils"
-          emoji="🖊️"
+          emoji="✒️"
           description="HB pencils, gel pens, colour pens & more"
-          bgEmojis={["🖊️","✏️","🖋️","📝","🎨","🖌️"]}
+          bgEmojis={["✒️","🖊️","✏️","🖍️","📝","✒️"]}
           subcategories={[{ label: "HB Pencils", slug: "hb-pencils" }, { label: "Gel Pens", slug: "gel-pens" }, { label: "Colour Pens", slug: "colour-pens" }, { label: "Mechanical Pencils", slug: "mechanical-pencils" }, { label: "Sketch Pens", slug: "sketch-pens" }]}
           tags={["Smooth Writing","Non-toxic Ink","School Safe"]}
           categorySlug="pens-pencils"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/stationery"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

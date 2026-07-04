@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Board Games"
           emoji="🎲"
           description="Family, card, strategy & party games"
-          bgEmojis={["🎲","♟️","🃏","🎯","🏆","🎰"]}
+          bgEmojis={["🎲","♟️","🃏","🎯","🏆","🧩"]}
           subcategories={[{ label: "Strategy Games", slug: "strategy-games" }, { label: "Card Games", slug: "card-games" }, { label: "Party Games", slug: "party-games" }, { label: "Classic Games", slug: "classic-games" }]}
           tags={["2-6 Players","Family Fun","Award Winning"]}
           categorySlug="board-games"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/toys"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

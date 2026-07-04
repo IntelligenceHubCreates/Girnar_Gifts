@@ -16,6 +16,7 @@ import {
   useEffect,
   ReactNode,
 } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface WishlistContextValue {
   wishlist: string[];
@@ -28,41 +29,47 @@ const WishlistContext = createContext<WishlistContextValue | undefined>(undefine
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [wishlist, setWishlist] = useState<string[]>([]);
+  const { data: session, status } = useSession();
+  const token = (session as any)?.backendToken as string | undefined;
 
-  // Load the user's existing wishlist once on mount.
   useEffect(() => {
+    if (status !== 'authenticated' || !token) return;
     const controller = new AbortController();
     (async () => {
       try {
-        const res = await fetch('/api/favorite', { signal: controller.signal });
+        const res = await fetch('/api/favorite', {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
         if (!res.ok) return;
         const data = await res.json();
-        const ids: string[] = Array.isArray(data)
+        const rawList: any[] = Array.isArray(data)
           ? data
-          : Array.isArray(data?.data)
-            ? data.data.map((p: { id: string }) => p.id)
-            : [];
+          : (data?.favorites ?? data?.data ?? []);
+        const ids: string[] = rawList.map((item: any) =>
+          String(item?.product?.id ?? item?.id ?? item),
+        ).filter(Boolean);
         setWishlist(ids);
-      } catch {
-        /* non-critical on initial load */
-      }
+      } catch { /* non-critical */ }
     })();
     return () => controller.abort();
-  }, []);
+  }, [status, token]);
 
   const toggleWishlist = useCallback(
     async (id: string) => {
       const wasWishlisted = wishlist.includes(id);
       setWishlist((prev) => (wasWishlisted ? prev.filter((x) => x !== id) : [...prev, id]));
       try {
-        const res = await fetch(`/api/favorite/${id}`, { method: wasWishlisted ? 'DELETE' : 'POST' });
+        const res = await fetch(`/api/favorite/${id}`, {
+          method: wasWishlisted ? 'DELETE' : 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         if (!res.ok) throw new Error('wishlist request failed');
       } catch {
-        // roll back on failure
         setWishlist((prev) => (wasWishlisted ? [...prev, id] : prev.filter((x) => x !== id)));
       }
     },
-    [wishlist],
+    [wishlist, token],
   );
 
   const isWishlisted = useCallback((id: string) => wishlist.includes(id), [wishlist]);

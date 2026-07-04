@@ -463,7 +463,7 @@ export default function Header() {
           <div className={styles.iconActions}>
 
             {/* Wishlist */}
-            <Link href="/account?tab=wishlist" className={styles.iconAction} aria-label="Wishlist">
+            <Link href="/wishlist" className={styles.iconAction} aria-label="Wishlist">
               <span className={styles.iconActionIcon}><IconHeart /></span>
               <span className={styles.iconActionLabel}>Wishlist</span>
             </Link>
@@ -701,7 +701,7 @@ export default function Header() {
 
               {/* Wishlist + Orders quick links in drawer */}
               <div className={styles.drawerSection}>
-                <Link href="/account?tab=wishlist" className={styles.drawerToggle} onClick={closeMenu}>
+                <Link href="/wishlist" className={styles.drawerToggle} onClick={closeMenu}>
                   <span aria-hidden="true">❤️</span>
                   <span className={styles.drawerToggleLabel}>Wishlist</span>
                 </Link>

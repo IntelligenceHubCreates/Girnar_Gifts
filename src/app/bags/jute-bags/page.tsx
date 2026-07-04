@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Jute Bags"
           emoji="🛍️"
           description="Eco-friendly jute tote bags"
-          bgEmojis={["🛍️","🌿","🌱","🌾","♻️","🌍"]}
+          bgEmojis={["🛍️","🌿","♻️","🪴","🌱","🤝"]}
           subcategories={[{ label: "Plain Jute", slug: "plain-jute" }, { label: "Printed Jute", slug: "printed-jute" }, { label: "Gift Jute", slug: "gift-jute" }]}
           tags={["Eco Friendly","Sturdy","Reusable"]}
           categorySlug="jute-bags"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/bags"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

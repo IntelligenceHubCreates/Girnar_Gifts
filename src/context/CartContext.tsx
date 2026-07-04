@@ -250,14 +250,16 @@ async function mergeLocalIntoServer(local: CartItem[]) {
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
-  const loadedRef = useRef(false);
-  const itemsRef  = useRef(state.items);
-  const authedRef = useRef(state.authed);
-  const putTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadedRef   = useRef(false);
+  const itemsRef    = useRef(state.items);
+  const authedRef   = useRef(state.authed);
+  const hydratedRef = useRef(state.hydrated);
+  const putTimers   = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const toastTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => { itemsRef.current = state.items; }, [state.items]);
-  useEffect(() => { authedRef.current = state.authed; }, [state.authed]);
+  useEffect(() => { itemsRef.current  = state.items;    }, [state.items]);
+  useEffect(() => { authedRef.current = state.authed;   }, [state.authed]);
+  useEffect(() => { hydratedRef.current = state.hydrated; }, [state.hydrated]);
 
   // Persist to localStorage on every change once we've loaded.
   useEffect(() => { if (state.hydrated) writeLocal(state.items); }, [state.items, state.hydrated]);
@@ -300,6 +302,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [loadCart]);
 
   const addItem = useCallback(async (input: AddItemInput): Promise<ActionResult> => {
+    // Still resolving auth state — do nothing yet
+    if (!hydratedRef.current) return { ok: false, error: 'loading' };
+
+    // Not logged in → redirect to login with current page as callback
+    if (!authedRef.current) {
+      if (typeof window !== 'undefined') {
+        const cb = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `/login?callbackUrl=${cb}`;
+      }
+      return { ok: false, error: 'login_required' };
+    }
+
     const color = input.color ?? '';
     const payload: CartItem = {
       id: input.id,
@@ -322,8 +336,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     dispatch({ type: 'ADD_ITEM', payload });               // optimistic
 
-    if (!authedRef.current) { markGuestPending(); return { ok: true }; }
-
     try {
       const res: any = await _post('/api/cart/items', {
         product_id: input.id,
@@ -344,10 +356,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return { ok: true };
     } catch (e: any) {
-      if (statusOf(e) === 401) {                           // token expired → keep as guest
+      if (statusOf(e) === 401) {
+        // Token expired mid-session → redirect to login
         dispatch({ type: 'SET_AUTHED', payload: false });
-        markGuestPending();
-        return { ok: true };
+        if (typeof window !== 'undefined') {
+          const cb = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `/login?callbackUrl=${cb}`;
+        }
+        return { ok: false, error: 'login_required' };
       }
       // Real failure (e.g. out of stock) → accurate rollback
       if (prevQty > 0) dispatch({ type: 'UPDATE_QUANTITY', payload: { id: input.id, color, quantity: prevQty } });

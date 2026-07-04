@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -12,9 +12,9 @@ export default function Page() {
       <main>
         <CategoryPage
           title="Hair Accessories"
-          emoji="💇"
+          emoji="🎀"
           description="Scrunchies, clips, headbands & hair ties"
-          bgEmojis={["💇","🎀","🌸","✨","🌈","⭐"]}
+          bgEmojis={["🎀","💇","✨","🌸","🪢","💜"]}
           subcategories={[{ label: "Scrunchies", slug: "scrunchies" }, { label: "Hair Clips", slug: "hair-clips" }, { label: "Headbands", slug: "headbands" }, { label: "Hair Ties", slug: "hair-ties" }, { label: "Claw Clips", slug: "claw-clips" }]}
           tags={["Trendy","Damage Free","Great Gifts"]}
           categorySlug="hair"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/beauty"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

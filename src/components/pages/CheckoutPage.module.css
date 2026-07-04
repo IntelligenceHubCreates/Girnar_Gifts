@@ -55,13 +55,13 @@
 
 @media (max-width: 768px) {
   .page {
-    padding: 16px 16px 80px;
+    padding: 16px 16px 90px;
   }
 }
 
 @media (max-width: 480px) {
   .page {
-    padding: 12px 12px 72px;
+    padding: 12px 12px 90px;
   }
 }
 

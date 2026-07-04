@@ -294,6 +294,18 @@
   color: #fff;
   transform: translateY(-1px);
 }
+/*!************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[3]!./src/app/cart/cart.module.css ***!
+  \************************************************************************************************************************************************************************************************************************************************************************/
+/* Footer: visible on desktop, hidden on tablet + mobile */
+.cart_footerWrap__RPxcU { display: block; }
+
+@media (max-width: 1024px) {
+  .cart_footerWrap__RPxcU { display: none; }
+  /* CartPage.module.css already handles bottom clearance for both the
+     mobile checkout bar and the MobileBottomNav — no padding needed here */
+}
+
 /*!***********************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[3]!./src/components/layout/Header.module.css ***!
   \***********************************************************************************************************************************************************************************************************************************************************************************/
@@ -1188,6 +1200,175 @@
     color: #fff;
   }
 }
+/*!********************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[3]!./src/components/layout/MobileBottomNav.module.css ***!
+  \********************************************************************************************************************************************************************************************************************************************************************************************/
+/* ═══════════════════════════════════════════════════════════════════════════
+   MobileBottomNav — Glassmorphism floating pill
+   Desktop: hidden.  ≤1024px: floating fixed bar.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.MobileBottomNav_bottomNav__IHc0K { display: none; }
+
+@media (max-width: 1024px) {
+  .MobileBottomNav_bottomNav__IHc0K {
+    display: flex;
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 900;
+    align-items: center;
+    justify-content: space-around;
+    padding: 8px 4px;
+    box-sizing: border-box;
+
+    /* ── Glassmorphism ── */
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+
+    /* ── Shape ── */
+    border-radius: 26px;
+    border: 1.5px solid rgba(255, 255, 255, 0.72);
+
+    /* ── Multi-layer shadow ── */
+    box-shadow:
+      0 2px 6px  rgba(0, 0, 0, 0.04),
+      0 8px 24px rgba(28, 31, 62, 0.10),
+      0 20px 44px rgba(28, 31, 62, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+}
+
+/* ── Nav item ────────────────────────────────────────────────────────────── */
+.MobileBottomNav_navItem__UPNba {
+  flex: 1 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 2px;
+  text-decoration: none;
+  color: #b4b8ce;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.22s ease;
+}
+
+.MobileBottomNav_navItemActive__pRITW { color: #FF6B35; }
+
+/* ── Icon pill ───────────────────────────────────────────────────────────── */
+.MobileBottomNav_iconWrap__K7iv0 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 34px;
+  border-radius: 14px;
+  transition: all 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Active: coral gradient pill */
+.MobileBottomNav_navItemActive__pRITW .MobileBottomNav_iconWrap__K7iv0 {
+  background: linear-gradient(135deg, #FF6B35 0%, #f4823a 100%);
+  box-shadow:
+    0 4px 12px rgba(255, 107, 53, 0.38),
+    0 1px 3px  rgba(255, 107, 53, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transform: scale(1.06) translateY(-1px);
+}
+
+/* White icon on coral background */
+.MobileBottomNav_navItemActive__pRITW .MobileBottomNav_iconWrap__K7iv0 svg {
+  stroke: #ffffff;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12));
+}
+
+/* Avatar: no coral pill — just a glowing ring */
+.MobileBottomNav_navItemActive__pRITW .MobileBottomNav_iconWrapAvatar__x55Yp {
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Press feedback */
+.MobileBottomNav_navItem__UPNba:active .MobileBottomNav_iconWrap__K7iv0         { transform: scale(0.88); transition-duration: 0.08s; }
+.MobileBottomNav_navItemActive__pRITW:active .MobileBottomNav_iconWrap__K7iv0   { transform: scale(0.94) translateY(0); transition-duration: 0.08s; }
+
+/* ── Label ───────────────────────────────────────────────────────────────── */
+.MobileBottomNav_navLabel___x9LZ {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.15px;
+  white-space: nowrap;
+  transition: color 0.22s ease;
+}
+
+/* ── Avatar ──────────────────────────────────────────────────────────────── */
+.MobileBottomNav_avatar__HIUFw {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  transition: box-shadow 0.22s ease;
+}
+
+.MobileBottomNav_navItemActive__pRITW .MobileBottomNav_avatar__HIUFw {
+  box-shadow:
+    0 0 0 2.5px #FF6B35,
+    0 0 0 4.5px rgba(255, 107, 53, 0.18);
+}
+
+.MobileBottomNav_avatarInitial__72nIv {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B35 0%, #f4823a 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: box-shadow 0.22s ease;
+}
+
+.MobileBottomNav_navItemActive__pRITW .MobileBottomNav_avatarInitial__72nIv {
+  box-shadow:
+    0 0 0 2.5px #FF6B35,
+    0 0 0 4.5px rgba(255, 107, 53, 0.18);
+}
+
+/* ── Badge ───────────────────────────────────────────────────────────────── */
+.MobileBottomNav_badge__78qKE {
+  position: absolute;
+  top: -5px;
+  right: -1px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 17px;
+  text-align: center;
+  box-sizing: border-box;
+  border: 2px solid rgba(255, 255, 255, 0.88);
+  box-shadow: 0 2px 6px rgba(244, 63, 94, 0.42);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .MobileBottomNav_navItem__UPNba, .MobileBottomNav_iconWrap__K7iv0 { transition: none; }
+}
+
 /*!************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[3]!./src/components/pages/CartPage.module.css ***!
   \************************************************************************************************************************************************************************************************************************************************************************************/
@@ -2079,11 +2260,15 @@
 
 /* ═══ Mobile sticky checkout bar ═══ */
 .CartPage_mobileCheckoutBar__bTblC {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+  position: fixed; left: 14px; right: 14px;
+  /* Sit above the floating MobileBottomNav (66px tall + 12px gap + safe-area) */
+  bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  z-index: 901;
   display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  padding: 10px 14px;
   background: rgba(255,255,255,0.96); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border-top: 1.5px solid #f0ece5; box-shadow: 0 -6px 24px rgba(0,0,0,0.08);
+  border-radius: 22px;
+  border: 1.5px solid rgba(255,255,255,0.72); box-shadow: 0 -6px 24px rgba(0,0,0,0.08);
 }
 .CartPage_mcbInfo__tgBkf   { display: flex; flex-direction: column; line-height: 1.15; flex-shrink: 0; }
 .CartPage_mcbLabel__tcyNQ  { font-size: 10px; color: #8a8a8a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -2093,8 +2278,8 @@
 .CartPage_mcbBtnDisabled__gj3kh { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
 /* Desktop already has a sticky summary → hide the bar */
 @media (min-width: 960px) { .CartPage_mobileCheckoutBar__bTblC { display: none; } }
-/* Clear the bar on mobile */
-@media (max-width: 959px) { .CartPage_page__MtB67 { padding-bottom: 104px; } }
+/* Clear BOTH bars: nav bottom (82px) + checkout bar height (~62px) + breathing room */
+@media (max-width: 959px) { .CartPage_page__MtB67 { padding-bottom: calc(152px + env(safe-area-inset-bottom, 0px)); } }
 
 /* ═══ Skeleton loaders ═══ */
 .CartPage_cartSkeleton__49tdu { display: flex; flex-direction: column; gap: 14px; }

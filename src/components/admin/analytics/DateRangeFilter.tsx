@@ -24,28 +24,49 @@ export default function DateRangeFilter({
   const [e, setE] = useState(end ?? '')
 
   return (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-      {PRESETS.map(p => (
-        <button key={p.key}
-          className={`btn ${range === p.key ? 'btn-primary' : 'btn-outline'} btn-sm`}
-          onClick={() => { setShowCustom(false); onChange(p.key) }}>
-          {p.label}
+    <div className="drf-root">
+      {/* Preset buttons — scrollable on mobile */}
+      <div className="drf-presets">
+        {PRESETS.map(p => (
+          <button
+            key={p.key}
+            className={`btn ${range === p.key ? 'btn-primary' : 'btn-outline'} btn-sm`}
+            onClick={() => { setShowCustom(false); onChange(p.key) }}
+          >
+            {p.label}
+          </button>
+        ))}
+        <button
+          className={`btn ${range === 'custom' ? 'btn-primary' : 'btn-outline'} btn-sm`}
+          onClick={() => setShowCustom(v => !v)}
+        >
+          Custom
         </button>
-      ))}
-      <button
-        className={`btn ${range === 'custom' ? 'btn-primary' : 'btn-outline'} btn-sm`}
-        onClick={() => setShowCustom(v => !v)}>
-        Custom
-      </button>
+      </div>
+
+      {/* Custom date pickers — stack on mobile */}
       {showCustom && (
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <input type="date" value={s} max={e || undefined} onChange={ev => setS(ev.target.value)}
-            className="form-input" style={{ width: 150, padding: '5px 8px' }} />
-          <span style={{ color: 'var(--muted,#9ca3af)' }}>→</span>
-          <input type="date" value={e} min={s || undefined} onChange={ev => setE(ev.target.value)}
-            className="form-input" style={{ width: 150, padding: '5px 8px' }} />
-          <button className="btn btn-primary btn-sm" disabled={!s || !e}
-            onClick={() => onChange('custom', s, e)}>Apply</button>
+        <div className="drf-custom">
+          <div className="drf-date-row">
+            <input
+              type="date" value={s} max={e || undefined}
+              onChange={ev => setS(ev.target.value)}
+              className="form-input drf-date-input"
+            />
+            <span className="drf-sep">→</span>
+            <input
+              type="date" value={e} min={s || undefined}
+              onChange={ev => setE(ev.target.value)}
+              className="form-input drf-date-input"
+            />
+          </div>
+          <button
+            className="btn btn-primary btn-sm"
+            disabled={!s || !e}
+            onClick={() => onChange('custom', s, e)}
+          >
+            Apply
+          </button>
         </div>
       )}
     </div>

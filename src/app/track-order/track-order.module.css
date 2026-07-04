@@ -1,0 +1,6 @@
+/* Footer: visible on desktop, hidden on tablet + mobile */
+.footerWrap { display: block; }
+
+@media (max-width: 1024px) {
+  .footerWrap { display: none; }
+}

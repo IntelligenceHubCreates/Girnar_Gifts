@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="All Keychains"
           emoji="🗝️"
           description="Browse our complete keychain collection"
-          bgEmojis={["🗝️","🔑","⭐","✨","🌟","💫"]}
+          bgEmojis={["🗝️","🔑","✨","🌟","🎀","💎"]}
           subcategories={[{ label: "Character Keychains", slug: "character-keychains" }, { label: "Plain Keychains", slug: "plain-keychains" }, { label: "Photo Keychains", slug: "photo-keychains" }, { label: "Novelty Keychains", slug: "novelty-keychains" }]}
           tags={["Collectable","Giftable","Great Quality"]}
           categorySlug="keychains-all"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/keychains"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

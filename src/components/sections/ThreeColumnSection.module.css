@@ -1,11 +1,60 @@
+/* ══════════════════════════════════════════════════════════════
+   ThreeColumnSection — 3-col editorial grid on desktop,
+   stacked sections on mobile
+   ══════════════════════════════════════════════════════════════ */
+
 .threeCol {
-  padding: 0 40px 56px;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
+  padding: 56px 40px 64px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+  gap: 0;
+  background: #FDFAF6;
+  border-top: 1px solid #F0EAE0;
+  border-bottom: 1px solid #F0EAE0;
 }
 
-@media (max-width: 1100px) { .threeCol { padding: 0 24px 48px; } }
-@media (max-width: 768px)  { .threeCol { padding: 0 16px 40px; gap: 24px; } }
-@media (max-width: 600px)  { .threeCol { padding: 0 12px 32px; gap: 20px; } }
-@media (max-width: 380px)  { .threeCol { padding: 0 10px 28px; gap: 16px; } }
+/* Inner padding + column dividers */
+.threeCol > * { padding: 0 32px; }
+.threeCol > *:first-child { padding-left: 0; }
+.threeCol > *:last-child  { padding-right: 0; }
+.threeCol > * + * { border-left: 1px solid #F0EAE0; }
+
+/* Tablet */
+@media (max-width: 1100px) {
+  .threeCol         { padding: 44px 24px 52px; }
+  .threeCol > *     { padding: 0 22px; }
+}
+
+/* Mobile: stack vertically with alternating backgrounds for visual rhythm */
+@media (max-width: 768px) {
+  .threeCol {
+    grid-template-columns: 1fr;
+    padding: 0;
+    border-bottom: none;
+    background: transparent;
+  }
+
+  /* Remove desktop column divider; media query order ensures this wins */
+  .threeCol > * {
+    min-width: 0;       /* grid items default to min-width:auto which expands to content width */
+    overflow: hidden;   /* clip the track so overflow-x:auto on the track creates the scroll */
+    padding: 20px 16px 24px;
+    border-left: none;
+    border-bottom: 1px solid #EDE8E0;
+  }
+
+  /* Alternate cream / white to visually separate the 3 carousels */
+  .threeCol > *:nth-child(odd)  { background: #FDFAF6; }
+  .threeCol > *:nth-child(even) { background: #ffffff; }
+
+  /* Override the desktop zero-padding rules which have higher specificity (0,2,0) */
+  .threeCol > *:first-child { padding-left: 16px; }
+  .threeCol > *:last-child  { padding-right: 16px; border-bottom: none; }
+}
+
+@media (max-width: 480px) {
+  .threeCol > * { padding: 16px 12px 20px; }
+  .threeCol > *:first-child { padding-left: 12px; }
+  .threeCol > *:last-child  { padding-right: 12px; }
+}

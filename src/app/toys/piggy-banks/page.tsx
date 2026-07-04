@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Piggy Banks"
           emoji="🐷"
           description="Coin banks in animal, character & digital styles"
-          bgEmojis={["🐷","💰","🐻","🦊","🌟","💎"]}
+          bgEmojis={["🐷","🪙","💰","💵","🏦","⭐"]}
           //subcategories={[{ label: "Piggy Bank", slug: "piggy-bank" }, { label: "Digital Banks", slug: "digital-banks" }, { label: "Novelty Banks", slug: "novelty-banks" }, { label: "Transparent Banks", slug: "transparent-banks" }]}
           tags={["Teach Saving","Cute Designs","Durable"]}
           categorySlug="piggy-banks"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/toys"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

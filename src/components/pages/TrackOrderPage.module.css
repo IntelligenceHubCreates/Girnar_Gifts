@@ -455,7 +455,7 @@
 
 /* ─── Tablet (≤768px) ────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .page { padding: 16px 16px 80px; }
+  .page { padding: 16px 16px 90px; }
 
   .hero { padding: 28px 24px; gap: 20px; border-radius: 20px; }
   .heroArt { display: none; }
@@ -489,7 +489,7 @@
 
 /* ─── Mobile (≤600px) ────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .page { padding: 12px 12px 80px; }
+  .page { padding: 12px 12px 90px; }
 
   /* Hero */
   .hero { padding: 24px 20px; border-radius: 18px; margin-bottom: 16px; }
@@ -590,7 +590,7 @@
 
 /* ─── Very small (≤380px) ────────────────────────────────────────────────── */
 @media (max-width: 380px) {
-  .page      { padding: 10px 10px 80px; }
+  .page      { padding: 10px 10px 90px; }
   .heroTitle { font-size: 18px; }
   .railNode  { width: 30px; height: 30px; font-size: 13px; }
   .railLabel { font-size: 8px; max-width: 44px; }

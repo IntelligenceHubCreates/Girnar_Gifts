@@ -72,23 +72,15 @@ export const _delete = (url: string, config?: Config) => {
 export const handleResponse = async (response: Response) => {
   if (!response.ok) {
     if (response.status === 401) {
-      if (typeof window !== 'undefined') {
-        // The backend token has expired. A hard redirect to /login does NOT clear
-        // the NextAuth session cookie (30-day maxAge), so middleware keeps waving
-        // the user through → the page 401s again → infinite redirect loop.
-        // signOut() invalidates the session so the redirect actually sticks.
-        const { signOut } = await import('next-auth/react');
-        // Avoid firing signOut repeatedly if several calls 401 at once.
-        if (!(window as any).__loggingOut) {
-          (window as any).__loggingOut = true;
-          await signOut({ callbackUrl: '/login' });
-        }
-      }
-      return Promise.reject('Unauthorized');
+      // Do NOT navigate or signOut here. Several contexts (cart, wishlist) fetch
+      // protected endpoints on mount; if the user is logged out those 401 legitimately.
+      // Navigating from here caused an infinite /login ⇄ signout loop. Callers that
+      // care about auth (or the middleware on the next protected navigation) handle it.
+      return Promise.reject(Object.assign(new Error('Unauthorized'), { status: 401 }));
     }
     if (response.status === 403) {
       toast.error('Permission denied');
-      return Promise.reject('Forbidden');
+      return Promise.reject(Object.assign(new Error('Forbidden'), { status: 403 }));
     }
     const data = await response.json().catch(() => ({}));
     return Promise.reject(data?.detail || data?.message || response.statusText || 'Request failed');

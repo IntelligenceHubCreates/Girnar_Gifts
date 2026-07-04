@@ -1,8 +1,8 @@
-import TopBar from '@/components/layout/TopBar';
 import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import ProductPage from '@/components/pages/ProductPage';
+import styles from '@/styles/pageLayout.module.css';
 
 interface Props {
   params: { id: string };
@@ -15,7 +15,10 @@ export default function ProductDetailPage({ params }: Props) {
       <main>
         <ProductPage productId={params.id} />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

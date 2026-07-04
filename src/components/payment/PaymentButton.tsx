@@ -75,7 +75,7 @@ export default function PaymentButton({
         headers:     { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          amount,
+          amount:           Math.round(amount),
           cart_items:       cartItems,      // color fields now included
           shipping_address: shippingAddress,
           coupon_code:      couponCode,     // ← NEW

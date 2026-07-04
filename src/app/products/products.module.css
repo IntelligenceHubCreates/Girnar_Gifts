@@ -17,5 +17,5 @@
 
   /* Reserve space so page content never hides behind the fixed bottom nav
      (≈64px bar + iPhone safe-area inset). */
-  .pageMain { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+  .pageMain { padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
 }

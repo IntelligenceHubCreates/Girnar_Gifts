@@ -1,9 +1,8 @@
-// app/order-confirmation/page.tsx
-import TopBar from '@/components/layout/TopBar';
 import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import OrderConfirmationClient from './OrderConfirmationClient';
+import styles from '@/styles/pageLayout.module.css';
 import { Suspense } from 'react';
 
 export default function OrderConfirmationPage() {
@@ -15,7 +14,10 @@ export default function OrderConfirmationPage() {
           <OrderConfirmationClient />
         </Suspense>
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

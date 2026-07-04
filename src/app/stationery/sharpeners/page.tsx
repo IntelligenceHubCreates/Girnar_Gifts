@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Sharpeners"
           emoji="✂️"
           description="Handheld, electric & novelty sharpeners"
-          bgEmojis={["✂️","✏️","🔑","⚙️","🌟","🎯"]}
+          bgEmojis={["✂️","✏️","🖊️","⚙️","🔧","🌟"]}
           subcategories={[{ label: "Handheld Sharpeners", slug: "handheld-sharpeners" }, { label: "Electric Sharpeners", slug: "electric-sharpeners" }, { label: "Novelty Sharpeners", slug: "novelty-sharpeners" }]}
           tags={["Precise Cut","Dust-free","School Safe"]}
           categorySlug="sharpeners"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/stationery"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

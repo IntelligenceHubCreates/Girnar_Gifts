@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Duffle & Travel"
           emoji="🧳"
           description="Spacious duffel bags for trips & camps"
-          bgEmojis={["🧳","✈️","🚂","🏕️","🎒","⛵"]}
+          bgEmojis={["🧳","🎒","✈️","🗺️","🏕️","🚂"]}
           subcategories={[{ label: "Kids Duffel", slug: "kids-duffel" }, { label: "Sports Bags", slug: "sports-bags" }, { label: "Overnight Bags", slug: "overnight-bags" }]}
           tags={["Spacious","Durable Zips","Washable"]}
           categorySlug="duffle-travel"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/bags"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

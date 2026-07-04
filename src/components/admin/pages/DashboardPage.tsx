@@ -303,53 +303,6 @@ const counts = stats?.order_status_counts
 
   return (
     <>
-      <style>{`
-        @keyframes shimmer {
-          0%   { background-position: -200% 0 }
-          100% { background-position:  200% 0 }
-        }
-        .dash-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
-        .dash-mid-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; margin-bottom: 20px; }
-        .dash-bot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-        @media (max-width: 1100px) {
-          .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); }
-          .dash-mid-grid { grid-template-columns: 1fr; }
-          .dash-bot-grid { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 600px) {
-          .dash-kpi-grid { grid-template-columns: 1fr; }
-        }
-        .dash-card { background: #fff; border-radius: 14px; border: 1px solid #f0f0f0; box-shadow: 0 1px 10px rgba(0,0,0,0.04); }
-        .dash-card-head { padding: 16px 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f9f9f9; gap: 10px; flex-wrap: wrap; }
-        .dash-card-title { font-weight: 900; font-size: .9rem; color: #111827; }
-        .dash-alert {
-          display: flex; align-items: center; gap: 12px;
-          background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px;
-          padding: 12px 18px; margin-bottom: 20px; cursor: pointer;
-          transition: background .15s, border-color .15s;
-        }
-        .dash-alert:hover { background: #fef3c7; border-color: #fcd34d; }
-        .dash-alert-icon { font-size: 18px; flex-shrink: 0; }
-        .dash-alert span:nth-child(2) { flex: 1; font-size: .84rem; font-weight: 600; color: #92400e; }
-        .dash-alert-cta { font-size: .8rem; font-weight: 800; color: #b45309; white-space: nowrap; }
-        .orders-tab-btn {
-          padding: 4px 12px; border-radius: 20px; font-size: .72rem; font-weight: 700;
-          cursor: pointer; border: 1.5px solid transparent; background: transparent;
-          color: #9ca3af; transition: all .15s; white-space: nowrap;
-        }
-        .orders-tab-btn:hover { background: #f3f4f6; color: #374151; }
-        .orders-tab-btn.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
-        .dash-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
-        .dash-table thead tr { background: #fafafa; }
-        .dash-table th { padding: 9px 14px; text-align: left; font-size: .67rem; font-weight: 900; color: #9ca3af; letter-spacing: .06em; border-bottom: 1px solid #f3f4f6; }
-        .dash-table tbody tr { border-bottom: 1px solid #fafafa; transition: background .1s; }
-        .dash-table tbody tr:hover { background: #fafafa; }
-        .dash-table td { padding: 11px 14px; }
-        .dash-act-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #fafafa; }
-        .dash-act-row:last-child { border-bottom: none; }
-        .dash-act-ico { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-      `}</style>
-
       {/* ── KPI Cards ──────────────────────────────────────────── */}
       <div className="dash-kpi-grid">
         {loading
@@ -390,7 +343,7 @@ const counts = stats?.order_status_counts
         <div className="dash-alert" role="button" tabIndex={0} onClick={() => onNavigate?.('orders')}
           onKeyDown={(e) => { if (e.key === 'Enter') onNavigate?.('orders') }}>
           <span className="dash-alert-icon">🔔</span>
-          <span>
+          <span className="dash-alert-msg">
             <strong>{needsAttention}</strong> order{needsAttention !== 1 ? 's' : ''} need attention
             {' '}— {pending} pending, {processing} processing.
           </span>

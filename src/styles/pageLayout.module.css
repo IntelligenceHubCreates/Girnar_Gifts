@@ -1,0 +1,8 @@
+/* Shared layout shell: footer visibility + floating nav clearance.
+   Import this in any page that uses Header + Footer + MobileBottomNav. */
+
+.footerWrap { display: block; }
+
+@media (max-width: 1024px) {
+  .footerWrap { display: none; }
+}

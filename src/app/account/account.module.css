@@ -4,9 +4,12 @@
    AccountPage.tsx or AccountPage.module.css.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Matches the account background (--ll-bg) so the bottom-nav clearance area
-   below the page blends seamlessly on mobile. */
+/* Warm cream background on mobile — matches homepage mobile palette */
 .pageMain { background: #f7f8fa; }
+
+@media (max-width: 768px) {
+  .pageMain { background: #FEF6EE; }
+}
 
 /* Footer is shown on desktop … */
 .footerWrap { display: block; }

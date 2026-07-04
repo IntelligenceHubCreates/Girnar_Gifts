@@ -6,8 +6,9 @@ import Image from 'next/image';
 import { _get } from '@/shared/fetchwrapper';
 import type { UiProduct } from '@/types/product';
 import styles from './StationerySpotlight.module.css';
+import { normaliseProduct, unwrapList, fmtINR as fmt, PLACEHOLDER } from '@/lib/normalise';
 
-const PLACEHOLDER = '/images/placeholder-product.png';
+
 
 const FEATURE_ITEMS = [
   { label: 'Boosts Creativity' },
@@ -113,47 +114,7 @@ function ConfettiPiece({ piece }: { piece: typeof CONFETTI[0] }) {
   return null;
 }
 
-function normalise(p: any): UiProduct {
-  const price  = Number(p.original_price ?? p.price ?? 0);
-  const amtOff = Number(p.amount_discount ?? 0);
-  const pctOff = Number(p.percentage_discount ?? 0);
-  let sale = price;
-  if (amtOff > 0)  sale = price - amtOff;
-  else if (pctOff) sale = Math.round(price - (price * pctOff) / 100);
-  sale = Math.max(0, Math.min(sale, price));
 
-  const rawImgs = p.product_image ?? p.images ?? [];
-  const images: string[] = Array.isArray(rawImgs)
-    ? rawImgs.map((i: any) => typeof i === 'string' ? i : (i?.url ?? i?.secure_url ?? '')).filter(Boolean)
-    : [];
-
-  const stock = Number(p.count ?? p.stock ?? p.quantity ?? 0);
-  return {
-    id: String(p.id ?? ''),
-    name: String(p.name ?? ''),
-    price: sale > 0 ? sale : price,
-    originalPrice: price,
-    images,
-    brand: String(p.brand ?? ''),
-    category: String(p.category ?? ''),
-    subcategory: String(p.sub_category_name ?? p.subcategory ?? ''),
-    subcategorySlug: String(p.sub_category_slug ?? ''),
-    ageRange: String(p.age_range ?? ''),
-    stars: Math.min(5, Math.max(0, Number(p.stars ?? p.rating ?? 0))),
-    reviews: Number(p.reviews ?? p.review_count ?? 0),
-    inStock: stock > 0,
-    stockCount: stock,
-    badges: Array.isArray(p.badges) ? p.badges : [],
-    bgGradient: Boolean(p.bg_gradient),
-    description: String(p.description ?? ''),
-    emoji: String(p.emoji ?? ''),
-    discountPct: pctOff,
-    colors: [],
-  };
-}
-
-const fmt = (n: number) =>
-  Number.isFinite(n) && n > 0 ? n.toLocaleString('en-IN') : '0';
 
 function ProductImg({ src, alt }: { src: string; alt: string }) {
   const [errored, setErrored] = useState(false);
@@ -187,22 +148,16 @@ export default function StationerySpotlight() {
   const [loading,    setLoading]    = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
-    setFetchError(false);
-    _get('/api/product/all?category_slug=stationery&limit=5')
-      .then((res) => {
-        const raw: any[] =
-          Array.isArray((res as any)?.data)       ? (res as any).data
-          : Array.isArray(res)                    ? res
-          : Array.isArray((res as any)?.products) ? (res as any).products
-          : [];
-        if (!raw.length) { setFetchError(true); return; }
-        setProducts(raw.map(normalise).slice(0, 5));
-      })
-      .catch(() => setFetchError(true))
-      .finally(() => setLoading(false));
-  }, []);
+useEffect(() => {
+  setLoading(true); setFetchError(false);
+  _get('/api/product/all?category_slug=stationery&limit=5&skip=0')
+    .then((res) => {
+      setProducts(unwrapList(res).map(normaliseProduct).slice(0, 5));
+      // empty = valid, not an error
+    })
+    .catch(() => setFetchError(true))
+    .finally(() => setLoading(false));
+}, []);
 
   return (
     <section className={styles.section}>
@@ -243,6 +198,9 @@ export default function StationerySpotlight() {
             src="/girl.png"
             alt="Child playing with educational toys"
             className={styles.heroImg}
+            width={420}   /* set to actual intrinsic ratio of girl.png */
+            height={480}
+            loading="lazy"
           />
         </div>
 

@@ -1,7 +1,7 @@
-import TopBar from '@/components/layout/TopBar';
-import Header from '@/components/layout/Header';
-import NavBar from '@/components/layout/NavBar';
+﻿import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import styles from '@/styles/pageLayout.module.css';
 import CategoryPage from '@/components/pages/CategoryPage';
 
 
@@ -14,7 +14,7 @@ export default function Page() {
           title="Water Bottles"
           emoji="💧"
           description="Sipper, sports & insulated bottles"
-          bgEmojis={["💧","🌊","❄️","☀️","🏃","🎒"]}
+          bgEmojis={["💧","🍶","🌊","♻️","🥤","❄️"]}
           subcategories={[{ label: "Sipper Bottles", slug: "sipper-bottles" }, { label: "Sports Bottles", slug: "sports-bottles" }, { label: "Insulated", slug: "insulated-bottles" }, { label: "Flip Cap", slug: "flip-cap" }]}
           tags={["BPA Free","Leakproof","Keeps Cold 12hr"]}
           categorySlug="water-bottles"
@@ -23,7 +23,10 @@ export default function Page() {
           parentHref="/bottles"
         />
       </main>
-      <Footer />
+      <div className={styles.footerWrap}>
+        <Footer />
+      </div>
+      <MobileBottomNav />
     </>
   );
 }

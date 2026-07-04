@@ -13,10 +13,11 @@
 
 /* ── Section shell ───────────────────────────────────────── */
 .section {
-  background: transparent;
-  padding: 40px 32px 48px;
+  background: #fff;
+  padding: 48px 32px 56px;
   font-family: var(--font-nunito, 'Nunito', sans-serif);
   margin-top: 0;
+  border-bottom: 1px solid #F0EAE0;
 }
 
 .container { padding: 0; }
@@ -38,11 +39,12 @@
 }
 
 .heading {
-  font-size: clamp(18px, 2.6vw, 28px);
+  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-size: clamp(20px, 2.6vw, 30px);
   font-weight: 900;
   color: #1A1A1A;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   margin: 0;
 }
 
@@ -341,8 +343,8 @@
 /* ── ≤600px: card 148px ─────────────────────────────────── */
 /* productWrap: 148*0.84 ≈ 124px */
 @media (max-width: 600px) {
-  .section        { padding: 20px 14px 28px; }
-  .header         { margin-bottom: 24px; }
+  .section        { padding: 20px 14px 24px; }
+  .header         { margin-bottom: 20px; }
   .heading        { font-size: 17px; }
   .viewAllText    { font-size: 15px; }          /* show only arrow circle */
   .viewAll        { padding: 0; background: transparent; border: none;
