@@ -136,8 +136,8 @@ function messageFromError(e: any): string {
 }
 
 // ── localStorage (persistence + guest layer) ─────────────────────────────────
-const LS_KEY        = 'littleloot_cart_v1';
-const LS_GUEST_FLAG = 'littleloot_cart_guest_pending';
+const LS_KEY        = 'girnar_cart_v1';
+const LS_GUEST_FLAG = 'girnar_cart_guest_pending';
 function readLocal(): CartItem[] {
   if (typeof window === 'undefined') return [];
   try { const raw = localStorage.getItem(LS_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; }

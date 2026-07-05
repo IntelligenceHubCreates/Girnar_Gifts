@@ -4,7 +4,7 @@ import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import WishlistPage from '@/components/pages/WishlistPage';
 import styles from '@/styles/pageLayout.module.css';
 
-export const metadata = { title: 'My Wishlist — Little Loot' };
+export const metadata = { title: 'My Wishlist' };
 
 export default function Wishlist() {
   return (

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import styles from './NewsletterSection.module.css';
+import { brand } from '@/config/brand';
 
 export default function NewsletterSection() {
   const [email, setEmail]         = useState('');
@@ -70,7 +71,7 @@ export default function NewsletterSection() {
 
         {/* ── Copy ── */}
         <div className={styles.copy}>
-          <p className={styles.heading}>Join the Little Loot Family</p>
+          <p className={styles.heading}>Join the {brand.name} Family</p>
           <p className={styles.sub}>
             Get exclusive offers, parenting tips, and new arrivals straight to your inbox.
           </p>

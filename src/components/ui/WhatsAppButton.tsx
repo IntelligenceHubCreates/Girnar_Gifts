@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import styles from './WhatsAppButton.module.css';
+import { brand } from '@/config/brand';
 
-const WHATSAPP_NUMBER = '919876543210'; // format: country code + number, no + or spaces
 const WHATSAPP_MESSAGE = encodeURIComponent(
-  'Hi Little Loot! 👋 I need some help with my order / have a question.'
+  `Hi ${brand.name}! 👋 I need some help with my order / have a question.`
 );
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
+const WHATSAPP_URL = `https://wa.me/${brand.whatsapp}?text=${WHATSAPP_MESSAGE}`;
 
 export default function WhatsAppButton() {
   const [visible,  setVisible]  = useState(false);
@@ -26,7 +26,7 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       className={`${styles.fab} ${visible ? styles.fabVisible : ''}`}
-      aria-label="Chat with Little Loot on WhatsApp"
+      aria-label={`Chat with ${brand.name} on WhatsApp`}
     >
       {/* Tooltip */}
       {tooltip && (

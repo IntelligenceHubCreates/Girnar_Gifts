@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { FormEvent } from 'react'
 import { signOut } from 'next-auth/react'
 import { PageId, PAGE_META } from '@/lib/adminData'
+import { brand } from '@/config/brand'
 
 interface TopbarProps {
   activePage: PageId
@@ -90,15 +91,15 @@ export default function Topbar({ activePage, subtitle, onMenuClick, onSearch }: 
           aria-haspopup="menu"
           aria-expanded={menuOpen}
         >
-          <span className="tb-pav">L</span>
-          <span className="tb-pname">Little Loot</span>
+          <span className="tb-pav">{brand.shortName[0]}</span>
+          <span className="tb-pname">{brand.name}</span>
           <span className="tb-caret">▾</span>
         </button>
 
         {menuOpen && (
           <div className="tb-menu" role="menu">
             <div className="tb-menu-head">
-              <div className="tb-menu-name">Little Loot</div>
+              <div className="tb-menu-name">{brand.name}</div>
               <div className="tb-menu-role">Store Administrator</div>
             </div>
             <button

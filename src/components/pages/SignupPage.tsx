@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { _post } from '@/shared/fetchwrapper';
 import styles from './SignupPage.module.css';
+import { brand } from '@/config/brand';
 
 const PERKS = [
   { emoji: '🎁', title: 'Exclusive Deals', sub: 'Members-only offers daily' },
@@ -202,7 +203,7 @@ export default function SignupPage() {
 
       {/* ── Right: Perks Panel ── */}
       <div className={styles.rightPanel}>
-        <p className={styles.perksHeading}>Why Join Little Loot? 💛</p>
+        <p className={styles.perksHeading}>Why Join {brand.name}? 💛</p>
         <div className={styles.perksList}>
           {PERKS.map(p => (
             <div key={p.title} className={styles.perkItem}>
@@ -217,7 +218,7 @@ export default function SignupPage() {
         <div className={styles.promoTag}>🎁 Get ₹100 off your first order!</div>
       </div>
 
-      {toast && <div className={styles.toast}>🎉 Account created! Welcome to Little Loot!</div>}
+      {toast && <div className={styles.toast}>🎉 Account created! Welcome to {brand.name}!</div>}
     </div>
   );
 }

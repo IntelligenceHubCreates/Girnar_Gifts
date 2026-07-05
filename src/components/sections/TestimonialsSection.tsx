@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { TESTIMONIALS } from '@/lib/data';
 import styles from './TestimonialsSection.module.css';
+import { brand } from '@/config/brand';
 
 const AUTOPLAY_DELAY = 4500;
 
@@ -230,7 +231,7 @@ export default function TestimonialsSection() {
                   {/* Top row: 98% + label */}
                   <div className={styles.statTopRow}>
                     <div className={styles.statNumber}>98%</div>
-                    <div className={styles.statLabel}>Parents Recommend<br />Little Loot</div>
+                    <div className={styles.statLabel}>Customers Recommend<br />{brand.name}</div>
                   </div>
                   {/* Bottom row: avatars + and more */}
                   <div className={styles.statAvatarRow}>

@@ -8,8 +8,8 @@ import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import styles from './products.module.css';
 
 export const metadata = {
-  title: 'All Products | Little Loot',
-  description: 'Discover our wide range of premium products for every child\'s need.',
+  title: 'All Products',
+  description: 'Discover our wide range of thoughtful gifts for every occasion.',
 };
 
 export default function AllProductsPage() {

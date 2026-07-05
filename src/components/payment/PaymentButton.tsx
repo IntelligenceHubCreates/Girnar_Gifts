@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRazorpay, RazorpaySuccessResponse } from '@/hooks/useRazorpay';
 import styles from './PaymentButton.module.css';
+import { brand } from '@/config/brand';
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
 
@@ -63,7 +64,7 @@ export default function PaymentButton({
       const raw = localStorage.getItem('appliedCoupon');
       couponCode = raw ? (JSON.parse(raw)?.code ?? null) : null;
     } catch {}
-    try { giftMessage = localStorage.getItem('littleloot_gift_message') || null; } catch {}
+    try { giftMessage = localStorage.getItem('girnar_gift_message') || null; } catch {}
 
 
     try {
@@ -97,7 +98,7 @@ export default function PaymentButton({
         amount:      amountPaise,
         currency,
         order_id:    razorpay_order_id,
-        name:        'Little Loot',
+        name:        brand.name,
         description: `Order for ${cartItems.length} item${cartItems.length !== 1 ? 's' : ''}`,
         prefill: {
           name:    shippingAddress.fullName,

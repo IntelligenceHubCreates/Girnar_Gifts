@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import type { ApiOrder } from '@/lib/adminApi'
 import { fmtMoneyFull, fmtDate } from '@/lib/format'
+import { brand } from '@/config/brand'
 
 export default function OrderReceipt({ order, onClose }: { order: ApiOrder; onClose: () => void }) {
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function OrderReceipt({ order, onClose }: { order: ApiOrder; onCl
         <div id="ll-receipt" style={{ padding: '28px 32px', color: '#111', fontSize: '.85rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
             <div>
-              <div style={{ fontWeight: 900, fontSize: '1.3rem' }}>Little<span style={{ color: '#FF6B5B' }}>Loot</span></div>
+              <div style={{ fontWeight: 900, fontSize: '1.3rem' }}>{brand.shortName}<span style={{ color: '#FF6B5B' }}>{brand.name.replace(brand.shortName, '').trim()}</span></div>
               <div style={{ color: '#6b7280', fontSize: '.72rem', marginTop: 2 }}>Order Receipt</div>
             </div>
             <div style={{ textAlign: 'right' }}>
@@ -111,7 +112,7 @@ export default function OrderReceipt({ order, onClose }: { order: ApiOrder; onCl
           </div>
 
           <div style={{ marginTop: 18, textAlign: 'center', fontSize: '.68rem', color: '#9ca3af' }}>
-            This is a system-generated receipt, not a tax invoice. Thank you for shopping with Little Loot.
+            This is a system-generated receipt, not a tax invoice. Thank you for shopping with {brand.name}.
           </div>
         </div>
       </div>

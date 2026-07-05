@@ -6,6 +6,7 @@ import React from 'react';
 import { motion, Transition } from 'framer-motion';
 import Image from 'next/image';
 import styles from './HeroSection.module.css';
+import { brand } from '@/config/brand';
 
 /* ── animation helpers ───────────────────────────────────── */
 const up = (delay = 0) => ({
@@ -87,7 +88,7 @@ function BoyColumn() {
       >
         <Image
           src="/boy.png"
-          alt="Little Loot mascot"
+          alt={`${brand.name} mascot`}
           width={520}      /* set to boy.png's actual intrinsic size */
           height={560}
           priority

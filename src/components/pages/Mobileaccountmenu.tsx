@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import styles from './AccountPage.module.css';
+import { brand } from '@/config/brand';
 
 interface MenuCounts {
   orders: number;
@@ -76,7 +77,7 @@ export default function MobileAccountMenu({
       label: 'Rewards',
       rows: [
         { key: 'coupons', label: 'Coupons',          desc: `${counts.coupons} active`,        icon: <TicketI />, bg: '#fffbeb', color: '#f59e0b', badge: counts.coupons, onClick: () => onNavigate('coupons') },
-        { key: 'club',    label: 'Little Loot Club', desc: 'Exclusive member perks',          icon: <TrophyI />, bg: '#f5f3ff', color: '#7c3aed', isNew: true, onClick: () => onNavigate('coupons') },
+        { key: 'club',    label: `${brand.shortName} Club`, desc: 'Exclusive member perks',   icon: <TrophyI />, bg: '#f5f3ff', color: '#7c3aed', isNew: true, onClick: () => onNavigate('coupons') },
       ],
     },
     {

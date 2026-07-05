@@ -489,7 +489,7 @@ export default function CheckoutPage() {
                     await clearCartAfterPayment();
                         try {
                           localStorage.removeItem('appliedCoupon');
-                          localStorage.removeItem('littleloot_gift_message');
+                          localStorage.removeItem('girnar_gift_message');
                         } catch {}
                     console.log('Payment success — cart cleared:', paymentId, orderId);
                   }}

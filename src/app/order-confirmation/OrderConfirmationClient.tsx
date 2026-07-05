@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from './OrderConfirmation.module.css';
+import { brand } from '@/config/brand';
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
 
@@ -125,7 +126,7 @@ export default function OrderConfirmationClient() {
 
         <h1 className={styles.title}>Payment Successful!</h1>
         <p className={styles.sub}>
-          Thank you for shopping at Little Loot 🎁<br />
+          Thank you for shopping at {brand.name} 🎁<br />
           Your order is confirmed and will be packed soon.
         </p>
 

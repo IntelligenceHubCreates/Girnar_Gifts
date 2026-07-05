@@ -1,6 +1,6 @@
 import SignupPage from '@/components/pages/SignupPage';
 
-export const metadata = { title: 'Create Account — Little Loot' };
+export const metadata = { title: 'Create Account' };
 
 export default function Signup() {
   return (

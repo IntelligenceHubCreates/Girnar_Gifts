@@ -19,6 +19,7 @@ import type {
   ProductColor,
   ApiColorVariant,
 } from '@/types/products';
+import { brand } from '@/config/brand';
 
 const PLACEHOLDER_IMAGE = '/placeholder-product.png';
 
@@ -95,7 +96,7 @@ export function mapProduct(p: ApiProduct): UiProduct {
     discountPct,
     stars:           Math.round(avg),
     reviews,
-    brand:           p.brand ?? 'Little Loot',
+    brand:           p.brand ?? brand.name,
     ageRange:        p.age_range ?? '3+ yrs',
     inStock:         (p.count ?? 0) > 0,
     stockCount:      p.count ?? 0,

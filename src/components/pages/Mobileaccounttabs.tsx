@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './AccountPage.module.css';
 import { RETURN_STATUS_LABEL, RETURN_STATUS_COLOR, RETURN_REASON_LABEL, type ReturnSummary } from '@/lib/returnsApi';
+import { brand } from '@/config/brand';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MobileAccountTabs.tsx
-   App-style mobile screens for the Account page (≤768px). Light Little Loot
+   App-style mobile screens for the Account page (≤768px). Light Girnar Gifts
    theme. All six tab components live here as named exports:
      MobileDashboard · MobileOrders · MobileWishlist ·
      MobileAddresses · MobileReviews · MobileProfile
@@ -160,7 +161,7 @@ export function MobileDashboard({
         <div className={styles.mtHeroInfo}>
           <div className={styles.mtGreeting}>{greeting},</div>
           <div className={styles.mtHeroName}>{firstName || displayName} 👋</div>
-          <div className={styles.mtHeroEmail}>{phone ? `📞 ${phone}` : 'Welcome back to Little Loot'}</div>
+          <div className={styles.mtHeroEmail}>{phone ? `📞 ${phone}` : `Welcome back to ${brand.name}`}</div>
         </div>
       </div>
 
@@ -890,8 +891,8 @@ function mtBuildNotifications(orders: MappedOrder[]) {
     });
   });
   items.push({
-    id: 'welcome', type: 'system', title: 'Welcome to Little Loot! 🧸',
-    body: 'Your account is all set. Start exploring toys, bags and stationery for your little ones.',
+    id: 'welcome', type: 'system', title: `Welcome to ${brand.name}! 🎁`,
+    body: 'Your account is all set. Start exploring thoughtful gifts for every occasion.',
     time: 'Just now', read: true, icon: '🧸', color: '#FF6B35',
   });
   return items;
@@ -1085,15 +1086,15 @@ const MT_FAQ = [
 export function MobileHelp() {
   return (
     <div className={styles.mtShell}>
-      <a href="tel:+919876543210" className={styles.mtContactCard}>
+      <a href={`tel:${brand.phone}`} className={styles.mtContactCard}>
         <span className={styles.mtContactIcon} style={{ background: '#f0fdf4', color: '#10b981' }}><Phone /></span>
-        <div><div className={styles.mtContactTitle}>Call us</div><div className={styles.mtContactSub}>+91 98765 43210</div></div>
+        <div><div className={styles.mtContactTitle}>Call us</div><div className={styles.mtContactSub}>{brand.phone}</div></div>
       </a>
-      <a href="mailto:hello@littleloot.com" className={styles.mtContactCard}>
+      <a href={`mailto:${brand.email.support}`} className={styles.mtContactCard}>
         <span className={styles.mtContactIcon} style={{ background: '#eff6ff', color: '#3b82f6' }}><Mail /></span>
-        <div><div className={styles.mtContactTitle}>Email us</div><div className={styles.mtContactSub}>hello@littleloot.com</div></div>
+        <div><div className={styles.mtContactTitle}>Email us</div><div className={styles.mtContactSub}>{brand.email.support}</div></div>
       </a>
-      <a href="https://wa.me/919876543210" target="_blank" rel="noopener" className={styles.mtContactCard}>
+      <a href={`https://wa.me/${brand.whatsapp}`} target="_blank" rel="noopener" className={styles.mtContactCard}>
         <span className={styles.mtContactIcon} style={{ background: '#f0fdf4', color: '#25d366' }}><Wa s={20} /></span>
         <div><div className={styles.mtContactTitle}>WhatsApp</div><div className={styles.mtContactSub}>Chat with us</div></div>
       </a>

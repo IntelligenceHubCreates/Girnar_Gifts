@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { FOOTER_INFO_LINKS, FOOTER_ACCOUNT_LINKS } from '@/lib/data';
 import styles from './Footer.module.css';
+import { brand } from '@/config/brand';
 
 // ── Social media SVG icons (official brand colors on hover via CSS) ──
 
@@ -95,10 +96,10 @@ function IconNetBanking() {
 // ── Social link data ────────────────────────────────────────────
 
 const SOCIAL_LINKS = [
-  { label: 'Facebook',  href: 'https://facebook.com/littleloot',  icon: <IconFacebook />,  hoverColor: '#1877F2' },
-  { label: 'Instagram', href: 'https://instagram.com/littleloot', icon: <IconInstagram />, hoverColor: '#E1306C' },
-  { label: 'X',         href: 'https://x.com/littleloot',         icon: <IconX />,         hoverColor: '#000000' },
-  { label: 'YouTube',   href: 'https://youtube.com/@littleloot',  icon: <IconYouTube />,   hoverColor: '#FF0000' },
+  { label: 'Facebook',  href: brand.social.facebook,             icon: <IconFacebook />,  hoverColor: '#1877F2' },
+  { label: 'Instagram', href: brand.social.instagram,            icon: <IconInstagram />, hoverColor: '#E1306C' },
+  { label: 'X',         href: 'https://x.com/girnargifts',        icon: <IconX />,         hoverColor: '#000000' },
+  { label: 'YouTube',   href: 'https://youtube.com/@girnargifts', icon: <IconYouTube />,   hoverColor: '#FF0000' },
 ];
 
 // ── Footer component ────────────────────────────────────────────
@@ -116,15 +117,12 @@ export default function Footer() {
             <div className={styles.logoIcon}>🌟</div>
             <div className={styles.logoText}>
               <span className={styles.logoName}>
-                Little<span className={styles.logoDot}>Loot</span>
+                {brand.shortName}<span className={styles.logoDot}>{brand.name.replace(brand.shortName, '').trim()}</span>
               </span>
-              <span className={styles.logoTagline}>Joy for every child</span>
+              <span className={styles.logoTagline}>{brand.tagline}</span>
             </div>
           </Link>
-          <p>
-            Your one-stop destination for premium kids toys, creative stationery,
-            and educational games. Bringing joy to every child!
-          </p>
+          <p>{brand.description}</p>
           <div className={styles.footerSocial}>
             {SOCIAL_LINKS.map((s) => (
               <a
@@ -175,22 +173,22 @@ export default function Footer() {
           <h4>Contact Us</h4>
           <div className={styles.contactItem}>
             <span className={styles.contactIcon}>📍</span>
-            <span>123 Market Street, Guntur,<br />Andhra Pradesh 522001</span>
+            <span>{brand.business.address}</span>
           </div>
           <div className={styles.contactItem}>
             <span className={styles.contactIcon}>📞</span>
-            <a href="tel:+919876543210">+91 98765 43210</a>
+            <a href={`tel:${brand.phone}`}>{brand.phone}</a>
           </div>
           <div className={styles.contactItem}>
             <span className={styles.contactIcon}>✉️</span>
-            <a href="mailto:hello@littleloot.in">hello@littleloot.in</a>
+            <a href={`mailto:${brand.email.support}`}>{brand.email.support}</a>
           </div>
           <div className={styles.contactItem}>
             <span className={styles.contactIcon}>⏰</span>
             <span>Mon–Sat: 9 am – 7 pm IST</span>
           </div>
           {/* Quick support CTA */}
-          <a href="https://wa.me/919876543210?text=Hi%20Little%20Loot!%20%F0%9F%91%8B%20I%20need%20some%20help." target="_blank" rel="noopener noreferrer" className={styles.supportBtn}>
+          <a href={`https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`Hi ${brand.name}! 👋 I need some help.`)}`} target="_blank" rel="noopener noreferrer" className={styles.supportBtn}>
             💬 Chat with Support
           </a>
         </div>
@@ -199,7 +197,7 @@ export default function Footer() {
 
       {/* ── Bottom bar ── */}
       <div className={styles.footerBottom}>
-        <span>© {currentYear} Little Loot. All rights reserved. Built with ❤️ by Intelligence Hub.</span>
+        <span>© {currentYear} {brand.name}. All rights reserved. Built with ❤️ by Intelligence Hub.</span>
         <div className={styles.paymentIcons}>
           <IconUPI />
           <IconVisa />

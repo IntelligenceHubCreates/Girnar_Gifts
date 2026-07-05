@@ -4,7 +4,7 @@ import AccountPage from '@/components/pages/AccountPage';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import styles from './account.module.css';
 
-export const metadata = { title: 'My Account — Little Loot' };
+export const metadata = { title: 'My Account' };
 
 export default function Account() {
   return (

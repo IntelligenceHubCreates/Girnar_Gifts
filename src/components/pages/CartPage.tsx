@@ -287,7 +287,7 @@ const [couponLoading, setCouponLoading] = useState(false);
   // Load any previously-saved gift message (survives refresh; PaymentButton reads this key at checkout)
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('littleloot_gift_message');
+      const saved = localStorage.getItem('girnar_gift_message');
       if (saved) { setGiftMessage(saved); setGiftSaved(true); setGiftOpen(true); }
     } catch {}
   }, []);
@@ -296,15 +296,15 @@ const [couponLoading, setCouponLoading] = useState(false);
     const msg = giftMessage.trim().slice(0, 500);
     setGiftMessage(msg);
     try {
-      if (msg) localStorage.setItem('littleloot_gift_message', msg);
-      else     localStorage.removeItem('littleloot_gift_message');
+      if (msg) localStorage.setItem('girnar_gift_message', msg);
+      else     localStorage.removeItem('girnar_gift_message');
     } catch {}
     setGiftSaved(true);
     pushToast(msg ? 'Gift message saved' : 'Gift message cleared', 'success');
   }
   function clearGiftMessage() {
     setGiftMessage('');
-    try { localStorage.removeItem('littleloot_gift_message'); } catch {}
+    try { localStorage.removeItem('girnar_gift_message'); } catch {}
     setGiftSaved(false);
   }
 

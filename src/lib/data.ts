@@ -1,5 +1,7 @@
 // ─── Types ──────────────────────────────────────────────────────────────────
 
+import { brand } from '@/config/brand';
+
 export interface Product {
   id: number;
   emoji: string;
@@ -107,13 +109,13 @@ export const SPECIAL_PICKS: MiniProduct[] = [
 
 export const TESTIMONIALS: Testimonial[] = [
   {
-    quote: 'My daughter absolutely loves the art kit from Little Loot. The quality is outstanding and the packaging is so adorable. Will definitely be ordering again!',
+    quote: `My daughter absolutely loves the art kit from ${brand.name}. The quality is outstanding and the packaging is so adorable. Will definitely be ordering again!`,
     author: 'Priya Sharma',
     sub: 'Mom of 2 · Hyderabad',
     profilePhoto: '',
   },
   {
-    quote: 'Great stationery selection! My son needed a full kit for school and Little Loot had everything in one place. Delivery was super fast too!',
+    quote: `Great stationery selection! My son needed a full kit for school and ${brand.name} had everything in one place. Delivery was super fast too!`,
     author: 'Rahul Mehta',
     sub: 'Father of 1 · Vijayawada',
     profilePhoto: '',
@@ -196,7 +198,7 @@ export const PRODUCT_DETAILS: Record<number, ProductDetail> = {
     dimensions: '89 × 42 × 56 cm | Weight: 2.8 kg',
     safetyInfo: 'BIS Certified · No sharp edges · Non-toxic paint',
     description: 'A beautifully designed balance bike that helps your toddler gain confidence before moving to a pedal cycle.',
-    longDescription: 'The Little Loot Balance Bicycle is engineered for tiny explorers ready to conquer the world on two wheels. Its lightweight aluminium frame keeps it easy to handle, while the low step-through frame ensures kids can mount and dismount safely. Soft EVA foam tyres never go flat and are gentle on indoor floors — perfect for living rooms, corridors, and quiet parks alike.',
+    longDescription: `The ${brand.name} Balance Bicycle is engineered for tiny explorers ready to conquer the world on two wheels. Its lightweight aluminium frame keeps it easy to handle, while the low step-through frame ensures kids can mount and dismount safely. Soft EVA foam tyres never go flat and are gentle on indoor floors — perfect for living rooms, corridors, and quiet parks alike.`,
     highlights: [
       'Adjustable saddle: 34–44 cm seat height',
       'Ultra-lightweight 2.8 kg — kids carry it themselves',
@@ -376,11 +378,11 @@ export const PRODUCT_DETAILS: Record<number, ProductDetail> = {
     dimensions: '55 × 15 cm | Weight: 1.1 kg',
     safetyInfo: 'BIS Certified · Grip tape non-slip · Safety pads recommended',
     description: 'A professional-grade mini skateboard for kids — smooth-rolling with durable maple construction.',
-    longDescription: 'Let your little shredder hit the pavements with confidence on this properly built mini skateboard. A 7-ply Canadian maple deck gives the perfect flex, while ABEC-7 rated bearings roll fast and smooth on any surface. The custom Little Loot grip tape design ensures safe footing while looking absolutely cool.',
+    longDescription: `Let your little shredder hit the pavements with confidence on this properly built mini skateboard. A 7-ply Canadian maple deck gives the perfect flex, while ABEC-7 rated bearings roll fast and smooth on any surface. The custom ${brand.name} grip tape design ensures safe footing while looking absolutely cool.`,
     highlights: [
       '7-ply Canadian maple deck — pro quality',
       'ABEC-7 sealed bearings for smooth roll',
-      'Custom Little Loot grip tape design',
+      `Custom ${brand.name} grip tape design`,
       'High-rebound 52mm polyurethane wheels',
       'Includes a beginner tricks booklet',
     ],

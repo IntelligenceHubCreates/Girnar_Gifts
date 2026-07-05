@@ -5,6 +5,7 @@ import SessionProvider from '@/components/SessionProvider';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { Toaster } from 'react-hot-toast';
+import { brand } from '@/config/brand';
 
 const baloo2 = Baloo_2({
   subsets: ['latin'],
@@ -21,9 +22,17 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: 'Little Loot — Kids & Stationery Store',
-  description:
-    'Your one-stop destination for premium kids toys, creative stationery, and educational games. Bringing joy to every child!',
+  metadataBase: new URL(brand.url),
+  title: { default: brand.name, template: `%s | ${brand.name}` },
+  description: brand.description,
+  openGraph: {
+    title: brand.name,
+    description: brand.description,
+    url: brand.url,
+    siteName: brand.name,
+    images: [brand.assets.ogImage],
+  },
+  icons: { icon: brand.assets.favicon },
 };
 
 export const viewport: Viewport = {

@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import styles from './Header.module.css';
 import { useCart } from '@/context/CartContext';
+import { brand } from '@/config/brand';
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 interface SubItem { emoji: string; label: string; sub: string; href: string; }
@@ -349,8 +350,8 @@ export default function Header() {
           <Link href="/" className={styles.logo}>
             <div className={styles.logoIcon}>🛍️</div>
             <div className={styles.logoText}>
-              <span className={styles.logoName}>Little Loot</span>
-              <span className={styles.logoTagline}>Curated with love, for little ones.</span>
+              <span className={styles.logoName}>{brand.name}</span>
+              <span className={styles.logoTagline}>{brand.tagline}</span>
             </div>
           </Link>
 

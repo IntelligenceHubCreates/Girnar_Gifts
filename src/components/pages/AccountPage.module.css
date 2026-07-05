@@ -1268,7 +1268,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MOBILE ACCOUNT MENU — Little Loot light theme  (phones only, ≤768px)
+   MOBILE ACCOUNT MENU — Girnar Gifts light theme  (phones only, ≤768px)
    APPEND this block to the END of AccountPage.module.css.
    On desktop/tablet (>768px) the menu + back bar are display:none → no impact.
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -1370,7 +1370,7 @@
 }
 
 /* ===========================================================================
-   MOBILE TAB SCREENS  —  app-style, Little Loot LIGHT theme  (≤768px only)
+   MOBILE TAB SCREENS  —  app-style, Girnar Gifts LIGHT theme  (≤768px only)
    APPEND this whole block to the END of AccountPage.module.css.
 
    Why it's desktop-safe:

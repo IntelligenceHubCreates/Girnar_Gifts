@@ -1,6 +1,6 @@
 // src/types/product.ts
 // ---------------------------------------------------------------------------
-// Shared product/category types for Little Loot.
+// Shared product/category types for Girnar Gifts.
 // Fixes vs. previous version:
 //   • ApiProduct now declares the fields the backend ACTUALLY returns
 //     (color, color_hex, color_variants, variant_group_id, product_video,

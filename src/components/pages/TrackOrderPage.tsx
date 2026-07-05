@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import styles from './TrackOrderPage.module.css';
+import { brand } from '@/config/brand';
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
 
@@ -107,7 +108,7 @@ function buildTrackingEvents(order: OrderData): TrackEvent[] {
     label:       STATUS_CFG[s]?.label ?? s,
     description: getDefaultDesc(s),
     timestamp:   i === 0 ? fmtDateTime(order.created_at) : i <= currentIdx ? 'Completed' : 'Pending',
-    location:    i === 0 ? 'Little Loot Warehouse' : '',
+    location:    i === 0 ? `${brand.name} Warehouse` : '',
     done:        i < currentIdx,
     active:      i === currentIdx,
   }));
@@ -309,7 +310,7 @@ export default function TrackOrderPage() {
           <div className={styles.heroBadge}>📦 Real-time tracking</div>
           <h1 className={styles.heroTitle}>
             Where's your<br />
-            <span className={styles.heroAccent}>Little Loot?</span>
+            <span className={styles.heroAccent}>Gift?</span>
           </h1>
           <p className={styles.heroSub}>Enter your Order ID to see exactly where your package is.</p>
         </div>
@@ -369,9 +370,9 @@ export default function TrackOrderPage() {
             Check your confirmation email for the correct Order ID.
           </p>
           <div className={styles.tipList}>
-            <div className={styles.tip}><span>📧</span><span>Find your Order ID in the confirmation email from Little Loot</span></div>
+            <div className={styles.tip}><span>📧</span><span>Find your Order ID in the confirmation email from {brand.name}</span></div>
             <div className={styles.tip}><span>👤</span><span>Or check your <Link href="/account/orders" className={styles.notFoundLink}>order history</Link></span></div>
-            <div className={styles.tip}><span>📞</span><span>Need help? Email us at help@littleloot.in</span></div>
+            <div className={styles.tip}><span>📞</span><span>Need help? Email us at {brand.email.support}</span></div>
           </div>
         </div>
       )}
@@ -657,13 +658,13 @@ export default function TrackOrderPage() {
               <div className={styles.panel}>
                 <div className={styles.panelTitle}><span>🙋</span> Need Help?</div>
                 <div className={styles.helpBtns}>
-                  <a href="https://wa.me/911234567890" target="_blank" rel="noopener noreferrer" className={`${styles.helpBtn} ${styles.helpWhatsapp}`}>
+                  <a href={`https://wa.me/${brand.whatsapp}`} target="_blank" rel="noopener noreferrer" className={`${styles.helpBtn} ${styles.helpWhatsapp}`}>
                     <span className={styles.helpBtnIco}>💬</span>
                     <div><div className={styles.helpBtnTitle}>WhatsApp</div><div className={styles.helpBtnSub}>Replies in 5 min</div></div>
                   </a>
-                  <a href="mailto:help@littleloot.in" className={`${styles.helpBtn} ${styles.helpEmail}`}>
+                  <a href={`mailto:${brand.email.support}`} className={`${styles.helpBtn} ${styles.helpEmail}`}>
                     <span className={styles.helpBtnIco}>📧</span>
-                    <div><div className={styles.helpBtnTitle}>Email Support</div><div className={styles.helpBtnSub}>help@littleloot.in</div></div>
+                    <div><div className={styles.helpBtnTitle}>Email Support</div><div className={styles.helpBtnSub}>{brand.email.support}</div></div>
                   </a>
                 </div>
               </div>

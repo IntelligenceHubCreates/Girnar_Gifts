@@ -2,6 +2,7 @@
 
 import { signOut } from 'next-auth/react'
 import { NAV_GROUPS, PageId } from '@/lib/adminData'
+import { brand } from '@/config/brand'
 
 interface SidebarProps {
   activePage: PageId
@@ -56,9 +57,9 @@ export default function Sidebar({ activePage, onNavigate, open = false, onClose,
 
       {/* Footer */}
       <div className="s-footer">
-        <div className="s-avatar">L</div>
+        <div className="s-avatar">{brand.shortName[0]}</div>
         <div className="s-footer-info">
-          <div className="s-user-name">Little Loot</div>
+          <div className="s-user-name">{brand.name}</div>
           <div className="s-user-role">Store Administrator</div>
         </div>
         <button
