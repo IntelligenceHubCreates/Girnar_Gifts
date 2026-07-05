@@ -27,3 +27,10 @@ See `MIGRATION_MAP.md` (workspace root, one level up) for the full Phase 0 disco
 ## Phase 5 — Categories & Products
 - Admin panel category dropdowns/CRUD are already fully DB-driven (`fetchCategories`, `adminApi.ts`) — no change needed.
 - **Flagged, not changed** (per user decision — needs subcategory decisions first): the storefront nav (`Header.tsx` `NAV_ITEMS`, `NavBar.tsx`) and ~50 route files under `src/app/{stationery,bags,bottles,toys,beauty,keychains,gifts}/**` hardcode Little Loot's kids/stationery taxonomy as route structure, not just labels. See `MANUAL_STEPS.md` §1 for the full writeup and recommended approach (a single dynamic category/subcategory route instead of ~50 static files).
+
+## Phase 6 — SEO & Legal
+- `app/sitemap.ts` (static + legal pages + dynamic product URLs from the API) and `app/robots.ts` (disallow `/admin` `/api`, brand-driven sitemap/host) added.
+- Privacy/Terms/Refund/Shipping policy pages added via a shared `components/legal/LegalPageLayout`, brand-driven, placeholder text flagged for lawyer review.
+- `app/layout.tsx` metadata (metadataBase/title-template/OpenGraph/favicon) was already done in Phase 3.
+- **Fixed a pre-existing production-build blocker** (unrelated to rebrand, found while verifying `npm run build` passes per the DoD): `/track-order` used `useSearchParams()` without a Suspense boundary, which Next.js's static export rejects. Wrapped in `<Suspense>`.
+- **Found `.next/` build output already committed to git history** (829 files changed by a single fresh build). Added `.next/` to `.gitignore` going forward; left the already-tracked files alone rather than remove 1272 tracked files unprompted — see `MANUAL_STEPS.md` §10 for the one-line follow-up.
