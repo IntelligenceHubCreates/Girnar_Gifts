@@ -1,0 +1,41 @@
+.wrap {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 48px 20px 80px;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.wrap h1 {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.updated {
+  color: var(--ll-muted, #6b7280);
+  font-size: 0.85rem;
+  margin-bottom: 32px;
+}
+
+.wrap h2 {
+  font-family: var(--font-head);
+  font-size: 1.25rem;
+  margin: 32px 0 12px;
+}
+
+.wrap p,
+.wrap li {
+  font-size: 0.95rem;
+  color: var(--ll-body, #374151);
+}
+
+.wrap ul {
+  padding-left: 1.25rem;
+  margin: 8px 0;
+}
+
+.wrap a {
+  color: var(--ll-accent, #EC4899);
+  text-decoration: underline;
+}

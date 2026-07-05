@@ -11,6 +11,8 @@ node_modules/
 # Build files
 dist/
 build/
+.next/
+tsconfig.tsbuildinfo
 
 # OS files
 .DS_Store

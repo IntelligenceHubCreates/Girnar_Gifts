@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
@@ -9,7 +10,9 @@ export default function TrackOrder() {
     <>
       <Header />
       <main>
-        <TrackOrderPage />
+        <Suspense fallback={null}>
+          <TrackOrderPage />
+        </Suspense>
       </main>
       <div className={styles.footerWrap}>
         <Footer />
