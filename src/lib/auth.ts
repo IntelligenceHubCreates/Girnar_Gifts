@@ -12,6 +12,7 @@ declare module 'next-auth' {
       isAdmin?: boolean;
     };
     backendToken?: string;
+    accessToken?: string;
     isAdmin?: boolean;
   }
   interface User {
@@ -111,6 +112,7 @@ export const authOptions: NextAuthOptions = {
             token.name        = data.user.name        ?? googleName;
             token.picture     = data.user.profile_image ?? googleImage ?? null;
             token.backendToken = data.token;
+            token.accessToken  = data.token;
             token.isAdmin     = data.user.role === 1;
           } else {
             console.error('Google login backend error:', res.status);
@@ -119,6 +121,7 @@ export const authOptions: NextAuthOptions = {
             token.name        = googleName  ?? undefined;
             token.picture     = googleImage ?? undefined;
             token.backendToken = '';
+            token.accessToken  = '';
             token.isAdmin     = false;
           }
         } catch (err) {
@@ -128,6 +131,7 @@ export const authOptions: NextAuthOptions = {
           token.name        = googleName  ?? undefined;
           token.picture     = googleImage ?? undefined;
           token.backendToken = '';
+          token.accessToken  = '';
           token.isAdmin     = false;
         }
       }
@@ -138,6 +142,7 @@ export const authOptions: NextAuthOptions = {
         token.email       = user.email    ?? undefined;
         token.name        = user.name     ?? undefined;
         token.backendToken = user.backendToken || '';
+        token.accessToken  = user.backendToken || '';
         token.isAdmin     = user.isAdmin  ?? false;
       }
 
@@ -153,6 +158,7 @@ export const authOptions: NextAuthOptions = {
         session.user.isAdmin = token.isAdmin ?? false;
       }
       session.backendToken = token.backendToken;
+      session.accessToken  = token.accessToken;
       session.isAdmin      = token.isAdmin ?? false;
       return session;
     },
