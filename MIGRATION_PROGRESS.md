@@ -33,4 +33,10 @@ See `MIGRATION_MAP.md` (workspace root, one level up) for the full Phase 0 disco
 - Privacy/Terms/Refund/Shipping policy pages added via a shared `components/legal/LegalPageLayout`, brand-driven, placeholder text flagged for lawyer review.
 - `app/layout.tsx` metadata (metadataBase/title-template/OpenGraph/favicon) was already done in Phase 3.
 - **Fixed a pre-existing production-build blocker** (unrelated to rebrand, found while verifying `npm run build` passes per the DoD): `/track-order` used `useSearchParams()` without a Suspense boundary, which Next.js's static export rejects. Wrapped in `<Suspense>`.
-- **Found `.next/` build output already committed to git history** (829 files changed by a single fresh build). Added `.next/` to `.gitignore` going forward; left the already-tracked files alone rather than remove 1272 tracked files unprompted — see `MANUAL_STEPS.md` §10 for the one-line follow-up.
+- **Found `.next/` build output already committed to git history** (829 files changed by a single fresh build). Added `.next/` to `.gitignore` going forward; left the already-tracked files alone rather than remove 1272 tracked files unprompted — see `MANUAL_STEPS.md` §11 for the one-line follow-up.
+
+## Phase 7-8 — Payment/notifications, Cloudinary
+- No frontend changes needed. Razorpay `key_id` is sourced from the backend's create-order response, not a separate hardcoded frontend constant — nothing to rewire. Cloudinary folder rebrand is backend-only.
+
+## Phase 9 — .env.example
+- **Found and fixed a real secret committed to git**: `.env.example` had Little Loot's actual Razorpay test `key_id` + `key_secret` hardcoded in plain text instead of placeholders. Replaced with a placeholder `NEXT_PUBLIC_RAZORPAY_KEY_ID` (the secret itself is backend-only and was never needed here). Also added the missing `NEXT_PUBLIC_SITE_NAME`/`NEXT_PUBLIC_SITE_URL`/`NEXT_PUBLIC_API_BASE` vars.
