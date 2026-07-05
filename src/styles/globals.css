@@ -15,9 +15,9 @@
   --soft: #F7F3EC;
   --radius: 24px;
   --radius-sm: 14px;
-  --ll-accent:      #FF6B35;
-  --ll-accent-dark: #e55a25;
-  --ll-accent-soft: #fff5f2;
+  --ll-accent:      #EC4899;
+  --ll-accent-dark: #BE185D;
+  --ll-accent-soft: #FDF2F8;
   --ll-ink:    #1a1a2e;
   --ll-body:   #5b5b72;
   --ll-muted:  #9b9bb0;
@@ -55,9 +55,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
 :root {
-  --h-cream:    #FDF6F0;
-  --h-orange:   #F47C20;
-  --h-orange-h: #D96910;
+  --h-cream:    #FDF2F8;
+  --h-orange:   #EC4899;
+  --h-orange-h: #BE185D;
   --h-ink:      #1A1A2E;
   --h-ink-60:   rgba(26,26,46,0.60);
   --h-ink-30:   rgba(26,26,46,0.28);
@@ -87,8 +87,8 @@
   50%     { transform:translateY(-10px) rotate(-6deg); }
 }
 @keyframes h-pulse {
-  0%,100% { box-shadow:0 8px 28px rgba(244,124,32,0.40); }
-  50%     { box-shadow:0 8px 44px rgba(244,124,32,0.68); }
+  0%,100% { box-shadow:0 8px 28px rgba(236,72,153,0.40); }
+  50%     { box-shadow:0 8px 44px rgba(236,72,153,0.68); }
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Baloo+2:wght@800;900&family=Nunito:wght@400;600;700;800;900&display=swap');

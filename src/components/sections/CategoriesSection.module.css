@@ -50,7 +50,7 @@
 
 .headingBar {
   width: 38px; height: 4px;
-  background: #F47C20; border-radius: 4px;
+  background: #EC4899; border-radius: 4px;
 }
 
 /* Right side: arrows + view-all */
@@ -83,7 +83,7 @@
 }
 
 .btnFill { background: #1A1A1A; border: 1.5px solid #1A1A1A; color: #fff; }
-.btnFill:not(:disabled):hover { background: #F47C20; border-color: #F47C20; }
+.btnFill:not(:disabled):hover { background: #EC4899; border-color: #EC4899; }
 
 .viewAll {
   display: inline-flex; align-items: center; gap: 8px;
@@ -95,11 +95,11 @@
 .viewAll:hover {
    color: #fff;
 }
-.viewAllText { line-height: 1; color: #F47C20; }
+.viewAllText { line-height: 1; color: #EC4899; }
 
 .viewAllCircle {
   width: 24px; height: 24px;
-  background: #F47C20; border-radius: 50%;
+  background: #EC4899; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   color: #fff; font-size: 12px; flex-shrink: 0;
   transition: background .18s;
@@ -301,7 +301,7 @@
 }
 
 .dotOn {
-  background: #F47C20;
+  background: #EC4899;
   width: 18px; height: 6px;
   border-radius: 20px;
 }
@@ -351,7 +351,7 @@
                     box-shadow: none; gap: 0; }
   .viewAllCircle  { width: 34px; height: 34px; font-size: 15px; }
   .viewAll:hover  { background: transparent; color: inherit; }
-  .viewAll:hover .viewAllCircle { background: #F47C20; }
+  .viewAll:hover .viewAllCircle { background: #EC4899; }
   .btn            { width: 30px; height: 30px; }
   .track          { gap: 10px; padding-top: 80px; }
   .outerWrap      { padding-top: 80px; margin-top: -80px; }

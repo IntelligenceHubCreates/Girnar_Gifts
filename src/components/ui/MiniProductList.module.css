@@ -51,7 +51,7 @@
   display: block;
   width: 34px;
   height: 3.5px;
-  background: #F47C20;
+  background: #EC4899;
   border-radius: 4px;
 }
 
@@ -62,7 +62,7 @@
   font-family: var(--font-nunito, 'Nunito', sans-serif);
   font-size: 13px;
   font-weight: 700;
-  color: #F47C20;
+  color: #EC4899;
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
@@ -140,7 +140,7 @@
   position: absolute;
   top: 7px;
   left: 7px;
-  background: #F47C20;
+  background: #EC4899;
   color: #fff;
   font-family: var(--font-nunito, 'Nunito', sans-serif);
   font-size: 9px;

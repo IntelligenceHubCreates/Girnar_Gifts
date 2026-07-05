@@ -1737,14 +1737,14 @@
   /* Profile card: warm gradient first impression */
   .mmProfileCard {
     background: linear-gradient(135deg, #FFF4E8 0%, #ffffff 58%);
-    border-color: rgba(244, 124, 32, 0.13);
-    box-shadow: 0 4px 22px rgba(244, 124, 32, 0.09), 0 1px 3px rgba(16, 24, 40, 0.04);
+    border-color: rgba(236,72,153, 0.13);
+    box-shadow: 0 4px 22px rgba(236,72,153, 0.09), 0 1px 3px rgba(16, 24, 40, 0.04);
   }
 
   /* Menu section cards: warm border + shadow */
   .mmCard {
     border-color: rgba(240, 234, 224, 0.95);
-    box-shadow: 0 2px 14px rgba(244, 124, 32, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
+    box-shadow: 0 2px 14px rgba(236,72,153, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
   }
 
   /* Menu row icons: warm cream background instead of cold grey */
@@ -1755,8 +1755,8 @@
 
   /* Back-to-menu pill: warm border */
   .mobileBackBar {
-    border-color: rgba(244, 124, 32, 0.15);
-    box-shadow: 0 2px 10px rgba(244, 124, 32, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
+    border-color: rgba(236,72,153, 0.15);
+    box-shadow: 0 2px 10px rgba(236,72,153, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
   }
 
   /* ── Mobile dashboard (mobileOnly) ── */
@@ -1764,39 +1764,39 @@
   /* Hero greeting card: warm gradient */
   .mtHero {
     background: linear-gradient(135deg, #FFF4E8 0%, #ffffff 60%);
-    border-color: rgba(244, 124, 32, 0.10);
-    box-shadow: 0 4px 22px rgba(244, 124, 32, 0.08), 0 1px 3px rgba(16, 24, 40, 0.04);
+    border-color: rgba(236,72,153, 0.10);
+    box-shadow: 0 4px 22px rgba(236,72,153, 0.08), 0 1px 3px rgba(16, 24, 40, 0.04);
   }
 
   /* Stat cards: warm border + shadow */
   .mtStatCard {
     border-color: rgba(240, 234, 224, 0.95);
-    box-shadow: 0 2px 14px rgba(244, 124, 32, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
+    box-shadow: 0 2px 14px rgba(236,72,153, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
   }
 
   /* Generic content cards */
   .mtCard {
     border-color: rgba(240, 234, 224, 0.95);
-    box-shadow: 0 2px 14px rgba(244, 124, 32, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
+    box-shadow: 0 2px 14px rgba(236,72,153, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
   }
 
   /* Action grid items: warm border */
   .mtActionCard {
     border-color: rgba(240, 234, 224, 0.95);
-    box-shadow: 0 2px 10px rgba(244, 124, 32, 0.06), 0 1px 3px rgba(16, 24, 40, 0.04);
+    box-shadow: 0 2px 10px rgba(236,72,153, 0.06), 0 1px 3px rgba(16, 24, 40, 0.04);
   }
 
   /* Form/settings cards */
   .mtFormCard {
     border-color: rgba(240, 234, 224, 0.95);
-    box-shadow: 0 2px 14px rgba(244, 124, 32, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
+    box-shadow: 0 2px 14px rgba(236,72,153, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
   }
 
   /* Profile settings hero */
   .mtProfileHero {
     background: linear-gradient(135deg, #FFF4E8 0%, #ffffff 60%);
-    border-color: rgba(244, 124, 32, 0.10);
-    box-shadow: 0 4px 22px rgba(244, 124, 32, 0.08), 0 1px 3px rgba(16, 24, 40, 0.04);
+    border-color: rgba(236,72,153, 0.10);
+    box-shadow: 0 4px 22px rgba(236,72,153, 0.08), 0 1px 3px rgba(16, 24, 40, 0.04);
   }
 
   /* ── Desktop top-nav strip at 769–900px: warm background ── */
@@ -1805,6 +1805,6 @@
 @media (max-width: 900px) and (min-width: 769px) {
   .sidebar {
     background: linear-gradient(135deg, #FFF4E8 0%, #ffffff 70%);
-    border-bottom-color: rgba(244, 124, 32, 0.10);
+    border-bottom-color: rgba(236,72,153, 0.10);
   }
 }

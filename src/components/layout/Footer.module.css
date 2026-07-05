@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════════════════════════
    Footer.module.css — styled to match Header design language
-   Colors: #FDF8F3 bg, #F47C20 orange, #1A1A2E navy, #F0EAE0 border
+   Colors: #FDF8F3 bg, #EC4899 orange, #1A1A2E navy, #F0EAE0 border
    Fonts: Nunito (body), Baloo 2 (brand)
    ══════════════════════════════════════════════════════════════ */
 
@@ -9,7 +9,7 @@
   color: rgba(255, 255, 255, 0.7);
   font-family: var(--font-nunito, 'Nunito', sans-serif);
   padding: 56px 40px 28px;
-  border-top: 3px solid #F47C20; /* orange top accent — matches header allCatsBtn */
+  border-top: 3px solid #EC4899; /* orange top accent — matches header allCatsBtn */
 }
 
 /* ── Grid ────────────────────────────────────────────────────── */
@@ -42,7 +42,7 @@
 .logoIcon {
   width: 40px;
   height: 40px;
-  background: #F47C20;
+  background: #EC4899;
   border-radius: 11px;
   display: flex;
   align-items: center;
@@ -69,7 +69,7 @@
 
 /* "Loot" in orange — matches header brand accent color */
 .logoDot {
-  color: #F47C20;
+  color: #EC4899;
 }
 
 .logoTagline {
@@ -103,8 +103,8 @@
   transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
 .socialBtn:hover {
-  background: #F47C20;             /* orange on hover — matches header allCatsBtn */
-  border-color: #F47C20;
+  background: #EC4899;             /* orange on hover — matches header allCatsBtn */
+  border-color: #EC4899;
   transform: translateY(-2px);
 }
 
@@ -128,7 +128,7 @@
   left: 0;
   width: 28px;
   height: 3px;
-  background: #F47C20;
+  background: #EC4899;
   border-radius: 3px;
 }
 
@@ -150,7 +150,7 @@
   display: inline-block;
 }
 .footerCol ul li a:hover {
-  color: #F47C20;                  /* matches header nav link hover */
+  color: #EC4899;                  /* matches header nav link hover */
   padding-left: 4px;
 }
 
@@ -169,7 +169,7 @@
   text-decoration: none;
   transition: color 0.18s;
 }
-.contactItem a:hover { color: #F47C20; }
+.contactItem a:hover { color: #EC4899; }
 
 .contactIcon {
   font-size: 15px;
@@ -177,7 +177,7 @@
   margin-top: 1px;
   width: 28px;
   height: 28px;
-  background: rgba(244, 124, 32, 0.15);
+  background: rgba(236,72,153, 0.15);
   border-radius: 8px;              /* matches header .dropdownEmoji style */
   display: flex;
   align-items: center;
@@ -217,8 +217,8 @@
   transition: background 0.18s, color 0.18s;
 }
 .payIcon:hover {
-  background: rgba(244, 124, 32, 0.15);
-  color: #F47C20;
+  background: rgba(236,72,153, 0.15);
+  color: #EC4899;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -260,8 +260,8 @@
 
 /* ── Social hover — uses --hover-color CSS variable set inline ── */
 .socialBtn:hover {
-  background: var(--hover-color, #F47C20) !important;
-  border-color: var(--hover-color, #F47C20) !important;
+  background: var(--hover-color, #EC4899) !important;
+  border-color: var(--hover-color, #EC4899) !important;
   color: #fff;
 }
 
@@ -272,21 +272,21 @@
   gap: 6px;
   margin-top: 16px;
   padding: 9px 16px;
-  background: rgba(244, 124, 32, 0.12);
-  border: 1.5px solid rgba(244, 124, 32, 0.35);
+  background: rgba(236,72,153, 0.12);
+  border: 1.5px solid rgba(236,72,153, 0.35);
   border-radius: 50px;
   font-family: var(--font-nunito, 'Nunito', sans-serif);
   font-size: 12.5px;
   font-weight: 700;
-  color: #F47C20;
+  color: #EC4899;
   text-decoration: none;
   transition: background 0.18s, border-color 0.18s, transform 0.15s;
   white-space: nowrap;
   align-self: flex-start;
 }
 .supportBtn:hover {
-  background: #F47C20;
-  border-color: #F47C20;
+  background: #EC4899;
+  border-color: #EC4899;
   color: #fff;
   transform: translateY(-1px);
 }
