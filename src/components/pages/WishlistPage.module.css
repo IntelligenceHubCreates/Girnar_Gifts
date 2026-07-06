@@ -13,7 +13,7 @@
   background: #fff;
   margin: 0 -20px 32px;
   padding: 22px 20px 20px;
-  border-bottom: 1px solid #f0ece5;
+  border-bottom: 1px solid var(--gg-border);
 }
 
 .pageHeaderInner { max-width: 1240px; margin: 0 auto; }
@@ -23,13 +23,13 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #9aa0ad;
+  color: var(--gg-muted);
   margin-bottom: 10px;
 }
-.breadcrumb a { color: #9aa0ad; text-decoration: none; }
-.breadcrumb a:hover { color: #FF6B35; }
+.breadcrumb a { color: var(--gg-muted); text-decoration: none; }
+.breadcrumb a:hover { color: var(--gg-primary); }
 .breadSep { opacity: 0.4; }
-.breadCurrent { color: #161e33; }
+.breadCurrent { color: var(--gg-ink); }
 
 .headerRow {
   display: flex;
@@ -40,7 +40,7 @@
 .pageTitle {
   font-size: 28px;
   font-weight: 800;
-  color: #161e33;
+  color: var(--gg-ink);
   margin: 0;
   display: flex;
   align-items: center;
@@ -51,9 +51,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #fff1ec;
-  border: 1px solid #ffd5c2;
-  color: #FF6B35;
+  background: var(--gg-muted-fill);
+  border: 1px solid var(--gg-accent);
+  color: var(--gg-primary);
   font-size: 14px;
   font-weight: 700;
   border-radius: 20px;
@@ -62,7 +62,7 @@
 }
 
 .pageDesc {
-  color: #9aa0ad;
+  color: var(--gg-muted);
   font-size: 14px;
   margin: 6px 0 0;
 }
@@ -87,7 +87,7 @@
 .card {
   background: #fff;
   border-radius: 14px;
-  border: 1px solid #f0ece5;
+  border: 1px solid var(--gg-border);
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   display: flex;
@@ -102,7 +102,7 @@
 .cardImgWrap {
   position: relative;
   aspect-ratio: 1;
-  background: #f8f5f0;
+  background: var(--gg-muted-fill);
   overflow: hidden;
 }
 
@@ -138,7 +138,7 @@
 }
 
 .badgeNew {
-  background: #1a9e78;
+  background: var(--gg-success);
   color: #fff;
   font-size: 10px;
   font-weight: 800;
@@ -149,7 +149,7 @@
 }
 
 .badgeSale {
-  background: #FF6B35;
+  background: var(--gg-primary);
   color: #fff;
   font-size: 10px;
   font-weight: 800;
@@ -187,7 +187,7 @@
   justify-content: center;
   font-size: 13px;
   font-weight: 800;
-  color: #a0a0a0;
+  color: var(--gg-muted);
   letter-spacing: 0.5px;
 }
 
@@ -202,7 +202,7 @@
 .cardBrand {
   font-size: 10px;
   font-weight: 700;
-  color: #b0a898;
+  color: var(--gg-muted);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
@@ -210,7 +210,7 @@
 .cardName {
   font-size: 14px;
   font-weight: 700;
-  color: #161e33;
+  color: var(--gg-ink);
   text-decoration: none;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -219,7 +219,7 @@
   line-height: 1.35;
   flex: 1;
 }
-.cardName:hover { color: #FF6B35; }
+.cardName:hover { color: var(--gg-primary); }
 
 .cardPriceRow {
   display: flex;
@@ -232,19 +232,19 @@
 .cardPrice {
   font-size: 16px;
   font-weight: 800;
-  color: #161e33;
+  color: var(--gg-ink);
 }
 
 .cardOldPrice {
   font-size: 12px;
-  color: #b0a898;
+  color: var(--gg-muted);
   text-decoration: line-through;
 }
 
 .cardSave {
   font-size: 11px;
   font-weight: 800;
-  color: #FF6B35;
+  color: var(--gg-primary);
 }
 
 .addBtn {
@@ -252,7 +252,7 @@
   padding: 9px 0;
   border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, #FF6B35, #ff8a5e);
+  background: linear-gradient(135deg, var(--gg-primary), var(--gg-primary-hover));
   color: #fff;
   font-size: 13px;
   font-weight: 800;
@@ -261,27 +261,27 @@
   margin-top: 4px;
 }
 .addBtn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-.addBtn:disabled { background: #e8e0d8; color: #b0a898; cursor: not-allowed; }
-.addBtnDone { background: linear-gradient(135deg, #1a9e78, #21b88a); }
+.addBtn:disabled { background: var(--gg-border); color: var(--gg-muted); cursor: not-allowed; }
+.addBtnDone { background: linear-gradient(135deg, var(--gg-success), var(--gg-success)); }
 
 /* ── Skeleton ───────────────────────────────────── */
 .skeleton {
   background: #fff;
   border-radius: 14px;
-  border: 1px solid #f0ece5;
+  border: 1px solid var(--gg-border);
   overflow: hidden;
 }
 
 .skeletonImg {
   aspect-ratio: 1;
-  background: linear-gradient(90deg, #f5f1ec 25%, #ece8e2 50%, #f5f1ec 75%);
+  background: linear-gradient(90deg, var(--gg-muted-fill) 25%, var(--gg-border) 50%, var(--gg-muted-fill) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
 
 .skeletonLine {
   height: 14px;
-  background: linear-gradient(90deg, #f5f1ec 25%, #ece8e2 50%, #f5f1ec 75%);
+  background: linear-gradient(90deg, var(--gg-muted-fill) 25%, var(--gg-border) 50%, var(--gg-muted-fill) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
   border-radius: 6px;
@@ -291,7 +291,7 @@
 .skeletonLineShort {
   height: 12px;
   width: 55%;
-  background: linear-gradient(90deg, #f5f1ec 25%, #ece8e2 50%, #f5f1ec 75%);
+  background: linear-gradient(90deg, var(--gg-muted-fill) 25%, var(--gg-border) 50%, var(--gg-muted-fill) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
   border-radius: 6px;
@@ -319,13 +319,13 @@
 .empty h2 {
   font-size: 22px;
   font-weight: 800;
-  color: #161e33;
+  color: var(--gg-ink);
   margin: 0;
 }
 
 .empty p {
   font-size: 15px;
-  color: #8a8a8a;
+  color: var(--gg-muted);
   margin: 0;
   max-width: 320px;
 }
@@ -334,7 +334,7 @@
   display: inline-block;
   margin-top: 8px;
   padding: 12px 28px;
-  background: linear-gradient(135deg, #FF6B35, #ff8a5e);
+  background: linear-gradient(135deg, var(--gg-primary), var(--gg-primary-hover));
   color: #fff;
   font-size: 14px;
   font-weight: 800;

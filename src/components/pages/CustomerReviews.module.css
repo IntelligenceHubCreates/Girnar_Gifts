@@ -369,7 +369,7 @@
   font-family: var(--font-baloo, 'Baloo 2', cursive);
   font-size: 15px; font-weight: 700; cursor: pointer;
   transition: opacity .18s, transform .15s;
-  box-shadow: 0 4px 14px rgba(244,98,58,.3);
+  box-shadow: 0 4px 14px rgba(122,30,51,.3);
 }
 .submitBtn:hover:not(:disabled)  { opacity: .9; transform: translateY(-1px); }
 .submitBtn:disabled { opacity: .55; cursor: not-allowed; transform: none; }

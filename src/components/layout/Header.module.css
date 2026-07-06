@@ -409,7 +409,7 @@
   font-family: var(--gg-font-body);
   font-size: 13.5px; font-weight: 700; color: var(--gg-ink);
   padding: 8px 16px; border-radius: var(--gg-radius-lg);
-  border: 1.5px solid rgba(26,26,46,0.18);
+  border: 1.5px solid rgba(42,18,24,0.18);
   text-decoration: none; white-space: nowrap;
   transition: border-color 0.18s, color 0.18s;
 }

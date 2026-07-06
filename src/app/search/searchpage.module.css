@@ -265,7 +265,7 @@
 
 /* Highlight */
 .highlight {
-  background: rgba(255,107,91,0.15);
+  background: rgba(122,30,51,0.15);
   color: var(--coral, #FF6B5B);
   border-radius: 2px;
   padding: 0 1px;

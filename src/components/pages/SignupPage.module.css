@@ -3,7 +3,7 @@
   min-height: 80vh;
   display: flex;
   align-items: stretch;
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   background: var(--soft);
 }
 
@@ -23,7 +23,7 @@
 }
 
 .formHeading {
-  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-family: var(--gg-font-display);
   font-size: 30px;
   font-weight: 800;
   color: var(--navy);
@@ -31,7 +31,7 @@
 }
 .formSub {
   font-size: 14px;
-  color: #999;
+  color: var(--gg-muted);
   margin-bottom: 28px;
 }
 .formSub a {
@@ -72,12 +72,12 @@
 .input {
   width: 100%;
   padding: 12px 16px 12px 42px;
-  border: 2px solid #eee;
+  border: 2px solid var(--gg-border);
   border-radius: var(--radius-sm);
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 15px;
   color: var(--navy);
-  background: #fafafa;
+  background: var(--gg-muted-fill);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -86,7 +86,7 @@
   background: #fff;
   box-shadow: 0 0 0 4px rgba(62,207,178,0.09);
 }
-.input::placeholder { color: #bbb; }
+.input::placeholder { color: var(--gg-muted); }
 .eyeBtn {
   position: absolute;
   right: 14px;
@@ -112,14 +112,14 @@
   flex: 1;
   height: 4px;
   border-radius: 99px;
-  background: #eee;
+  background: var(--gg-border);
   transition: background 0.3s;
 }
-.strengthSeg.active.weak   { background: #ff4444; }
+.strengthSeg.active.weak   { background: var(--gg-error); }
 .strengthSeg.active.fair   { background: var(--peach); }
 .strengthSeg.active.good   { background: var(--sun); }
 .strengthSeg.active.strong { background: var(--mint); }
-.strengthLabel { font-size: 11px; color: #aaa; margin-top: 4px; }
+.strengthLabel { font-size: 11px; color: var(--gg-muted); margin-top: 4px; }
 
 /* ─── Terms row ──────────────────────────────────────────────────────────── */
 .termsRow {
@@ -137,7 +137,7 @@
 }
 .termsText {
   font-size: 13px;
-  color: #777;
+  color: var(--gg-muted);
   line-height: 1.5;
 }
 .termsText a {
@@ -154,7 +154,7 @@
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
-  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-family: var(--gg-font-display);
   font-size: 17px;
   font-weight: 800;
   cursor: pointer;
@@ -166,7 +166,7 @@
   margin-bottom: 20px;
 }
 .submitBtn:hover {
-  background: #32b89d;
+  background: var(--gg-success);
   transform: translateY(-1px);
   box-shadow: 0 8px 24px rgba(62,207,178,0.28);
 }
@@ -177,7 +177,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #ccc;
+  color: var(--gg-border);
   font-size: 13px;
   margin-bottom: 16px;
 }
@@ -185,7 +185,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: #eee;
+  background: var(--gg-border);
 }
 
 /* ─── Social Buttons ─────────────────────────────────────────────────────── */
@@ -196,10 +196,10 @@
 .socialBtn {
   flex: 1;
   padding: 11px;
-  border: 2px solid #eee;
+  border: 2px solid var(--gg-border);
   border-radius: var(--radius-sm);
   background: #fff;
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 14px;
   font-weight: 700;
   color: var(--navy);
@@ -210,17 +210,17 @@
   justify-content: center;
   gap: 8px;
 }
-.socialBtn:hover { border-color: var(--mint); background: #f0fdf9; }
+.socialBtn:hover { border-color: var(--mint); background: var(--gg-success); }
 .socialIcon { font-size: 18px; }
 
 /* ─── Error ──────────────────────────────────────────────────────────────── */
-.inputError { border-color: #ff4444 !important; }
-.errorMsg { font-size: 12px; color: #ff4444; margin-top: 5px; display: block; }
+.inputError { border-color: var(--gg-error) !important; }
+.errorMsg { font-size: 12px; color: var(--gg-error); margin-top: 5px; display: block; }
 
 /* ─── Right Promo Panel ──────────────────────────────────────────────────── */
 .rightPanel {
   flex: 0.9;
-  background: linear-gradient(145deg, #fff8f0 0%, #fce8e4 50%, #e8f8f5 100%);
+  background: linear-gradient(145deg, var(--gg-muted-fill) 0%, var(--gg-muted-fill) 50%, var(--gg-success) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -239,7 +239,7 @@
 }
 
 .perksHeading {
-  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-family: var(--gg-font-display);
   font-size: 22px;
   font-weight: 800;
   color: var(--navy);
@@ -278,7 +278,7 @@
 }
 .perkText span {
   font-size: 12px;
-  color: #999;
+  color: var(--gg-muted);
 }
 
 .promoTag {

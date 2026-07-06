@@ -35,7 +35,7 @@
   --r-xs: 6px;
   --sidebar-w: 262px;
   --topbar-h: 64px;
-  --sidebar-glow: rgba(255,107,91,0.18);
+  --sidebar-glow: rgba(122,30,51,0.18);
 }
 
 /* ═══════════════════════════════════════ RESET */
@@ -75,7 +75,7 @@ input, select, textarea { font-family: inherit; }
   top: -60px; right: -60px;
   width: 200px; height: 200px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,107,91,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(122,30,51,0.12) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -98,7 +98,7 @@ input, select, textarea { font-family: inherit; }
   width: 40px; height: 40px; border-radius: 12px;
   background: linear-gradient(135deg, #FF6B5B 0%, #FF8A5E 100%);
   display: grid; place-items: center; font-size: 19px; flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(255,107,91,.5), inset 0 1px 0 rgba(255,255,255,.2);
+  box-shadow: 0 4px 16px rgba(122,30,51,.5), inset 0 1px 0 rgba(255,255,255,.2);
 }
 .s-logo-text { font-size: 1.12rem; font-weight: 900; color: #fff; line-height: 1; letter-spacing: -.01em; }
 .s-logo-text em { color: var(--sun); font-style: normal; }
@@ -136,7 +136,7 @@ input, select, textarea { font-family: inherit; }
   transform: translateX(2px);
 }
 .s-item.active {
-  background: linear-gradient(90deg, rgba(255,107,91,.22) 0%, rgba(255,107,91,.08) 100%);
+  background: linear-gradient(90deg, rgba(122,30,51,.22) 0%, rgba(122,30,51,.08) 100%);
   color: #fff;
   border-left: 2.5px solid var(--coral);
   padding-left: 11.5px;
@@ -152,8 +152,8 @@ input, select, textarea { font-family: inherit; }
 }
 .s-item:hover .s-icon { background: rgba(255,255,255,.1); }
 .s-item.active .s-icon {
-  background: rgba(255,107,91,.25);
-  box-shadow: 0 2px 8px rgba(255,107,91,.25);
+  background: rgba(122,30,51,.25);
+  box-shadow: 0 2px 8px rgba(122,30,51,.25);
 }
 
 .s-label { flex: 1; min-width: 0; }
@@ -190,7 +190,7 @@ input, select, textarea { font-family: inherit; }
   display: grid; place-items: center; flex-shrink: 0;
   transition: all .15s;
 }
-.s-logout:hover { background: rgba(255,107,91,.25); border-color: rgba(255,107,91,.4); color: #FF9080; }
+.s-logout:hover { background: rgba(122,30,51,.25); border-color: rgba(122,30,51,.4); color: #FF9080; }
 
 /* Drawer controls */
 .s-logo-text-wrap { flex: 1; min-width: 0; }
@@ -205,7 +205,7 @@ input, select, textarea { font-family: inherit; }
   flex-shrink: 0;
   transition: all .15s;
 }
-.s-drawer-close:hover { background: rgba(255,107,91,.25); color: #FF9080; }
+.s-drawer-close:hover { background: rgba(122,30,51,.25); color: #FF9080; }
 
 /* ═══════════════════════════════════════ TOPBAR */
 .topbar {
@@ -252,7 +252,7 @@ input, select, textarea { font-family: inherit; }
 }
 .tb-search:focus-within {
   border-color: var(--coral);
-  box-shadow: 0 0 0 3px rgba(255,107,91,.1);
+  box-shadow: 0 0 0 3px rgba(122,30,51,.1);
   background: #fff;
 }
 .tb-search input { border: none; background: none; outline: none; font-size: .82rem; color: var(--text); width: 100%; }
@@ -288,12 +288,12 @@ input, select, textarea { font-family: inherit; }
   font-family: inherit;
 }
 .tb-profile:hover,
-.tb-profile-wrap.open .tb-profile { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(255,107,91,.1); }
+.tb-profile-wrap.open .tb-profile { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(122,30,51,.1); }
 .tb-pav {
   width: 28px; height: 28px; border-radius: 50%;
   background: linear-gradient(135deg, var(--coral) 0%, var(--peach) 100%);
   display: grid; place-items: center; font-size: 12px; font-weight: 900; color: #fff;
-  box-shadow: 0 2px 6px rgba(255,107,91,.3);
+  box-shadow: 0 2px 6px rgba(122,30,51,.3);
 }
 .tb-pname { font-size: .76rem; font-weight: 800; }
 .tb-caret { color: var(--muted); font-size: .68rem; transition: transform .18s; }
@@ -347,12 +347,12 @@ input, select, textarea { font-family: inherit; }
 .btn-primary {
   background: linear-gradient(135deg, var(--coral) 0%, #FF7A6E 100%);
   color: #fff; border-color: var(--coral);
-  box-shadow: 0 3px 10px rgba(255,107,91,.32), inset 0 1px 0 rgba(255,255,255,.15);
+  box-shadow: 0 3px 10px rgba(122,30,51,.32), inset 0 1px 0 rgba(255,255,255,.15);
 }
 .btn-primary:hover {
   background: linear-gradient(135deg, var(--coral-dark) 0%, var(--coral) 100%);
   border-color: var(--coral-dark);
-  box-shadow: 0 5px 16px rgba(255,107,91,.42);
+  box-shadow: 0 5px 16px rgba(122,30,51,.42);
   transform: translateY(-1px);
 }
 .btn-outline { background: transparent; color: var(--text); border-color: var(--border); }
@@ -490,7 +490,7 @@ tbody tr:hover { background: #FAFAF7; }
 }
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   border-color: var(--coral); background: #fff;
-  box-shadow: 0 0 0 3px rgba(255,107,91,.1);
+  box-shadow: 0 0 0 3px rgba(122,30,51,.1);
 }
 .form-textarea { resize: vertical; min-height: 80px; }
 .form-select {
@@ -1004,7 +1004,7 @@ tbody tr:hover { background: #FAFAF7; }
   .sidebar { width: 82vw; max-width: 288px; border-radius: 0 22px 22px 0; }
   .sidebar.is-open {
     box-shadow: 8px 0 48px rgba(0,0,0,.28), 0 0 0 1px rgba(255,255,255,.04),
-                0 0 80px rgba(255,107,91,.06);
+                0 0 80px rgba(122,30,51,.06);
   }
   .s-drawer-close {
     width: 32px; height: 32px; border-radius: 10px;
@@ -1170,7 +1170,7 @@ tbody tr:hover { background: #FAFAF7; }
 .admin-btn-primary {
   background: linear-gradient(135deg, var(--coral) 0%, #FF7A6E 100%);
   color: #fff; border-color: var(--coral);
-  box-shadow: 0 3px 10px rgba(255,107,91,.28);
+  box-shadow: 0 3px 10px rgba(122,30,51,.28);
 }
 .admin-btn-primary:hover { background: linear-gradient(135deg, var(--coral-dark), var(--coral)); }
 .admin-btn-danger  { background: var(--coral-light); color: var(--coral); border-color: #FFCFC9; }
@@ -1196,7 +1196,7 @@ tbody tr:hover { background: #FAFAF7; }
   border-radius: 9px; padding: 7px 12px; flex: 1; min-width: 180px; max-width: 320px;
   transition: border-color .18s, box-shadow .18s;
 }
-.admin-search:focus-within { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(255,107,91,.1); }
+.admin-search:focus-within { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(122,30,51,.1); }
 .admin-search input { border: none; background: none; outline: none; font-size: .82rem; color: var(--text); width: 100%; }
 .admin-search input::placeholder { color: var(--muted); }
 .admin-table { width: 100%; border-collapse: collapse; min-width: 520px; }

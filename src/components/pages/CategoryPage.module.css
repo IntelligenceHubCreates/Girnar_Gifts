@@ -298,7 +298,7 @@
   background: linear-gradient(135deg, var(--gg-primary), var(--gg-primary-hover)); color: #fff; border: none; border-radius: 7px;
   padding: 4px 13px; font-size: 12px; font-weight: 700; cursor: pointer;
 }
-.errorBanner button:hover { box-shadow: 0 2px 8px rgba(224,78,39,.35); }
+.errorBanner button:hover { box-shadow: 0 2px 8px rgba(95,21,38,.35); }
 
 /* Progress bar (initial full-category load) */
 .progressBar { width: 100%; height: 3px; background: var(--gg-border); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
@@ -380,7 +380,7 @@
 .wishBtn:hover { transform: scale(1.18); }
 .wishBtn:active { transform: scale(.95); }
 .wishBtn:focus-visible { outline: 2px solid var(--gg-primary); outline-offset: 1px; }
-.wishActive { background: rgba(244,98,58,.14); }
+.wishActive { background: rgba(122,30,51,.14); }
 
 /* Card body */
 .cardBody { padding: 11px 12px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
@@ -426,13 +426,13 @@
   border: none; background: linear-gradient(135deg, var(--gg-primary), var(--gg-primary-hover)); color: #fff;
   font-family: var(--gg-font-display);
   font-size: 12.5px; font-weight: 700; letter-spacing: .02em;
-  cursor: pointer; box-shadow: 0 3px 10px rgba(224,78,39,.32);
+  cursor: pointer; box-shadow: 0 3px 10px rgba(95,21,38,.32);
   transition: transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .18s, background .18s;
   -webkit-tap-highlight-color: transparent;
 }
-.addBtn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(224,78,39,.42); }
+.addBtn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(95,21,38,.42); }
 .addBtn:active:not(:disabled) { transform: translateY(0) scale(.98); }
-.addBtn:focus-visible { outline: 3px solid rgba(244,98,58,.4); outline-offset: 2px; }
+.addBtn:focus-visible { outline: 3px solid rgba(122,30,51,.4); outline-offset: 2px; }
 .addBtn:disabled { background: var(--gg-border); color: var(--gg-muted); box-shadow: none; cursor: not-allowed; }
 .addBtnDone { background: linear-gradient(135deg, var(--gg-success), var(--gg-success)); box-shadow: 0 3px 10px rgba(47,143,99,.4); }
 
@@ -496,8 +496,8 @@
   box-shadow: 0 4px 14px rgba(122,30,51,.3);
   transition: transform .15s, box-shadow .15s; -webkit-tap-highlight-color: transparent;
 }
-.emptyBtn:hover { transform: translateY(-1px); box-shadow: 0 7px 20px rgba(224,78,39,.4); }
-.emptyBtn:focus-visible { outline: 3px solid rgba(244,98,58,.4); outline-offset: 2px; }
+.emptyBtn:hover { transform: translateY(-1px); box-shadow: 0 7px 20px rgba(95,21,38,.4); }
+.emptyBtn:focus-visible { outline: 3px solid rgba(122,30,51,.4); outline-offset: 2px; }
 
 /* ── Skeleton (loading placeholder cards) ────────────────────────── */
 @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
@@ -545,7 +545,7 @@
   border-color: var(--gg-primary) !important;
   color: #fff !important;
   border-radius: 50% !important;
-  box-shadow: 0 3px 10px rgba(224,78,39,.32);
+  box-shadow: 0 3px 10px rgba(95,21,38,.32);
 }
 .pageDots { font-size: 13px; color: var(--gg-muted); padding: 0 4px; line-height: 36px; }
 

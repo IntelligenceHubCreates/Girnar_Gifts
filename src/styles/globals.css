@@ -101,8 +101,8 @@
   50%     { transform:translateY(-10px) rotate(-6deg); }
 }
 @keyframes h-pulse {
-  0%,100% { box-shadow:0 8px 28px rgba(236,72,153,0.40); }
-  50%     { box-shadow:0 8px 44px rgba(236,72,153,0.68); }
+  0%,100% { box-shadow:0 8px 28px rgba(122,30,51,0.40); }
+  50%     { box-shadow:0 8px 44px rgba(122,30,51,0.68); }
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Baloo+2:wght@800;900&family=Nunito:wght@400;600;700;800;900&display=swap');
@@ -178,8 +178,8 @@ button, a {
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 91, 0.5); }
-  50% { box-shadow: 0 0 0 7px rgba(255, 107, 91, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(122, 30, 51, 0.5); }
+  50% { box-shadow: 0 0 0 7px rgba(122, 30, 51, 0); }
 }
 
 /* Reduce animations on preference */

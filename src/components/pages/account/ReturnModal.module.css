@@ -80,7 +80,7 @@
   width: 100%; padding: 10px 12px; border: 1.5px solid #e5e7eb; border-radius: 10px;
   font-size: .85rem; color: #111827; background: #fff; outline: none;
 }
-.select:focus { border-color: #FF6B35; box-shadow: 0 0 0 3px rgba(255,107,53,.12); }
+.select:focus { border-color: #FF6B35; box-shadow: 0 0 0 3px rgba(122,30,51,.12); }
 
 .typeGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .typeOption {
@@ -96,7 +96,7 @@
   width: 100%; padding: 10px 12px; border: 1.5px solid #e5e7eb; border-radius: 10px;
   font-size: .85rem; color: #111827; outline: none; resize: vertical; font-family: inherit;
 }
-.textarea:focus { border-color: #FF6B35; box-shadow: 0 0 0 3px rgba(255,107,53,.12); }
+.textarea:focus { border-color: #FF6B35; box-shadow: 0 0 0 3px rgba(122,30,51,.12); }
 .charCount { text-align: right; font-size: .68rem; color: #9ca3af; margin-top: 4px; }
 
 .dropzone {

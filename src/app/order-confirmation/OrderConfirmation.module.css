@@ -44,7 +44,7 @@
 .loadingSpinner {
   width: 44px;
   height: 44px;
-  border: 3.5px solid rgba(255,107,91,0.2);
+  border: 3.5px solid rgba(122,30,51,0.2);
   border-top-color: var(--coral, #FF6B5B);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -275,7 +275,7 @@
   color: var(--coral, #FF6B5B);
   white-space: nowrap;
   flex-shrink: 0;
-  background: rgba(255,107,91,0.08);
+  background: rgba(122,30,51,0.08);
   padding: 3px 10px;
   border-radius: 50px;
 }
@@ -420,6 +420,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(255,107,91,0.35);
+  box-shadow: 0 6px 20px rgba(122,30,51,0.35);
 }
-.trackBtn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,91,0.45); }
+.trackBtn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(122,30,51,0.45); }

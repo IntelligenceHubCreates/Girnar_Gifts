@@ -432,14 +432,14 @@
   justify-content: center;
   cursor: pointer;
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(244,98,26,0.35);
+  box-shadow: 0 4px 12px rgba(122,30,51,0.35);
   line-height: 1;
   padding-bottom: 1px;
 }
 .addBtn:hover:not(:disabled) {
   background: var(--gg-primary-hover);
   transform: scale(1.1);
-  box-shadow: 0 6px 18px rgba(244,98,26,0.45);
+  box-shadow: 0 6px 18px rgba(122,30,51,0.45);
 }
 .addBtn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 
@@ -571,7 +571,7 @@
 .qvQtyBtn:disabled { opacity:0.35; cursor:not-allowed; }
 .qvQtyNum { width:34px; text-align:center; font-family:var(--gg-font-body); font-size:15px; font-weight:800; color:var(--gg-ink); }
 .qvAddBtn { flex:1; min-width:0; padding:11px 18px; background:linear-gradient(135deg, var(--gg-primary), var(--gg-primary-hover)); color:#fff; border:none; border-radius:12px; font-family:var(--gg-font-body); font-size:14px; font-weight:700; cursor:pointer; transition:transform 0.2s,box-shadow 0.2s; box-shadow:0 5px 18px rgba(122,30,51,0.28); white-space:nowrap; }
-.qvAddBtn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 9px 26px rgba(244,98,26,0.42); }
+.qvAddBtn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 9px 26px rgba(122,30,51,0.42); }
 .qvAddBtn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
 .qvAddBtnAdded  { background:linear-gradient(135deg,var(--gg-success),var(--gg-success)) !important; box-shadow:0 5px 18px rgba(47,143,99,0.35) !important; }
 .qvAddBtnError  { background:linear-gradient(135deg, var(--gg-error), var(--gg-error)) !important; }

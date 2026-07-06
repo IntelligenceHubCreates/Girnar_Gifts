@@ -139,7 +139,7 @@
 }
 .searchBar:focus-within {
   border-color: #EC4899;
-  box-shadow: 0 0 0 3px rgba(236,72,153,0.10);
+  box-shadow: 0 0 0 3px rgba(122,30,51,0.10);
   background: #fff;
 }
 /* On mobile, hide the bar unless searchOpen (handled by parent class) */
@@ -376,13 +376,13 @@
 }
 .userMenuLoginBtn {
   flex: 1; text-align: center; padding: 9px 10px; border-radius: 50px;
-  border: 1.5px solid rgba(236,72,153,0.40); color: #EC4899;
+  border: 1.5px solid rgba(122,30,51,0.40); color: #EC4899;
   font-family: var(--font-nunito, 'Nunito', sans-serif);
   font-size: 13px; font-weight: 700; text-decoration: none;
   transition: border-color 0.18s, background 0.18s;
   display: flex; align-items: center; justify-content: center;
 }
-.userMenuLoginBtn:hover { border-color: #EC4899; background: rgba(236,72,153,0.06); }
+.userMenuLoginBtn:hover { border-color: #EC4899; background: rgba(122,30,51,0.06); }
 .userMenuRegisterBtn {
   flex: 1; text-align: center; padding: 9px 10px; border-radius: 50px;
   background: #EC4899; color: #fff;
@@ -399,7 +399,7 @@
   font-family: var(--font-nunito, 'Nunito', sans-serif);
   font-size: 13.5px; font-weight: 700; color: #1A1A2E;
   padding: 8px 16px; border-radius: 50px;
-  border: 1.5px solid rgba(26,26,46,0.18);
+  border: 1.5px solid rgba(42,18,24,0.18);
   text-decoration: none; white-space: nowrap;
   transition: border-color 0.18s, color 0.18s;
 }
@@ -633,7 +633,7 @@
 .drawerHeader {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 18px 14px;
-  border-bottom: 1px solid rgba(236,72,153,0.15);
+  border-bottom: 1px solid rgba(122,30,51,0.15);
   flex-shrink: 0;
 }
 .drawerLogo {
@@ -642,19 +642,19 @@
 }
 .drawerLogo span { color: #EC4899; }
 .drawerClose {
-  background: rgba(236,72,153,0.10); border: none; color: #EC4899;
+  background: rgba(122,30,51,0.10); border: none; color: #EC4899;
   width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; cursor: pointer; transition: background 0.2s;
   min-width: 44px; min-height: 44px;
 }
-.drawerClose:hover { background: rgba(236,72,153,0.22); }
+.drawerClose:hover { background: rgba(122,30,51,0.22); }
 
 .drawerUser {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 18px;
-  background: rgba(236,72,153,0.06);
-  border-bottom: 1px solid rgba(236,72,153,0.12);
+  background: rgba(122,30,51,0.06);
+  border-bottom: 1px solid rgba(122,30,51,0.12);
   flex-shrink: 0;
 }
 .drawerUserAvatar  { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
@@ -669,17 +669,17 @@
 
 .drawerAuthBtns {
   display: flex; gap: 10px; padding: 12px 18px;
-  border-bottom: 1px solid rgba(236,72,153,0.12); flex-shrink: 0;
+  border-bottom: 1px solid rgba(122,30,51,0.12); flex-shrink: 0;
 }
 .drawerLoginBtn {
   flex: 1; text-align: center; padding: 10px; border-radius: 50px;
-  border: 1.5px solid rgba(236,72,153,0.40); color: #EC4899;
+  border: 1.5px solid rgba(122,30,51,0.40); color: #EC4899;
   font-family: var(--font-nunito, 'Nunito', sans-serif);
   font-size: 13.5px; font-weight: 700; text-decoration: none;
   transition: border-color 0.18s, background 0.18s;
   min-height: 44px; display: flex; align-items: center; justify-content: center;
 }
-.drawerLoginBtn:hover { border-color: #EC4899; background: rgba(236,72,153,0.07); }
+.drawerLoginBtn:hover { border-color: #EC4899; background: rgba(122,30,51,0.07); }
 .drawerRegisterBtn {
   flex: 1; text-align: center; padding: 10px; border-radius: 50px;
   background: #EC4899; color: #fff;
@@ -691,7 +691,7 @@
 .drawerRegisterBtn:hover { background: #BE185D; }
 
 .drawerNav { flex: 1; overflow-y: auto; padding: 4px 0 48px; -webkit-overflow-scrolling: touch; }
-.drawerSection { border-bottom: 1px solid rgba(236,72,153,0.09); }
+.drawerSection { border-bottom: 1px solid rgba(122,30,51,0.09); }
 
 .drawerToggle {
   width: 100%; display: flex; align-items: center; gap: 12px;
@@ -701,13 +701,13 @@
   cursor: pointer; transition: background 0.15s, color 0.15s;
   text-align: left; text-decoration: none; min-height: 52px;
 }
-.drawerToggle:hover { background: rgba(236,72,153,0.06); color: #EC4899; }
-.drawerLinkActive   { color: #EC4899 !important; background: rgba(236,72,153,0.08) !important; }
+.drawerToggle:hover { background: rgba(122,30,51,0.06); color: #EC4899; }
+.drawerLinkActive   { color: #EC4899 !important; background: rgba(122,30,51,0.08) !important; }
 .drawerToggleLabel  { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .drawerChevron      { font-size: 10px; opacity: 0.4; color: #888; transition: transform 0.22s; flex-shrink: 0; }
 .drawerChevronOpen  { transform: rotate(180deg); opacity: 0.7; }
 
-.drawerSubs { background: rgba(236,72,153,0.04); padding: 2px 0 6px; }
+.drawerSubs { background: rgba(122,30,51,0.04); padding: 2px 0 6px; }
 .drawerSub {
   display: flex; align-items: center; gap: 10px;
   padding: 11px 18px 11px 30px; color: #555;
@@ -715,22 +715,22 @@
   font-size: 13px; font-weight: 600;
   text-decoration: none; transition: color 0.15s, background 0.15s; min-height: 46px;
 }
-.drawerSub:hover { color: #EC4899; background: rgba(236,72,153,0.06); }
+.drawerSub:hover { color: #EC4899; background: rgba(122,30,51,0.06); }
 
 .drawerViewAll {
   display: flex; align-items: center; justify-content: center;
   margin: 5px 14px 3px 26px; padding: 9px 12px;
-  background: rgba(236,72,153,0.09); border-radius: 8px;
+  background: rgba(122,30,51,0.09); border-radius: 8px;
   color: #EC4899 !important; text-decoration: none;
   font-family: var(--font-nunito, 'Nunito', sans-serif);
   font-size: 12px; font-weight: 800;
   transition: background 0.15s; min-height: 40px;
 }
-.drawerViewAll:hover { background: rgba(236,72,153,0.18); }
+.drawerViewAll:hover { background: rgba(122,30,51,0.18); }
 
 .drawerSignOut {
   width: 100%; padding: 14px 18px; background: none; border: none;
-  border-top: 1px solid rgba(236,72,153,0.10); color: #e55;
+  border-top: 1px solid rgba(122,30,51,0.10); color: #e55;
   font-family: var(--font-nunito, 'Nunito', sans-serif);
   font-size: 14px; font-weight: 700;
   text-align: left; cursor: pointer; transition: background 0.15s;
