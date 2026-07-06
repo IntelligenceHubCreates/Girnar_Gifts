@@ -6,7 +6,7 @@
 
 /* Matches the account background (--ll-bg) so the bottom-nav clearance area
    below the page blends seamlessly on mobile. */
-.pageMain { background: #f7f8fa; }
+.pageMain { background: var(--gg-canvas); }
 
 /* Footer is shown on desktop … */
 .footerWrap { display: block; }
