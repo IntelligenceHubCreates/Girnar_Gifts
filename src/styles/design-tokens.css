@@ -1,0 +1,137 @@
+/* ============================================================================
+   GIRNAR GIFTS — DESIGN TOKENS (locked palette, Phase 0 preview)
+   "The art of gifting" — considered, warm-premium, feminine, occasion-led.
+   This file is additive during Phase 0 (imported alongside the legacy
+   globals.css tokens). Once the checkpoint is approved, the legacy rainbow
+   tokens in globals.css (the ll prefixed and h prefixed blocks) are retired
+   and every component is repointed at these.
+   ============================================================================ */
+
+:root {
+  /* ── Brand (from the logo) ── */
+  --gg-wine:         #7A1E33;
+  --gg-wine-dark:    #5F1526;
+  --gg-rose:         #E84C88;
+  --gg-rose-dark:    #D13A75;
+  --gg-petal:        #F49FB3;
+  --gg-blush:        #F6D7DE;
+  --gg-blush-deep:   #F1C6CF;
+
+  /* ── Neutrals (warm, pink undertone) ── */
+  --gg-canvas:       #FFFBFC;
+  --gg-surface:      #FFFFFF;
+  --gg-ink:          #2A1218;
+  --gg-body:         #5B474C;
+  --gg-muted:        #8C767C;
+  --gg-border:       #F0E1E5;
+  --gg-muted-fill:   #FAF1F3;
+
+  /* ── Semantic (status only — never brand) ── */
+  --gg-success:      #2F8F63;
+  --gg-warning:      #D08A1E;
+  --gg-error:        #DE3B3B;
+
+  /* ── Signature gradient — hero "gift reveal" + hero CTAs only ── */
+  --gg-gradient-signature: linear-gradient(135deg, #F49FB3 0%, #E84C88 100%);
+
+  /* ── Semantic role aliases (what components should actually consume) ── */
+  --gg-primary:            var(--gg-wine);
+  --gg-primary-hover:      var(--gg-wine-dark);
+  --gg-primary-foreground: #FFFFFF;
+  --gg-accent:             var(--gg-rose);
+  --gg-accent-hover:       var(--gg-rose-dark);
+  --gg-background:         var(--gg-canvas);
+  --gg-card:               var(--gg-surface);
+  --gg-foreground:         var(--gg-ink);
+
+  /* ── Type scale (fluid, clamp-based) ──
+     roles: display, h1-h4, body, small, caption, overline */
+  --gg-text-display: clamp(2.75rem, 2rem + 3vw, 4.875rem);   /* ~44-78px, hero */
+  --gg-text-h1:      clamp(2.25rem, 1.8rem + 2vw, 3.25rem);  /* ~36-52px */
+  --gg-text-h2:      clamp(1.75rem, 1.5rem + 1.2vw, 2.5rem); /* ~28-40px */
+  --gg-text-h3:      clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem); /* ~22-28px */
+  --gg-text-h4:      clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem); /* ~18-20px */
+  --gg-text-body:    1rem;       /* 16px */
+  --gg-text-small:   0.875rem;   /* 14px */
+  --gg-text-caption: 0.75rem;    /* 12px */
+  --gg-text-overline:0.6875rem;  /* 11px */
+
+  --gg-font-display: var(--font-cinzel), 'Cinzel', Georgia, serif;
+  --gg-font-body:    var(--font-manrope), 'Manrope', system-ui, sans-serif;
+
+  --gg-weight-regular:  400;
+  --gg-weight-medium:   500;
+  --gg-weight-semibold: 600;
+  --gg-weight-bold:     700;
+
+  --gg-leading-tight:   1.1;
+  --gg-leading-snug:    1.3;
+  --gg-leading-normal:  1.55;
+  --gg-leading-relaxed: 1.7;
+
+  --gg-tracking-tight:   -0.01em;
+  --gg-tracking-normal:  0em;
+  --gg-tracking-wide:    0.04em;   /* overline / eyebrow labels */
+  --gg-tracking-wider:   0.08em;   /* the display serif at large sizes wants a touch of air */
+
+  /* ── Spacing scale (4px base) ── */
+  --gg-space-1:  4px;
+  --gg-space-2:  8px;
+  --gg-space-3:  12px;
+  --gg-space-4:  16px;
+  --gg-space-5:  20px;
+  --gg-space-6:  24px;
+  --gg-space-8:  32px;
+  --gg-space-10: 40px;
+  --gg-space-12: 48px;
+  --gg-space-16: 64px;
+  --gg-space-20: 80px;
+  --gg-space-24: 96px;
+  --gg-space-32: 128px;
+
+  /* ── Radii — refined, not maximal-pill ── */
+  --gg-radius-sm:   8px;
+  --gg-radius:      12px;
+  --gg-radius-lg:   16px;
+  --gg-radius-xl:   24px;
+  --gg-radius-pill: 999px;   /* reserved for chips/badges, not every button */
+
+  /* ── Elevation — soft, layered, editorial (not toy-store bouncy-shadow) ── */
+  --gg-shadow-sm:   0 1px 2px rgba(122,30,51,0.04), 0 2px 8px rgba(122,30,51,0.05);
+  --gg-shadow-card: 0 2px 6px rgba(122,30,51,0.05), 0 12px 32px rgba(122,30,51,0.08);
+  --gg-shadow-hover:0 4px 12px rgba(122,30,51,0.08), 0 20px 48px rgba(122,30,51,0.12);
+  --gg-shadow-pop:  0 24px 64px rgba(122,30,51,0.20);
+
+  /* ── Z-index scale ── */
+  --gg-z-dropdown: 100;
+  --gg-z-sticky:   200;
+  --gg-z-drawer:   300;
+  --gg-z-modal:    400;
+  --gg-z-toast:    500;
+
+  /* ── Breakpoints (reference only — CSS Modules use literal @media) ── */
+  --gg-bp-sm:  360px;
+  --gg-bp-md:  768px;
+  --gg-bp-lg:  1024px;
+  --gg-bp-xl:  1440px;
+
+  /* ── Motion tokens ── */
+  --gg-duration-fast:       150ms;
+  --gg-duration-base:       250ms;
+  --gg-duration-expressive: 400ms;
+  --gg-ease-out:   cubic-bezier(0.16, 1, 0.3, 1);      /* entrances */
+  --gg-ease-in:    cubic-bezier(0.7, 0, 0.84, 0);       /* exits */
+  --gg-ease-spring:cubic-bezier(0.34, 1.56, 0.64, 1);   /* interactive press/pop */
+}
+
+/* Global reduced-motion contract - every custom animation in the new system
+   must be wrapped by (or degrade gracefully under) this. Component-level
+   Motion (framer-motion) usage reads this via the shared useReducedMotion
+   hook instead of duplicating the media query in JS. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --gg-duration-fast: 0ms;
+    --gg-duration-base: 0ms;
+    --gg-duration-expressive: 0ms;
+  }
+}

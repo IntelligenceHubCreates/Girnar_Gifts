@@ -1,7 +1,7 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
-import HeroSection from '@/components/sections/HeroSection';
+import GirnarHeroSection from '@/components/sections/GirnarHeroSection';
 import CategoriesSection from '@/components/sections/CategoriesSection';
 import FeaturedProducts from '@/components/sections/FeaturedProducts';
 import PromoGrid from '@/components/sections/PromoGrid';
@@ -19,7 +19,7 @@ export default function HomePage() {
       <Header />
 
       <main className={styles.pageBackground}>
-        <HeroSection />
+        <GirnarHeroSection />
         <CategoriesSection />
         <FeaturedProducts />
         <TestimonialsSection />
