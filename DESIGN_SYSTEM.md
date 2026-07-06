@@ -1,6 +1,19 @@
 # DESIGN_SYSTEM.md — Girnar Gifts Redesign
 
-**Status: Phase 0 — checkpoint, awaiting approval.** Branch `feat/girnar-redesign`. Nothing beyond the token system + one homepage hero has been rolled out sitewide yet.
+**Status: Phase 0 checkpoint approved — sitewide rollout in progress.** Branch `feat/girnar-redesign`, committing per surface. See `MIGRATION_PROGRESS.md` for the running phase-by-phase log.
+
+## Confirmed dead/unused code (found during rollout, left untouched)
+
+These files are never imported anywhere live - restyling them would be wasted effort on unreachable code, so they were left as-is rather than force-fit into the new system:
+- `components/layout/NavBar.tsx`, `components/layout/TopBar.tsx` — Header.tsx renders its own inline nav/topbar instead.
+- `components/ui/ProductCard.tsx` — references the also-dead mock `Product` type/`PRODUCTS` array in `lib/data.ts`.
+- `components/sections/PromoGrid.tsx`, `StationerySpotlight.tsx`, `BlogSection.tsx`, `BrandsSection.tsx` — Little Loot's kids/stationery-specific promo tiles, a stationery-category spotlight fetching a category slug Girnar doesn't have, fabricated blog-post mock content, and a toy-brands strip. Removed from the homepage composition rather than reskinned with invented Girnar content.
+- `lib/data.ts`'s `PRODUCTS` and `BLOG_POSTS` mock arrays — imported nowhere.
+
+## Flagged for `MANUAL_STEPS.md` (data-layer work, out of scope for a presentation-only redesign)
+
+- **PDP personalisation/engraving input**: the backend already has a `personalisation_options` field on `Product` (added in the earlier white-label migration) but no frontend UI reads or collects it. The existing `gift_message` field IS wired end-to-end (CartPage → checkout → order), so the PDP was given a gift-wrap trust signal, but a proper per-product personalisation/engraving input on the PDP itself needs new state + API wiring, which this presentation-only pass doesn't do per guardrail #2.
+- **Instagram feed**: `InstagramSection` is an honest follow-CTA, not a real feed - a live feed needs Instagram API credentials/integration.
 
 ---
 

@@ -91,16 +91,6 @@ function mapProduct(p: BackendProduct): Product {
 }
 const fmt = (n: number) => Number.isFinite(n) && n > 0 ? n.toLocaleString('en-IN') : '0';
 
-/* ─── Highlight icons (SVG line-art style like reference) */
-const HL_SVG = [
-  <svg key="a" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>,
-  <svg key="b" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>,
-  <svg key="c" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><path d="M12 2L2 19h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-  <svg key="d" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-  <svg key="e" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-  <svg key="f" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f4623a" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>,
-];
-const HL_LABELS = ['Water Resistant','Ergonomic Design','BIS Certified','1 Year Warranty','Child Safe','Premium Quality'];
 
 /* ─── Carousel hook ──────────────────────────── */
 function useCarousel(count: number) {
@@ -540,7 +530,7 @@ async function handleQvAdd(qty: number) {
     <div className={styles.page} style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'60vh',flexDirection:'column',gap:16,padding:24}}>
       <span style={{fontSize:56}}>🔍</span>
       <h2 style={{fontFamily:'var(--font-baloo)',fontSize:24,color:'#1a2540',margin:0}}>Product not found</h2>
-      <Link href="/" style={{color:'#f4623a',fontWeight:700,fontSize:14}}>← Back to home</Link>
+      <Link href="/" style={{color:'var(--gg-primary)',fontWeight:700,fontSize:14}}>← Back to home</Link>
     </div>
   );
 
@@ -580,7 +570,7 @@ async function handleQvAdd(qty: number) {
                 className={`${styles.thumb} ${i===activeImg?styles.thumbOn:''}`}
                 onClick={() => setActiveImg(i)}>
                 {src==='VIDEO'
-                  ? <div className={styles.thumbVid}><svg width="14" height="14" viewBox="0 0 24 24" fill="#f4623a"><polygon points="5,3 19,12 5,21"/></svg></div>
+                  ? <div className={styles.thumbVid}><svg width="14" height="14" viewBox="0 0 24 24" fill="var(--gg-primary)"><polygon points="5,3 19,12 5,21"/></svg></div>
                   : <Image src={imgErr[i]?PLACEHOLDER:src} alt="" fill sizes="62px" className={styles.thumbImg} onError={() => setImgErr(p=>({...p,[i]:true}))}/>}
               </button>
             ))}
@@ -599,7 +589,7 @@ async function handleQvAdd(qty: number) {
 
             {/* Wishlist */}
             <button type="button" className={[styles.wishBtn, wished?styles.wishOn:''].filter(Boolean).join(' ')} onClick={handleWish} disabled={wishSt==='loading'} aria-label="Wishlist">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill={wished?'#f4623a':'none'} stroke={wished?'#f4623a':'#888'} strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill={wished?'var(--gg-primary)':'none'} stroke={wished?'var(--gg-primary)':'#888'} strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </button>
 
 {/* Video or image (with desktop hover-pan zoom on images) */}
@@ -771,7 +761,7 @@ async function handleQvAdd(qty: number) {
               {icon:'🚚',t:'Free Delivery',s:'On orders above ₹499'},
               {icon:'🔄',t:'7 Days Returns',s:'Hassle-free returns'},
               {icon:'🔒',t:'Secure Payment',s:'100% safe checkout'},
-              {icon:'❤️',t:'Made for Kids',s:'Child-safe materials'},
+              {icon:'🎁',t:'Gift Wrapping',s:'Complimentary on every order'},
             ].map(x => (
               <div key={x.t} className={styles.trustItem}>
                 <span className={styles.trustIcon}>{x.icon}</span>
@@ -819,7 +809,7 @@ async function handleQvAdd(qty: number) {
               </ul>
             )}
             <div className={styles.certRow}>
-              {['🏅 BIS Certified','🌿 Non-Toxic','💧 Water Resistant','⭐ Premium Quality'].map(c=><span key={c} className={styles.certChip}>{c}</span>)}
+              {['🎁 Gift Ready','✅ Quality Checked','📦 Secure Packaging','⭐ Premium Quality'].map(c=><span key={c} className={styles.certChip}>{c}</span>)}
             </div>
           </div>
           {product.videoUrl && (
