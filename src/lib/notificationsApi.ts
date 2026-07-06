@@ -54,7 +54,7 @@ export async function markAllNotificationsRead(token?: string | null): Promise<v
 /* Map a server notification type → an emoji + color for the bell UI. */
 export const NOTIF_TYPE_STYLE: Record<string, { icon: string; color: string }> = {
   shipping: { icon: '🚚', color: '#3b82f6' },
-  order:    { icon: '📦', color: '#FF6B35' },
+  order:    { icon: '📦', color: '#7A1E33' },
   return:   { icon: '🔄', color: '#a855f7' },
   offer:    { icon: '🎁', color: '#f59e0b' },
   system:   { icon: '🔔', color: '#6b7280' },

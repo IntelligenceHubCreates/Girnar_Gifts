@@ -2346,7 +2346,7 @@ export default function AccountPage() {
                               </div>
                               {/* Returns for this order (Phase 13) */}
                               {(returnsByOrder[o.id] ?? []).length > 0 && (
-                                <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed #e8e0d5' }}>
+                                <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed var(--gg-border)' }}>
                                   <div style={{ fontSize: 12, fontWeight: 800, color: '#6b7280', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.04em' }}>
                                     Returns for this order
                                   </div>

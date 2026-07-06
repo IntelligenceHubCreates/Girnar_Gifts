@@ -98,7 +98,7 @@ export interface ProductQueryParams {
 }
 
 export interface ProductColor {
-  hex:      string;   // CSS color, e.g. "#FF6B35"
+  hex:      string;   // CSS color, e.g. "#7A1E33"
   image?:   string;   // URL of the variant image shown when this color is selected
   label?:   string;   // Human-readable name, e.g. "Coral Red"
 }

@@ -41,7 +41,7 @@ export default function OrderReceipt({ order, onClose }: { order: ApiOrder; onCl
         <div id="ll-receipt" style={{ padding: '28px 32px', color: '#111', fontSize: '.85rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
             <div>
-              <div style={{ fontWeight: 900, fontSize: '1.3rem' }}>{brand.shortName}<span style={{ color: '#FF6B5B' }}>{brand.name.replace(brand.shortName, '').trim()}</span></div>
+              <div style={{ fontWeight: 900, fontSize: '1.3rem' }}>{brand.shortName}<span style={{ color: 'var(--gg-primary)' }}>{brand.name.replace(brand.shortName, '').trim()}</span></div>
               <div style={{ color: '#6b7280', fontSize: '.72rem', marginTop: 2 }}>Order Receipt</div>
             </div>
             <div style={{ textAlign: 'right' }}>

@@ -5,16 +5,16 @@
    ================================================================ */
 
 .pageBackground {
-  /* Smooth transition: cream hero → pure white mid-page → soft close */
+  /* Smooth transition: blush hero → pure white mid-page → soft close */
   background: linear-gradient(
     180deg,
-    #FDF8F3 0%,      /* hero cream */
-    #FDF8F3 18%,
-    #FEFCF9 35%,     /* gentle fade to near-white */
-    #FFFFFF 52%,     /* pure white centre — products / promo pop on this */
-    #FEFCF9 72%,
-    #FDF8F3 88%,     /* warm cream again toward newsletter */
-    #FDF5EE 100%
+    var(--gg-blush) 0%,       /* hero blush */
+    var(--gg-blush) 18%,
+    var(--gg-canvas) 35%,     /* gentle fade to near-white */
+    var(--gg-surface) 52%,    /* pure white centre — products / promo pop on this */
+    var(--gg-canvas) 72%,
+    var(--gg-blush) 88%,      /* blush again toward newsletter */
+    var(--gg-blush) 100%
   );
   min-height: 100vh;
   isolation: isolate;

@@ -556,7 +556,7 @@ export default function CheckoutPage() {
                     {/* Show selected color in summary */}
                     {item.color && (
                       <div style={{ display:'inline-flex', alignItems:'center', gap:4, marginTop:3,
-                        background:'#f5f2ee', border:'1px solid #e8e0d5', borderRadius:20,
+                        background:'var(--gg-muted-fill)', border:'1px solid var(--gg-border)', borderRadius:20,
                         padding:'2px 7px 2px 4px' }}>
                         {item.color_hex && (
                           <span style={{ width:8, height:8, borderRadius:'50%', background:item.color_hex,

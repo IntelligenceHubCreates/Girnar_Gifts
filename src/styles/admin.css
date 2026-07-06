@@ -1,31 +1,37 @@
-/* ═══════════════════════════════════════ BRAND TOKENS */
+/* ═══════════════════════════════════════ BRAND TOKENS
+   Repointed to the Girnar --gg-* palette (see design-tokens.css /
+   DESIGN_SYSTEM.md) - names kept stable so every admin component that
+   already consumes var(--coral) etc. inherits the new identity without
+   a file-by-file rewrite. Pure-black elevation shadows below are left
+   as literal rgba(0,0,0,..) since they're generic depth cues, not
+   brand identity. */
 :root {
-  --coral: #FF6B5B;
-  --coral-light: #FFF0EE;
-  --coral-dark: #E85545;
-  --mint: #3ECFB2;
+  --coral: var(--gg-primary);
+  --coral-light: var(--gg-blush);
+  --coral-dark: var(--gg-primary-hover);
+  --mint: var(--gg-success);
   --mint-light: #E6FAF6;
-  --sun: #FFD336;
-  --sun-light: #FFFBE6;
-  --sky: #5BBEF5;
+  --sun: var(--gg-accent);
+  --sun-light: var(--gg-blush);
+  --sky: var(--gg-petal);
   --sky-light: #E0F3FF;
-  --lilac: #C7A4F5;
+  --lilac: var(--gg-blush-deep);
   --lilac-light: #F0EAFF;
-  --peach: #FFAD8A;
-  --peach-light: #FFF3ED;
-  --navy: #141C30;
-  --navy-2: #1C2540;
-  --navy-3: #263050;
-  --navy-4: #0F1525;
-  --white: #FFFDF8;
-  --soft: #F7F3EE;
-  --soft-2: #EDE8DF;
-  --text: #1E2235;
-  --text-2: #505470;
-  --muted: #8E93AC;
-  --border: #EAE4DA;
-  --border-2: #D9D2C6;
-  --card: #FFFFFF;
+  --peach: var(--gg-petal);
+  --peach-light: var(--gg-blush);
+  --navy: var(--gg-ink);
+  --navy-2: var(--gg-ink);
+  --navy-3: var(--gg-ink);
+  --navy-4: var(--gg-ink);
+  --white: var(--gg-canvas);
+  --soft: var(--gg-muted-fill);
+  --soft-2: var(--gg-border);
+  --text: var(--gg-ink);
+  --text-2: var(--gg-body);
+  --muted: var(--gg-muted);
+  --border: var(--gg-border);
+  --border-2: var(--gg-border);
+  --card: var(--gg-surface);
   --shadow-xs: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04);
   --shadow-md: 0 8px 24px rgba(0,0,0,0.09), 0 2px 6px rgba(0,0,0,0.05);
@@ -96,7 +102,7 @@ input, select, textarea { font-family: inherit; }
 }
 .s-logo-icon {
   width: 40px; height: 40px; border-radius: 12px;
-  background: linear-gradient(135deg, #FF6B5B 0%, #FF8A5E 100%);
+  background: linear-gradient(135deg, var(--gg-petal) 0%, var(--gg-accent) 100%);
   display: grid; place-items: center; font-size: 19px; flex-shrink: 0;
   box-shadow: 0 4px 16px rgba(122,30,51,.5), inset 0 1px 0 rgba(255,255,255,.2);
 }

@@ -206,7 +206,7 @@ function OrderDrawer({ order, onClose, onStatusUpdate, onPrint }: {
                       <td style={{ padding: '10px 14px', fontWeight: 600 }}>{item.name}</td>
                       <td style={{ padding: '10px 14px' }}>
                         {item.color ? (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f5f2ee', border: '1px solid #e8e0d5', borderRadius: 20, padding: '2px 8px 2px 5px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'var(--gg-muted-fill)', border: '1px solid var(--gg-border)', borderRadius: 20, padding: '2px 8px 2px 5px' }}>
                             {item.color_hex && <span style={{ width: 10, height: 10, borderRadius: '50%', background: item.color_hex, border: '1.5px solid rgba(0,0,0,0.12)', display: 'inline-block' }} />}
                             <span style={{ fontSize: 10, fontWeight: 700, color: '#555' }}>{item.color}</span>
                           </span>
@@ -546,7 +546,7 @@ export default function OrdersPage() {
                             }
                             if (eligible) {
                               return <button title="Create shipment" disabled={shipBusy === o.id} onClick={() => handleShip(o)}
-                                style={{ padding: '0 10px', height: 30, borderRadius: 7, border: 'none', background: shipBusy === o.id ? '#fca5a5' : '#FF6B5B', color: '#fff', cursor: shipBusy === o.id ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 800 }}>{shipBusy === o.id ? '…' : '🚚 Ship'}</button>
+                                style={{ padding: '0 10px', height: 30, borderRadius: 7, border: 'none', background: shipBusy === o.id ? '#fca5a5' : 'var(--gg-primary)', color: '#fff', cursor: shipBusy === o.id ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 800 }}>{shipBusy === o.id ? '…' : '🚚 Ship'}</button>
                             }
                             return null
                           })()}
@@ -589,7 +589,7 @@ export default function OrdersPage() {
                         const shipped = shipMap[o.id]
                         const eligible = ['pending', 'confirmed', 'processing', 'packed'].includes((o.status || '').toLowerCase())
                         if (shipped) return <button onClick={() => handleShip(o)} style={{ padding: '6px 12px', borderRadius: 7, border: '1.5px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer', fontSize: '.76rem', fontWeight: 800 }}>🚚 View</button>
-                        if (eligible) return <button disabled={shipBusy === o.id} onClick={() => handleShip(o)} style={{ padding: '6px 12px', borderRadius: 7, border: 'none', background: shipBusy === o.id ? '#fca5a5' : '#FF6B5B', color: '#fff', cursor: 'pointer', fontSize: '.76rem', fontWeight: 800 }}>{shipBusy === o.id ? '…' : '🚚 Ship'}</button>
+                        if (eligible) return <button disabled={shipBusy === o.id} onClick={() => handleShip(o)} style={{ padding: '6px 12px', borderRadius: 7, border: 'none', background: shipBusy === o.id ? '#fca5a5' : 'var(--gg-primary)', color: '#fff', cursor: 'pointer', fontSize: '.76rem', fontWeight: 800 }}>{shipBusy === o.id ? '…' : '🚚 Ship'}</button>
                         return null
                       })()}
                       <button onClick={() => setViewOrder(o)} style={{ padding: '6px 12px', borderRadius: 7, border: '1.5px solid #e5e7eb', background: '#fff', cursor: 'pointer', fontSize: '.76rem', fontWeight: 700, color: '#374151' }}>View</button>

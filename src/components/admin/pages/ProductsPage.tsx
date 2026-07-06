@@ -64,7 +64,7 @@ function ColorVariantEditor({ variants, onChange }: ColorVariantEditorProps) {
   const fileRefs = useRef<Record<number, HTMLInputElement | null>>({})
 
   function addVariant() {
-    onChange([...variants, { name: '', hex: '#FF6B5B', images: [], files: [] }])
+    onChange([...variants, { name: '', hex: '#7A1E33', images: [], files: [] }])
   }
   function removeVariant(idx: number) {
     onChange(variants.filter((_, i) => i !== idx))
@@ -96,12 +96,12 @@ function ColorVariantEditor({ variants, onChange }: ColorVariantEditorProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {variants.length === 0 && (
-        <div style={{ background: '#faf8f5', border: '1.5px dashed #e0d8cf', borderRadius: 12, padding: '16px', textAlign: 'center', fontSize: '.82rem', color: 'var(--muted)' }}>
+        <div style={{ background: 'var(--gg-muted-fill)', border: '1.5px dashed var(--gg-border)', borderRadius: 12, padding: '16px', textAlign: 'center', fontSize: '.82rem', color: 'var(--muted)' }}>
           No color variants added yet. Click "+ Add Color" to add one.
         </div>
       )}
       {variants.map((cv, idx) => (
-        <div key={idx} style={{ background: '#faf8f5', border: '1.5px solid #e8e0d5', borderRadius: 14, padding: '14px 16px', position: 'relative' }}>
+        <div key={idx} style={{ background: 'var(--gg-muted-fill)', border: '1.5px solid var(--gg-border)', borderRadius: 14, padding: '14px 16px', position: 'relative' }}>
           <button type="button" onClick={() => removeVariant(idx)} style={{ position: 'absolute', top: 10, right: 10, width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#ffe4e1', color: 'var(--coral)', fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remove this color">✕</button>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, marginBottom: 10 }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
@@ -111,13 +111,13 @@ function ColorVariantEditor({ variants, onChange }: ColorVariantEditorProps) {
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label" style={{ fontSize: '.75rem' }}>Color</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input type="color" value={cv.hex} onChange={(e) => updateField(idx, 'hex', e.target.value)} style={{ width: 38, height: 38, padding: 2, cursor: 'pointer', border: '1.5px solid #e0d8cf', borderRadius: 8 }} title="Pick color" />
+                <input type="color" value={cv.hex} onChange={(e) => updateField(idx, 'hex', e.target.value)} style={{ width: 38, height: 38, padding: 2, cursor: 'pointer', border: '1.5px solid var(--gg-border)', borderRadius: 8 }} title="Pick color" />
                 <input className="form-input" value={cv.hex} placeholder="#F4A7B9" maxLength={7} onChange={(e) => updateField(idx, 'hex', e.target.value)} style={{ width: 90, height: 38, fontFamily: 'monospace', fontSize: '.82rem' }} />
               </div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: cv.hex, border: '2px solid #e0d8cf', flexShrink: 0 }} />
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: cv.hex, border: '2px solid var(--gg-border)', flexShrink: 0 }} />
             <span style={{ fontSize: '.78rem', color: 'var(--muted)' }}>{cv.name || 'Unnamed'} — {cv.hex}</span>
           </div>
           <div>
@@ -126,13 +126,13 @@ function ColorVariantEditor({ variants, onChange }: ColorVariantEditorProps) {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
                 {cv.images.map((url, imgIdx) => (
                   <div key={imgIdx} style={{ position: 'relative' }}>
-                    <img src={url} alt={`${cv.name} ${imgIdx + 1}`} style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 10, border: '1.5px solid #e0d8cf' }} />
+                    <img src={url} alt={`${cv.name} ${imgIdx + 1}`} style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 10, border: '1.5px solid var(--gg-border)' }} />
                     <button type="button" onClick={() => removeImage(idx, imgIdx)} style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', border: 'none', background: '#e74c3c', color: '#fff', fontWeight: 700, fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>✕</button>
                   </div>
                 ))}
               </div>
             )}
-            <div style={{ border: '2px dashed #e0d8cf', borderRadius: 10, padding: '10px 14px', textAlign: 'center', cursor: 'pointer', fontSize: '.78rem', color: 'var(--muted)', background: '#fff' }} onClick={() => fileRefs.current[idx]?.click()}>
+            <div style={{ border: '2px dashed var(--gg-border)', borderRadius: 10, padding: '10px 14px', textAlign: 'center', cursor: 'pointer', fontSize: '.78rem', color: 'var(--muted)', background: '#fff' }} onClick={() => fileRefs.current[idx]?.click()}>
               📷 Click to upload images for {cv.name || 'this color'}
             </div>
             <input ref={(el) => { fileRefs.current[idx] = el }} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={(e) => handleFiles(idx, e.target.files)} />

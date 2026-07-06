@@ -92,7 +92,7 @@ function FeaturedCard({
                   key={b.label}
                   className={styles.badge}
                   style={{
-                    background: BADGE_BG[b.type] ?? '#F4621A',
+                    background: BADGE_BG[b.type] ?? 'var(--gg-primary)',
                     color:      BADGE_TEXT[b.type] ?? '#fff',
                   }}
                 >
@@ -454,7 +454,7 @@ const addToCart = useCallback(async (product: UiProduct & { colors?: string[] })
                         <span
                           key={b.label}
                           className={styles.qvBadge}
-                          style={{ background: BADGE_BG[b.type] ?? '#F4621A', color: BADGE_TEXT[b.type] ?? '#fff' }}
+                          style={{ background: BADGE_BG[b.type] ?? 'var(--gg-primary)', color: BADGE_TEXT[b.type] ?? '#fff' }}
                         >
                           {b.label}
                         </span>

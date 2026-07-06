@@ -529,7 +529,7 @@ async function handleQvAdd(qty: number) {
   if (notFound || !product) return (
     <div className={styles.page} style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'60vh',flexDirection:'column',gap:16,padding:24}}>
       <span style={{fontSize:56}}>🔍</span>
-      <h2 style={{fontFamily:'var(--font-baloo)',fontSize:24,color:'#1a2540',margin:0}}>Product not found</h2>
+      <h2 style={{fontFamily:'var(--font-baloo)',fontSize:24,color:'var(--gg-ink)',margin:0}}>Product not found</h2>
       <Link href="/" style={{color:'var(--gg-primary)',fontWeight:700,fontSize:14}}>← Back to home</Link>
     </div>
   );

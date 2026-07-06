@@ -67,7 +67,7 @@ export default function MobileAccountMenu({
     {
       label: 'Main',
       rows: [
-        { key: 'dashboard', label: 'Dashboard', desc: 'Overview & insights',              icon: <GridI />,  bg: '#fff3ee', color: '#FF6B35', onClick: onDashboard },
+        { key: 'dashboard', label: 'Dashboard', desc: 'Overview & insights',              icon: <GridI />,  bg: '#fff3ee', color: 'var(--gg-primary)', onClick: onDashboard },
         { key: 'orders',    label: 'My Orders', desc: `${counts.orders} order${counts.orders !== 1 ? 's' : ''} placed`, icon: <BagI />, bg: '#eff6ff', color: '#3b82f6', badge: counts.orders, onClick: () => onNavigate('orders') },
         { key: 'wishlist',  label: 'Wishlist',  desc: `${counts.wishlist} item${counts.wishlist !== 1 ? 's' : ''} saved`, icon: <HeartI />, bg: '#fff1f2', color: '#f43f5e', badge: counts.wishlist, onClick: () => onNavigate('wishlist') },
         { key: 'addresses', label: 'Addresses', desc: `${counts.addresses} saved`,         icon: <PinI />,   bg: '#f0fdf4', color: '#10b981', badge: counts.addresses, onClick: () => onNavigate('addresses') },
@@ -84,7 +84,7 @@ export default function MobileAccountMenu({
       label: 'Activity',
       rows: [
         { key: 'reviews',       label: 'My Reviews',    desc: counts.pendingReviews > 0 ? `${counts.pendingReviews} pending` : 'Your reviews', icon: <StarI />, bg: '#faf5ff', color: '#a855f7', badge: counts.pendingReviews, onClick: () => onNavigate('reviews') },
-        { key: 'notifications', label: 'Notifications', desc: 'Orders, offers & more',         icon: <BellI />, bg: '#fff7ed', color: '#FF6B35', onClick: () => onNavigate('notifications') },
+        { key: 'notifications', label: 'Notifications', desc: 'Orders, offers & more',         icon: <BellI />, bg: '#fff7ed', color: 'var(--gg-primary)', onClick: () => onNavigate('notifications') },
       ],
     },
     {

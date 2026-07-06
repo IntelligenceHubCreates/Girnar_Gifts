@@ -144,7 +144,7 @@ export function MobileDashboard({
     { label: 'View orders',      color: '#3b82f6', bg: '#eff6ff', icon: <Bag />,   tab: 'orders' },
     { label: 'Manage addresses', color: '#10b981', bg: '#ecfdf5', icon: <Pin />,   tab: 'addresses' },
     { label: 'My wishlist',      color: '#f43f5e', bg: '#fff1f2', icon: <Heart />, tab: 'wishlist' },
-    { label: 'Edit profile',     color: '#FF6B35', bg: '#fff5f2', icon: <User />,  tab: 'settings' },
+    { label: 'Edit profile',     color: 'var(--gg-primary)', bg: '#fff5f2', icon: <User />,  tab: 'settings' },
   ];
 
   return (
@@ -237,7 +237,7 @@ export function MobileDashboard({
         <div className={styles.mtCard}>
           <div className={styles.mtCardHead}>
             <span className={styles.mtCardTitle}>Total spent</span>
-            <span className={styles.mtStatNum} style={{ fontSize: 20, color: '#FF6B35' }}>₹{totalSpend.toLocaleString('en-IN')}</span>
+            <span className={styles.mtStatNum} style={{ fontSize: 20, color: 'var(--gg-primary)' }}>₹{totalSpend.toLocaleString('en-IN')}</span>
           </div>
           <div className={styles.mtStatSub}>Across {counts.delivered} delivered order{counts.delivered > 1 ? 's' : ''}</div>
         </div>
@@ -359,7 +359,7 @@ export function MobileOrders({
 
                       {/* Returns for this order (Phase 13) */}
                     {(returnsByOrder[o.id] ?? []).length > 0 && (
-                      <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed #e8e0d5' }}>
+                      <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--gg-border)' }}>
                         <div style={{ fontSize: 11, fontWeight: 800, color: '#6b7280', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.04em' }}>
                           Returns
                         </div>
@@ -377,7 +377,7 @@ export function MobileOrders({
                                 <span style={{ flex: 1, fontSize: 11.5, color: '#6b7280', fontWeight: 600, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                   {RETURN_REASON_LABEL[rr.reason] ?? rr.reason} · {rr.item_count} item{rr.item_count !== 1 ? 's' : ''}
                                 </span>
-                                <span style={{ fontSize: 11.5, fontWeight: 800, color: '#FF6B35', whiteSpace: 'nowrap' }}>View →</span>
+                                <span style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--gg-primary)', whiteSpace: 'nowrap' }}>View →</span>
                               </button>
                             );
                           })}
@@ -893,7 +893,7 @@ function mtBuildNotifications(orders: MappedOrder[]) {
   items.push({
     id: 'welcome', type: 'system', title: `Welcome to ${brand.name}! 🎁`,
     body: 'Your account is all set. Start exploring thoughtful gifts for every occasion.',
-    time: 'Just now', read: true, icon: '🧸', color: '#FF6B35',
+    time: 'Just now', read: true, icon: '🎁', color: 'var(--gg-primary)',
   });
   return items;
 }
