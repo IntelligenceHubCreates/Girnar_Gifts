@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { DURATION, EASE } from '@/lib/motion';
 import styles from './CategoriesSection.module.css';
 
 interface Category {
@@ -184,7 +185,7 @@ export default function CategoriesSection() {
                 className={styles.card}
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.05 + i * 0.06, ease: 'easeOut' }}
+                transition={{ duration: DURATION.expressive, delay: 0.05 + i * 0.06, ease: EASE.out }}
               >
                 <Link
                   href={cat.href}

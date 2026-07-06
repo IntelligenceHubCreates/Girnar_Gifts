@@ -3,6 +3,7 @@ import { Baloo_2, Nunito, Cinzel, Manrope } from 'next/font/google';
 import '@/styles/globals.css';
 import '@/styles/design-tokens.css';
 import SessionProvider from '@/components/SessionProvider';
+import MotionProvider from '@/components/MotionProvider';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { Toaster } from 'react-hot-toast';
@@ -68,14 +69,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${baloo2.variable} ${nunito.variable} ${cinzel.variable} ${manrope.variable}`}>
       <body>
-        <SessionProvider>
-          <CartProvider>
-            <WishlistProvider>
-              {children}
-              <Toaster position="top-right" />
-            </WishlistProvider>
-          </CartProvider>
-        </SessionProvider>
+        <MotionProvider>
+          <SessionProvider>
+            <CartProvider>
+              <WishlistProvider>
+                {children}
+                <Toaster position="top-right" />
+              </WishlistProvider>
+            </CartProvider>
+          </SessionProvider>
+        </MotionProvider>
       </body>
     </html>
   );
