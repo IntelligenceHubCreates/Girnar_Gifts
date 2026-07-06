@@ -383,7 +383,7 @@ function buildInAppNotifications(orders: MappedOrder[], favs: any[]): Array<{
     time:  'Just now',
     read:  true,
     icon:  '🧸',
-    color: '#FF6B35',
+    color: 'var(--gg-primary)',
   });
 
   return items;
@@ -485,7 +485,7 @@ const markAllRead = () => {
           <div>
             <div className={styles.settingsSectionTitle}>
               <span className={styles.settingsSectionIcon} style={{ background:'#fff7ed' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gg-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               </span>
               Notifications
               {unreadCount > 0 && (
@@ -1538,7 +1538,7 @@ export default function AccountPage() {
             <button type="button"
               className={`${styles.sbItem} ${tab==='overview' ? styles.sbItemActive : ''}`}
               onClick={() => setTab('overview')}>
-              <span className={styles.sbItemIcon} style={{ background: tab==='overview' ? '#fff3ee' : undefined, color: tab==='overview' ? '#FF6B35' : undefined }}>
+              <span className={styles.sbItemIcon} style={{ background: tab==='overview' ? '#fff3ee' : undefined, color: tab==='overview' ? 'var(--gg-primary)' : undefined }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
               </span>
               <span className={styles.sbItemLabel}>Dashboard</span>
@@ -1617,7 +1617,7 @@ export default function AccountPage() {
             <button type="button"
               className={`${styles.sbItem} ${tab==='notifications' ? styles.sbItemActive : ''}`}
               onClick={() => setTab('notifications')}>
-              <span className={styles.sbItemIcon} style={{ background: tab==='notifications' ? '#fff7ed' : undefined, color: tab==='notifications' ? '#FF6B35' : undefined }}>
+              <span className={styles.sbItemIcon} style={{ background: tab==='notifications' ? '#fff7ed' : undefined, color: tab==='notifications' ? 'var(--gg-primary)' : undefined }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               </span>
               <span className={styles.sbItemLabel}>Notifications</span>
@@ -2029,7 +2029,7 @@ export default function AccountPage() {
                   </div>
                   <div className={styles.dashSpendList}>
                     {[
-                      { label:'Total Spent',       value:`₹${totalSpend.toLocaleString('en-IN')}`,    color:'#FF6B35', sub:'across all orders' },
+                      { label:'Total Spent',       value:`₹${totalSpend.toLocaleString('en-IN')}`,    color:'var(--gg-primary)', sub:'across all orders' },
                       { label:'Average Order',      value: orders.length > 0 ? `₹${Math.round(totalSpend/Math.max(deliveredOrders.length,1)).toLocaleString('en-IN')}` : '—', color:'#3b82f6', sub:'per delivered order' },
                       { label:'Wishlist Value',     value:`₹${favs.reduce((s,f)=>s+getSellingPrice(f.product),0).toLocaleString('en-IN')}`, color:'#f43f5e', sub:'items saved' },
                       { label:'Potential Savings',  value: totalSaved > 0 ? `₹${totalSaved.toLocaleString('en-IN')}` : '₹0', color:'#10b981', sub:'on wishlisted items' },
@@ -2363,7 +2363,7 @@ export default function AccountPage() {
                                           <span style={{ flex: 1, fontSize: 12, color: '#6b7280', fontWeight: 600 }}>
                                             {RETURN_REASON_LABEL[rr.reason] ?? rr.reason} · {rr.item_count} item{rr.item_count !== 1 ? 's' : ''} · {new Date(rr.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
                                           </span>
-                                          <span style={{ fontSize: 12, fontWeight: 800, color: '#FF6B35', whiteSpace: 'nowrap' }}>View →</span>
+                                          <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--gg-primary)', whiteSpace: 'nowrap' }}>View →</span>
                                         </button>
                                       );
                                     })}
@@ -2870,7 +2870,7 @@ export default function AccountPage() {
                   <div>
                     <div className={styles.settingsSectionTitle}>
                       <span className={styles.settingsSectionIcon} style={{ background:'#fff3ee' }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gg-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       </span>
                       Personal Information
                     </div>
@@ -3073,7 +3073,7 @@ export default function AccountPage() {
                   { q:'How do I track my order?', a:'Go to "My Orders", select your order and click "Track Order" to see real-time delivery status.' },
                   { q:'What is your return policy?', a:'We offer hassle-free 7-day returns on most products. Items must be unused and in original packaging.' },
                   { q:'How do I apply a coupon?', a:'Go to the "Coupons" tab, copy the code, and apply it at checkout to get your discount.' },
-                  { q:'Are the products safe for kids?', a:'Absolutely! All our products are made with certified child-safe, non-toxic materials.' },
+                  { q:'Can I add a gift message or request gift wrapping?', a:'Yes! Add your gift message during checkout, and every order includes complimentary gift wrapping.' },
                   { q:'How long does delivery take?', a:'Standard delivery takes 3–5 business days. Express delivery is available in select cities.' },
                 ].map((f,i) => (
                   <details key={i} className={styles.helpFaqItem}>
