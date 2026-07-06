@@ -72,8 +72,8 @@ const Icon = memo(function Icon(
 });
 
 /* ─── Badge helpers ──────────────────────────────────────────────────────── */
-const BADGE_BG: Record<string, string>   = { sale: '#FF6B5B', new: '#3ECFB2', hot: '#FFD336' };
-const BADGE_TEXT: Record<string, string> = { sale: '#fff',    new: '#fff',    hot: '#1A2540' };
+const BADGE_BG: Record<string, string>   = { sale: 'var(--gg-accent)', new: 'var(--gg-primary)', hot: 'var(--gg-primary)' };
+const BADGE_TEXT: Record<string, string> = { sale: '#fff',              new: '#fff',              hot: '#fff' };
 
 /* ─── Map backend → MappedProduct (same precedence as ProductPage) ────────── */
 function extractImageUrls(raw: { url: string }[] | string[] | undefined): string[] {
@@ -694,9 +694,9 @@ async function applyCoupon() {
         <div className={styles.errorState}>
           <div className={styles.errorIllus}>
             <svg width="96" height="96" viewBox="0 0 96 96" fill="none" aria-hidden="true">
-              <circle cx="48" cy="48" r="44" fill="#fdecea" />
-              <path d="M32 58h30a11 11 0 0 0 1-22 15 15 0 0 0-28-3" stroke="#e74c3c" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M30 30l36 36" stroke="#e74c3c" strokeWidth="3.2" strokeLinecap="round" />
+              <circle cx="48" cy="48" r="44" fill="var(--gg-muted-fill)" />
+              <path d="M32 58h30a11 11 0 0 0 1-22 15 15 0 0 0-28-3" stroke="var(--gg-error)" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M30 30l36 36" stroke="var(--gg-error)" strokeWidth="3.2" strokeLinecap="round" />
             </svg>
           </div>
           <h2 className={styles.errorTitle}>We couldn't load your cart</h2>
