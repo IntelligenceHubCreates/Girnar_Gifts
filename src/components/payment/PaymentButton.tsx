@@ -105,7 +105,7 @@ export default function PaymentButton({
           email:   userEmail,
           contact: shippingAddress.phone,
         },
-        theme:  { color: '#FF6B5B' },
+        theme:  { color: '#7A1E33' },
         modal:  { backdropclose: false, escape: false },
 
         handler: async (response: RazorpaySuccessResponse) => {

@@ -62,7 +62,7 @@ function Avatar({ src, name }: { src: string | null; name: string }) {
       </div>
     );
   }
-  const colors = ['#f4623a','#1a9e78','#3b82f6','#9b5de5','#f59e0b'];
+  const colors = ['var(--gg-primary)','#1a9e78','#3b82f6','#9b5de5','#f59e0b'];
   const bg = colors[name.charCodeAt(0) % colors.length];
   return <div className={styles.avatarInitials} style={{ background: bg }}>{initials(name)}</div>;
 }
@@ -273,7 +273,7 @@ export default function CustomerReviews({ productId, productName }: CustomerRevi
                 <div key={n} className={styles.distRow}>
                   <span className={styles.distLabel}>{n} ☆</span>
                   <div className={styles.distTrack}>
-                    <div className={styles.distFill} style={{ width: `${pct}%`, background: n >= 4 ? '#f4623a' : n === 3 ? '#f5a623' : '#ddd' }} />
+                    <div className={styles.distFill} style={{ width: `${pct}%`, background: n >= 4 ? 'var(--gg-primary)' : n === 3 ? '#f5a623' : '#ddd' }} />
                   </div>
                   <span className={styles.distPct}>{pct}% ({count})</span>
                 </div>

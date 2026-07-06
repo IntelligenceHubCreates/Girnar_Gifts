@@ -60,7 +60,7 @@ const STATUS_CFG: Record<string, { color: string; bg: string; label: string; emo
   shipped:          { color: '#FFAD8A', bg: 'rgba(255,173,138,0.1)', label: 'Shipped',           emoji: '🚀' },
   out_for_delivery: { color: '#FFD336', bg: 'rgba(255,211,54,0.12)', label: 'Out for Delivery',  emoji: '🛵' },
   delivered:        { color: '#3ECFB2', bg: 'rgba(62,207,178,0.1)',  label: 'Delivered',         emoji: '🎉' },
-  cancelled:        { color: '#FF6B5B', bg: 'rgba(255,107,91,0.1)',  label: 'Cancelled',         emoji: '❌' },
+  cancelled:        { color: 'var(--gg-error)', bg: 'rgba(222,59,59,0.1)',  label: 'Cancelled',         emoji: '❌' },
   returned:         { color: '#FFAD8A', bg: 'rgba(255,173,138,0.1)', label: 'Returned',          emoji: '↩️' },
 };
 

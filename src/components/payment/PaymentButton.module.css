@@ -1,7 +1,7 @@
 .btn {
   width: 100%;
   padding: 16px 32px;
-  background: linear-gradient(135deg, #FF6B5B, #ff8a7e);
+  background: linear-gradient(135deg, var(--gg-primary), var(--gg-rose));
   color: #fff;
   font-family: var(--font-baloo), 'Baloo 2', sans-serif;
   font-size: 17px;

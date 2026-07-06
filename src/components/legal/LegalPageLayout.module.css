@@ -36,6 +36,6 @@
 }
 
 .wrap a {
-  color: var(--ll-accent, #EC4899);
+  color: var(--ll-accent, var(--gg-primary));
   text-decoration: underline;
 }
