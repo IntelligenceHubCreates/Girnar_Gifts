@@ -19,83 +19,20 @@ interface SearchProduct {
   brand?: string;
 }
 
-/* ─── Nav data ───────────────────────────────────────────────────── */
+/* ─── Nav data — Girnar's real seeded gift categories (no fabricated
+       subcategories yet; see MANUAL_STEPS.md for the taxonomy decision
+       this is pending) ──────────────────────────────────────────────── */
+const catHref = (name: string) => `/products?category=${encodeURIComponent(name)}`;
+
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home', href: '/', emoji: '🏠' },
-  {
-    label: 'Stationery', href: '/stationery', emoji: '📝',
-    subItems: [
-      { emoji: '✏️', label: 'Pens & Pencils',     sub: 'Gel pens, colour pencils & sets',   href: '/stationery/pens-pencils' },
-      { emoji: '📏', label: 'Scales & Rulers',    sub: 'Acrylic, folding, triangle',         href: '/stationery/scales' },
-      { emoji: '🔪', label: 'Sharpeners',          sub: 'Character, novelty & standard',     href: '/stationery/sharpeners' },
-      { emoji: '🧹', label: 'Erasers',             sub: 'Novelty, box & standard erasers',   href: '/stationery/erasers' },
-      { emoji: '📒', label: 'Notebooks & Diaries', sub: 'Diaries, clipboards & notepads',   href: '/stationery/notebooks' },
-      { emoji: '🖍️', label: 'Art & Craft',         sub: 'Crayons, paints & colour books',   href: '/stationery/art-craft' },
-      { emoji: '🏷️', label: 'Stickers & Tapes',   sub: 'Washi tape, seal & deco stickers',  href: '/stationery/stickers' },
-      { emoji: '🎯', label: 'Stationery Sets',     sub: 'Gifting sets, space & kuromi kits', href: '/stationery/sets' },
-    ],
-  },
-  {
-    label: 'Bags & Pouches', href: '/bags', emoji: '👜',
-    subItems: [
-      { emoji: '🎒', label: 'School Bags',    sub: 'Premium & standard school bags',     href: '/bags/school-bags' },
-      { emoji: '👝', label: 'Sling Bags',     sub: 'Fancy, jelly, silicone & knot',      href: '/bags/sling-bags' },
-      { emoji: '🧳', label: 'Duffle & Travel',sub: 'Mini duffle, jelly & fancy duffle',  href: '/bags/duffle-travel' },
-      { emoji: '👛', label: 'Coin Pouches',   sub: 'Bling, unicorn & flat coin pouches', href: '/bags/coin-pouches' },
-      { emoji: '✏️', label: 'Pencil Pouches', sub: '3D zip, bunny, kitty & more',        href: '/bags/pencil-pouches' },
-      { emoji: '🌿', label: 'Jute Bags',      sub: 'Mini, small & medium jute bags',     href: '/bags/jute-bags' },
-      { emoji: '💼', label: 'Lunch Bags',     sub: 'Croc, bento, insulated & more',      href: '/bags/lunch-bags' },
-      { emoji: '🧊', label: 'Frosted & Jelly',sub: 'Transparent, jelly & frosted bags',  href: '/bags/frosted-jelly' },
-    ],
-  },
-  {
-    label: 'Bottles & Lunch', href: '/bottles', emoji: '🍱',
-    subItems: [
-      { emoji: '💧', label: 'Water Bottles',  sub: 'Cartoon, sports & printed bottles',  href: '/bottles/water-bottles' },
-      { emoji: '🏆', label: 'Tumblers & Cups',sub: 'Stanley, crystal, LED & handle',     href: '/bottles/tumblers' },
-      { emoji: '🍱', label: 'Lunch Boxes',    sub: 'Character, cat, plain & 3-section',  href: '/bottles/lunch-boxes' },
-      { emoji: '🥣', label: 'Tiffin & Soup',  sub: 'Insulated, steel & bento boxes',     href: '/bottles/tiffin' },
-    ],
-  },
-  {
-    label: 'Toys & Games', href: '/toys', emoji: '🎮',
-    subItems: [
-      { emoji: '🧩', label: 'Puzzles',          sub: 'Tangram, wooden, face & jigsaw',   href: '/toys/puzzles' },
-      { emoji: '🎲', label: 'Board Games',       sub: 'Ludo, tic tac toe, magnetic game', href: '/toys/board-games' },
-      { emoji: '🤸', label: 'Activity Toys',     sub: 'Slime, squishy, bubbles & more',  href: '/toys/activity' },
-      { emoji: '⏱️', label: 'Watches & Gadgets', sub: 'Camera watch, light & digital',   href: '/toys/watches-gadgets' },
-      { emoji: '🐷', label: 'Piggy Banks',       sub: 'Small, big & character banks',    href: '/toys/piggy-banks' },
-      { emoji: '🎨', label: 'DIY & Creative',    sub: 'Diamond painting, scratch books', href: '/toys/diy-creative' },
-    ],
-  },
-  {
-    label: 'Beauty & Hair', href: '/beauty', emoji: '💄',
-    subItems: [
-      { emoji: '💇', label: 'Hair Accessories', sub: 'Scrunchies, clips, bands & pins',  href: '/beauty/hair' },
-      { emoji: '💋', label: 'Makeup',           sub: 'Lipstick, face palette, lip balm', href: '/beauty/makeup' },
-      { emoji: '🧴', label: 'Skincare',         sub: 'Sunscreen, serum, moisturiser',    href: '/beauty/skincare' },
-      { emoji: '🪥', label: 'Hygiene',          sub: 'Toothbrush, handwash, wet wipes',  href: '/beauty/hygiene' },
-      { emoji: '🧼', label: 'Bath & Body',      sub: 'Soaps, shampoo bar, whipped soap', href: '/beauty/bath-body' },
-      { emoji: '💅', label: 'Nails & Jewellery',sub: 'Nail sets, bracelets & necklaces', href: '/beauty/nails-jewellery' },
-    ],
-  },
-  {
-    label: 'Keychains', href: '/keychains', emoji: '🔑',
-    subItems: [
-      { emoji: '🔑', label: 'All Keychains',    sub: 'Camera, casino, bottle & more',   href: '/keychains/all' },
-      { emoji: '✨', label: 'Phone Charms',      sub: 'Labubu, mobile & bag charms',     href: '/keychains/phone-charms' },
-      { emoji: '🧸', label: 'Character Charms', sub: 'Anime, cartoon & novelty charms', href: '/keychains/character' },
-    ],
-  },
-  {
-    label: 'Gift Sets', href: '/gifts', emoji: '🎁',
-    subItems: [
-      { emoji: '🎁', label: 'Gift Sets',       sub: 'Small, big & curated gift sets',    href: '/gifts/gift-sets' },
-      { emoji: '🎨', label: 'Art Gift Sets',   sub: 'Paint & stationery gifting sets',   href: '/gifts/art-gifts' },
-      { emoji: '🧳', label: 'Trolley Gift Sets',sub: 'Suitcase & trolley gift bundles',  href: '/gifts/trolley' },
-      { emoji: '👒', label: 'Accessory Sets',  sub: 'Box accessory & doll sets',         href: '/gifts/accessories' },
-    ],
-  },
+  { label: 'Personalised Gifts',  href: catHref('Personalised Gifts'),  emoji: '🎁' },
+  { label: 'Gift Hampers',        href: catHref('Gift Hampers'),        emoji: '🧺' },
+  { label: 'Festive & Occasion',  href: catHref('Festive & Occasion'),  emoji: '🎉' },
+  { label: 'Corporate Gifts',     href: catHref('Corporate Gifts'),     emoji: '💼' },
+  { label: 'Home & Decor',        href: catHref('Home & Decor'),        emoji: '🏡' },
+  { label: 'Chocolates & Sweets', href: catHref('Chocolates & Sweets'), emoji: '🍫' },
+  { label: 'Flowers & Plants',    href: catHref('Flowers & Plants'),    emoji: '🌸' },
 ];
 
 const CAT_ITEMS = NAV_ITEMS; // show all items including Home
@@ -317,7 +254,13 @@ export default function Header() {
   /* ── Helpers ── */
   const closeMenu     = () => { setMenuOpen(false); setOpenSection(null); };
   const toggleSection = (label: string) => setOpenSection((p) => p === label ? null : label);
-  const isActive      = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href);
+  // Category links now carry a `?category=` query string (real Girnar
+  // categories, not path segments) - deliberately not highlighted as
+  // "active" here since usePathname() can't see query params without
+  // useSearchParams(), which would force every page rendering Header
+  // out of static generation. Plain path hrefs still highlight correctly.
+  const isActive = (href: string) =>
+    href.includes('?') ? false : (href === '/' ? pathname === '/' : pathname.startsWith(href));
 
   /* ════════════════════════════════════════════════════════════════
      RENDER
@@ -327,7 +270,7 @@ export default function Header() {
       {/* ── ROW 1: TOP BAR ─────────────────────────────────────────── */}
       <div className={styles.topbar}>
         <span className={styles.topbarMsg}>
-          🌟 Free Shipping on orders above ₹499 &nbsp;|&nbsp; 7 Days Easy Returns
+          Complimentary gift wrapping on every order &nbsp;&middot;&nbsp; 7-day easy returns
         </span>
       </div>
 
@@ -348,7 +291,7 @@ export default function Header() {
 
           {/* Logo */}
           <Link href="/" className={styles.logo}>
-            <div className={styles.logoIcon}>🛍️</div>
+            <div className={styles.logoIcon}>🎁</div>
             <div className={styles.logoText}>
               <span className={styles.logoName}>{brand.name}</span>
               <span className={styles.logoTagline}>{brand.tagline}</span>
@@ -368,7 +311,7 @@ export default function Header() {
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Search for toys, bags, lunch boxes…"
+                placeholder="Search for gifts, hampers, personalised presents…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={onKeyDown}
@@ -530,10 +473,10 @@ export default function Header() {
         ))}
 
         <Link
-          href="/new-arrivals"
-          className={`${styles.catChip} ${isActive('/new-arrivals') ? styles.catChipActive : ''}`}
+          href="/products?sort=newest"
+          className={styles.catChip}
         >
-          <span className={styles.catChipEmoji} aria-hidden="true">⭐</span>
+          <span className={styles.catChipEmoji} aria-hidden="true">✦</span>
           New Arrivals
         </Link>
       </nav>
@@ -617,9 +560,9 @@ export default function Header() {
           ))}
         </div>
 
-        {/* ⭐ New Arrivals — right */}
-        <Link href="/new-arrivals" className={styles.newArrivalsLink}>
-          <span aria-hidden="true">⭐</span> New Arrivals
+        {/* New Arrivals — right */}
+        <Link href="/products?sort=newest" className={styles.newArrivalsLink}>
+          <span aria-hidden="true">✦</span> New Arrivals
         </Link>
       </nav>
 
@@ -633,7 +576,7 @@ export default function Header() {
           <div className={styles.drawer} onClick={(e) => e.stopPropagation()}>
 
             <div className={styles.drawerHeader}>
-              <div className={styles.drawerLogo}>Little<span>Loot</span></div>
+              <div className={styles.drawerLogo}>{brand.shortName}<span>{brand.name.replace(brand.shortName, '').trim()}</span></div>
               <button className={styles.drawerClose} onClick={closeMenu}
                 type="button" aria-label="Close menu">✕</button>
             </div>

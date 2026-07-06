@@ -1,15 +1,14 @@
 /* ══════════════════════════════════════════════════════════════
-   Footer.module.css — styled to match Header design language
-   Colors: #FDF8F3 bg, #EC4899 orange, #1A1A2E navy, #F0EAE0 border
-   Fonts: Nunito (body), Baloo 2 (brand)
+   Footer.module.css — Girnar Gifts design tokens
+   Dark wine-ink footer, wine/rose accents, Cinzel display + Manrope body.
    ══════════════════════════════════════════════════════════════ */
 
 .footer {
-  background: #1A1A2E;           /* navy — matches header .logoName color */
+  background: var(--gg-ink);
   color: rgba(255, 255, 255, 0.7);
-  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-family: var(--gg-font-body);
   padding: 56px 40px 28px;
-  border-top: 3px solid #EC4899; /* orange top accent — matches header allCatsBtn */
+  border-top: 3px solid var(--gg-primary);
 }
 
 /* ── Grid ────────────────────────────────────────────────────── */
@@ -42,7 +41,7 @@
 .logoIcon {
   width: 40px;
   height: 40px;
-  background: #EC4899;
+  background: var(--gg-primary);
   border-radius: 11px;
   display: flex;
   align-items: center;
@@ -59,7 +58,7 @@
 }
 
 .logoName {
-  font-family: var(--font-baloo, 'Baloo 2', cursive);
+  font-family: var(--gg-font-display);
   font-size: 22px;
   font-weight: 800;
   color: #fff;
@@ -67,13 +66,13 @@
   letter-spacing: -0.02em;
 }
 
-/* "Loot" in orange — matches header brand accent color */
+/* second half of the wordmark in the primary brand color */
 .logoDot {
-  color: #EC4899;
+  color: var(--gg-primary);
 }
 
 .logoTagline {
-  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-family: var(--gg-font-body);
   font-size: 11px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.45);
@@ -103,14 +102,14 @@
   transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
 .socialBtn:hover {
-  background: #EC4899;             /* orange on hover — matches header allCatsBtn */
-  border-color: #EC4899;
+  background: var(--gg-primary);             /* orange on hover — matches header allCatsBtn */
+  border-color: var(--gg-primary);
   transform: translateY(-2px);
 }
 
 /* ── Footer columns ──────────────────────────────────────────── */
 .footerCol h4 {
-  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-family: var(--gg-font-body);
   font-size: 13px;
   font-weight: 800;
   color: #fff;
@@ -128,7 +127,7 @@
   left: 0;
   width: 28px;
   height: 3px;
-  background: #EC4899;
+  background: var(--gg-primary);
   border-radius: 3px;
 }
 
@@ -150,7 +149,7 @@
   display: inline-block;
 }
 .footerCol ul li a:hover {
-  color: #EC4899;                  /* matches header nav link hover */
+  color: var(--gg-primary);                  /* matches header nav link hover */
   padding-left: 4px;
 }
 
@@ -169,7 +168,7 @@
   text-decoration: none;
   transition: color 0.18s;
 }
-.contactItem a:hover { color: #EC4899; }
+.contactItem a:hover { color: var(--gg-primary); }
 
 .contactIcon {
   font-size: 15px;
@@ -177,7 +176,7 @@
   margin-top: 1px;
   width: 28px;
   height: 28px;
-  background: rgba(236,72,153, 0.15);
+  background: rgba(122,30,51,0.22);
   border-radius: 8px;              /* matches header .dropdownEmoji style */
   display: flex;
   align-items: center;
@@ -186,7 +185,7 @@
 
 /* ── Divider ─────────────────────────────────────────────────── */
 .footerBottom {
-  border-top: 1.5px solid rgba(240, 234, 224, 0.12); /* matches header border-top color */
+  border-top: 1.5px solid rgba(246, 215, 222, 0.14); /* matches header border-top color */
   padding-top: 24px;
   display: flex;
   justify-content: space-between;
@@ -217,8 +216,8 @@
   transition: background 0.18s, color 0.18s;
 }
 .payIcon:hover {
-  background: rgba(236,72,153, 0.15);
-  color: #EC4899;
+  background: rgba(122,30,51,0.22);
+  color: var(--gg-primary);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -260,8 +259,8 @@
 
 /* ── Social hover — uses --hover-color CSS variable set inline ── */
 .socialBtn:hover {
-  background: var(--hover-color, #EC4899) !important;
-  border-color: var(--hover-color, #EC4899) !important;
+  background: var(--hover-color, var(--gg-primary)) !important;
+  border-color: var(--hover-color, var(--gg-primary)) !important;
   color: #fff;
 }
 
@@ -272,21 +271,21 @@
   gap: 6px;
   margin-top: 16px;
   padding: 9px 16px;
-  background: rgba(236,72,153, 0.12);
-  border: 1.5px solid rgba(236,72,153, 0.35);
+  background: rgba(122,30,51,0.18);
+  border: 1.5px solid rgba(122,30,51,0.4);
   border-radius: 50px;
-  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-family: var(--gg-font-body);
   font-size: 12.5px;
   font-weight: 700;
-  color: #EC4899;
+  color: var(--gg-primary);
   text-decoration: none;
   transition: background 0.18s, border-color 0.18s, transform 0.15s;
   white-space: nowrap;
   align-self: flex-start;
 }
 .supportBtn:hover {
-  background: #EC4899;
-  border-color: #EC4899;
+  background: var(--gg-primary);
+  border-color: var(--gg-primary);
   color: #fff;
   transform: translateY(-1px);
 }

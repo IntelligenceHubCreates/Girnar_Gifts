@@ -12,22 +12,31 @@ export const metadata = {
   description: 'Discover our wide range of thoughtful gifts for every occasion.',
 };
 
-export default function AllProductsPage() {
+export default function AllProductsPage({
+  searchParams,
+}: {
+  searchParams?: { category?: string };
+}) {
+  const category = searchParams?.category;
+
   return (
     <>
       <Header />
 
       <main className={styles.pageMain}>
         <CategoryPage
-          title="All Products"
-          emoji="🧸"
-          description="Discover our wide range of premium products for every child's need."
-          bgEmojis={['🎒', '🧸', '🎨', '📚', '🎯', '🎁']}
-          tags={['School Bags', 'Lunch & Bottles', 'Toys & Games', 'Stationery', 'Arts & Crafts', 'Educational', 'Gift Sets']}
+          title={category ?? 'All Products'}
+          emoji="🎁"
+          description={
+            category
+              ? `Thoughtful ${category.toLowerCase()}, curated for every occasion.`
+              : 'Discover our wide range of thoughtful gifts for every occasion.'
+          }
+          bgEmojis={['🎁', '🧺', '🎉', '🍫', '🌸']}
           parentLabel="Home"
           parentHref="/"
-          // No categorySlug → fetchAllProducts is used
-          heroGradient="linear-gradient(135deg, #FF6B35 0%, #FF8C42 40%, #FFA85C 100%)"
+          apiCategory={category}
+          // No categorySlug → fetchAllProducts is used, filtered by apiCategory when present
         />
       </main>
 

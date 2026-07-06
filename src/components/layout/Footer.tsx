@@ -44,7 +44,7 @@ function IconUPI() {
     <svg width="36" height="20" viewBox="0 0 60 30" fill="none">
       <rect width="60" height="30" rx="4" fill="#fff" stroke="#e0e0e0" strokeWidth="1"/>
       <text x="5" y="20" fontFamily="Arial" fontSize="11" fontWeight="900" fill="#7B25B5">UPI</text>
-      <polygon points="38,8 48,15 38,22" fill="#EC4899"/>
+      <polygon points="38,8 48,15 38,22" fill="var(--gg-primary)"/>
       <polygon points="48,8 58,15 48,22" fill="#7B25B5"/>
     </svg>
   );
@@ -84,11 +84,11 @@ function IconNetBanking() {
   return (
     <svg width="36" height="20" viewBox="0 0 60 30" fill="none">
       <rect width="60" height="30" rx="4" fill="#fff" stroke="#e0e0e0" strokeWidth="1"/>
-      <rect x="8" y="10" width="44" height="3" rx="1" fill="#1A1A2E"/>
-      <rect x="10" y="16" width="6" height="8" rx="1" fill="#EC4899"/>
-      <rect x="20" y="16" width="6" height="8" rx="1" fill="#EC4899"/>
-      <rect x="30" y="16" width="6" height="8" rx="1" fill="#EC4899"/>
-      <rect x="40" y="16" width="6" height="8" rx="1" fill="#EC4899"/>
+      <rect x="8" y="10" width="44" height="3" rx="1" fill="var(--gg-ink)"/>
+      <rect x="10" y="16" width="6" height="8" rx="1" fill="var(--gg-primary)"/>
+      <rect x="20" y="16" width="6" height="8" rx="1" fill="var(--gg-primary)"/>
+      <rect x="30" y="16" width="6" height="8" rx="1" fill="var(--gg-primary)"/>
+      <rect x="40" y="16" width="6" height="8" rx="1" fill="var(--gg-primary)"/>
     </svg>
   );
 }
@@ -114,7 +114,7 @@ export default function Footer() {
         {/* ── Brand ── */}
         <div className={styles.footerBrand}>
           <Link href="/" className={styles.logo}>
-            <div className={styles.logoIcon}>🌟</div>
+            <div className={styles.logoIcon}>🎁</div>
             <div className={styles.logoText}>
               <span className={styles.logoName}>
                 {brand.shortName}<span className={styles.logoDot}>{brand.name.replace(brand.shortName, '').trim()}</span>
