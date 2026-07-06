@@ -1,46 +1,60 @@
 
 
+/* ============================================================================
+   LEGACY LITTLE LOOT TOKENS — repointed, not deleted.
+   Every one of these names is still referenced by components not yet
+   individually migrated to the --gg-* scale in design-tokens.css. Rather
+   than hunt down every var(--coral)/var(--navy)/etc call site, the legacy
+   NAMES stay stable but now resolve to the Girnar palette - so any
+   not-yet-touched component automatically inherits the new identity. As
+   each component is directly migrated to --gg-* tokens, its reliance on
+   these aliases can be removed; nothing consumes the original hex values
+   directly anymore.
+   ============================================================================ */
 :root {
 
-  --sun: #FFD336;
-  --coral: #FF6B5B;
-  --mint: #3ECFB2;
-  --sky: #5BBEF5;
-  --lilac: #C7A4F5;
-  --peach: #FFAD8A;
-  --navy: #1A2540;
-  --white: #FFFDF8;
-  --card-bg: #FFFFFF;
-  --text: #2B2D42;
-  --soft: #F7F3EC;
+  --sun: var(--gg-accent);
+  --coral: var(--gg-primary);
+  --mint: var(--gg-success);
+  --sky: var(--gg-petal);
+  --lilac: var(--gg-blush-deep);
+  --peach: var(--gg-petal);
+  --navy: var(--gg-ink);
+  --white: var(--gg-canvas);
+  --card-bg: var(--gg-surface);
+  --text: var(--gg-ink);
+  --soft: var(--gg-muted-fill);
   --radius: 24px;
   --radius-sm: 14px;
-  --ll-accent:      #EC4899;
-  --ll-accent-dark: #BE185D;
-  --ll-accent-soft: #FDF2F8;
-  --ll-ink:    #1a1a2e;
-  --ll-body:   #5b5b72;
-  --ll-muted:  #9b9bb0;
-  --ll-faint:  #b9b9c7;
-  --ll-line:   #eef0f4;
-  --ll-line2:  #f5f6f8;
-  --ll-bg:     #f7f8fa;
-  --ll-card:   #ffffff;
+  --ll-accent:      var(--gg-primary);
+  --ll-accent-dark: var(--gg-primary-hover);
+  --ll-accent-soft: var(--gg-blush);
+  --ll-ink:    var(--gg-ink);
+  --ll-body:   var(--gg-body);
+  --ll-muted:  var(--gg-muted);
+  --ll-faint:  var(--gg-muted);
+  --ll-line:   var(--gg-border);
+  --ll-line2:  var(--gg-border);
+  --ll-bg:     var(--gg-canvas);
+  --ll-card:   var(--gg-surface);
 
+  /* Semantic tag colors (category/status color-coding, not brand identity) -
+     left as literal, distinct hues on purpose so multi-color tagging still
+     reads as distinct categories rather than collapsing onto one accent. */
   --ll-blue:   #3b82f6;  --ll-blue-bg:   #eff6ff;
-  --ll-green:  #10b981;  --ll-green-bg:  #ecfdf5;
+  --ll-green:  var(--gg-success);  --ll-green-bg:  #ecfdf5;
   --ll-purple: #7c3aed;  --ll-purple-bg: #f5f3ff;
-  --ll-pink:   #f43f5e;  --ll-pink-bg:   #fff1f2;
-  --ll-amber:  #f59e0b;  --ll-amber-bg:  #fffbeb;
+  --ll-pink:   var(--gg-accent);   --ll-pink-bg:   var(--gg-muted-fill);
+  --ll-amber:  var(--gg-warning);  --ll-amber-bg:  #fffbeb;
 
   --r-xl: 20px; --r-lg: 16px; --r: 13px; --r-sm: 10px; --r-pill: 999px;
 
-  --shadow-card:  0 1px 2px rgba(16,24,40,.04), 0 6px 18px rgba(16,24,40,.05);
-  --shadow-hover: 0 2px 6px rgba(16,24,40,.06), 0 14px 30px rgba(16,24,40,.10);
-  --shadow-pop:   0 18px 48px rgba(16,24,40,.18);
+  --shadow-card:  var(--gg-shadow-card);
+  --shadow-hover: var(--gg-shadow-hover);
+  --shadow-pop:   var(--gg-shadow-pop);
 
-  --font-head: var(--font-baloo), 'Baloo 2', system-ui, sans-serif;
-  --font-body: var(--font-nunito), 'Nunito', system-ui, sans-serif;
+  --font-head: var(--gg-font-display);
+  --font-body: var(--gg-font-body);
 }
 
 *,
@@ -55,15 +69,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Syne:wght@700;800;900&display=swap');
 
 :root {
-  --h-cream:    #FDF2F8;
-  --h-orange:   #EC4899;
-  --h-orange-h: #BE185D;
-  --h-ink:      #1A1A2E;
-  --h-ink-60:   rgba(26,26,46,0.60);
-  --h-ink-30:   rgba(26,26,46,0.28);
+  --h-cream:    var(--gg-blush);
+  --h-orange:   var(--gg-primary);
+  --h-orange-h: var(--gg-primary-hover);
+  --h-ink:      var(--gg-ink);
+  --h-ink-60:   rgba(42,18,24,0.60);
+  --h-ink-30:   rgba(42,18,24,0.28);
   --h-white:    #FFFFFF;
-  --h-display:  'Syne', sans-serif;
-  --h-body:     'Nunito', sans-serif;
+  --h-display:  var(--gg-font-display);
+  --h-body:     var(--gg-font-body);
 }
 
 @keyframes h-fadeUp {
