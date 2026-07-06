@@ -22,7 +22,7 @@
   --gg-surface:      #FFFFFF;
   --gg-ink:          #2A1218;
   --gg-body:         #5B474C;
-  --gg-muted:        #8C767C;
+  --gg-muted:        #776368; /* darkened from #8C767C - the lighter shade only hit ~4.1:1 on canvas/surface, short of WCAG AA's 4.5:1 for small text */
   --gg-border:       #F0E1E5;
   --gg-muted-fill:   #FAF1F3;
 
@@ -30,6 +30,13 @@
   --gg-success:      #2F8F63;
   --gg-warning:      #D08A1E;
   --gg-error:        #DE3B3B;
+  /* --gg-success / --gg-warning / --gg-error only reach ~2.6-4.1:1 on
+     light backgrounds, short of AA's 4.5:1 for small text - use these
+     darker variants when the color shows up as text (vs. a badge/dot/
+     border, where the lighter shade is fine). */
+  --gg-success-text: #22704C;
+  --gg-warning-text: #8C5A0D;
+  --gg-error-text:   #C22C2C;
 
   /* ── Signature gradient — hero "gift reveal" + hero CTAs only ── */
   --gg-gradient-signature: linear-gradient(135deg, #F49FB3 0%, #E84C88 100%);

@@ -318,8 +318,11 @@ export default function Header() {
                 onFocus={() => { results.length > 0 && setDropOpen(true); }}
                 autoComplete="off"
                 aria-label="Search products"
+                role="combobox"
                 aria-expanded={showDrop}
                 aria-haspopup="listbox"
+                aria-controls="header-search-listbox"
+                aria-autocomplete="list"
               />
               {search && (
                 <button className={styles.clearBtn} type="button"
@@ -357,7 +360,7 @@ export default function Header() {
 
             {/* Search results dropdown */}
             {showDrop && results.length > 0 && (
-              <div className={styles.searchDrop} role="listbox" aria-label="Search suggestions">
+              <div id="header-search-listbox" className={styles.searchDrop} role="listbox" aria-label="Search suggestions">
                 {results.map((product, i) => {
                   const imgEntry = product.product_image?.[0];
                   const imgUrl   = typeof imgEntry === 'string' ? imgEntry : imgEntry?.url ?? null;

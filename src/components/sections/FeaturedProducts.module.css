@@ -482,7 +482,7 @@
 /* ── Error banner ─────────────────────────────────────── */
 .errorBanner {
   background: var(--gg-muted-fill); border: 1.5px solid var(--gg-error); border-radius: 12px;
-  padding: 14px 18px; font-size: 14px; color: var(--gg-error); font-weight: 600;
+  padding: 14px 18px; font-size: 14px; color: var(--gg-error-text); font-weight: 600;
   margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
   font-family: var(--gg-font-body);
 }

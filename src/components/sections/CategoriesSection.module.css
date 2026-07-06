@@ -290,17 +290,25 @@
   gap: 5px; margin-top: 22px;
 }
 
+/* Button carries a full 24x24 hit area (WCAG target-size); the visible
+   dot itself stays small and is drawn via ::after so the design doesn't
+   change, only the clickable/tappable area around it. */
 .dot {
-  min-width: 0; min-height: 0;
-  width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(26,26,26,0.22);
+  width: 24px; height: 24px;
+  min-width: 24px; min-height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
   border: none; cursor: pointer; padding: 0;
-  border: none;
-  padding: 0;
+}
+
+.dot::after {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(42,18,24,0.22);
   transition: all 0.25s ease;
 }
 
-.dotOn {
+.dotOn::after {
   background: var(--gg-primary);
   width: 18px; height: 6px;
   border-radius: 20px;

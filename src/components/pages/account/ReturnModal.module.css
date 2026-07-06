@@ -34,7 +34,7 @@
   width: 32px; height: 32px; border-radius: 9px; border: 1px solid #eee;
   background: #fafafa; color: #6b7280; display: grid; place-items: center; cursor: pointer;
 }
-.close:hover { background: #fff1f0; border-color: #ffccc8; color: var(--gg-error); }
+.close:hover { background: #fff1f0; border-color: #ffccc8; color: var(--gg-error-text); }
 
 .body { padding: 18px 20px; overflow-y: auto; flex: 1; }
 .footer {
@@ -51,7 +51,7 @@
   font-size: .72rem; font-weight: 800; color: #6b7280; text-transform: uppercase;
   letter-spacing: .05em; margin: 16px 0 8px;
 }
-.req { color: var(--gg-error); text-transform: none; letter-spacing: 0; font-weight: 700; }
+.req { color: var(--gg-error-text); text-transform: none; letter-spacing: 0; font-weight: 700; }
 .opt { color: #9ca3af; text-transform: none; letter-spacing: 0; font-weight: 600; }
 
 .itemsList { display: flex; flex-direction: column; gap: 8px; }
@@ -117,7 +117,7 @@
 }
 
 .error {
-  background: #fef2f2; border: 1px solid #fecaca; color: var(--gg-error);
+  background: #fef2f2; border: 1px solid #fecaca; color: var(--gg-error-text);
   font-size: .8rem; font-weight: 600; border-radius: 10px; padding: 10px 12px; margin-top: 14px;
 }
 
@@ -133,7 +133,7 @@
 }
 .btnGhost:disabled { opacity: .55; cursor: not-allowed; }
 .cancelReturnBtn {
-  padding: 12px 16px; border: 1.5px solid #fecaca; border-radius: 11px; background: #fff; color: var(--gg-error);
+  padding: 12px 16px; border: 1.5px solid #fecaca; border-radius: 11px; background: #fff; color: var(--gg-error-text);
   font-weight: 800; font-size: .85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
 }
 .cancelReturnBtn:hover { background: #fef2f2; }
@@ -167,7 +167,7 @@
 .metaKey { color: #9ca3af; font-weight: 600; }
 .metaVal { color: var(--gg-ink); font-weight: 700; }
 .descBox { background: #fafafa; border-radius: 10px; padding: 10px 12px; font-size: .82rem; color: #374151; margin-top: 10px; line-height: 1.5; }
-.rejectBox { background: #fef2f2; border: 1px solid #fecaca; color: var(--gg-error); font-size: .82rem; border-radius: 10px; padding: 10px 12px; margin-top: 12px; line-height: 1.5; }
+.rejectBox { background: #fef2f2; border: 1px solid #fecaca; color: var(--gg-error-text); font-size: .82rem; border-radius: 10px; padding: 10px 12px; margin-top: 12px; line-height: 1.5; }
 
 .proofGrid { display: flex; flex-wrap: wrap; gap: 8px; }
 .proofThumb { width: 72px; height: 72px; border-radius: 10px; overflow: hidden; border: 1px solid #eee; display: block; }
@@ -191,5 +191,5 @@
 
 .skel { height: 48px; border-radius: 12px; background: linear-gradient(90deg,#f3f4f6 25%,#e9e9e9 50%,#f3f4f6 75%); background-size: 200% 100%; animation: ll-shimmer 1.4s infinite; margin-bottom: 10px; }
 @keyframes ll-shimmer { 0% { background-position: -200% 0 } 100% { background-position: 200% 0 } }
-.viewError { text-align: center; padding: 24px 0; color: var(--gg-error); font-size: .85rem; font-weight: 600; }
-.retryBtn { margin-top: 10px; padding: 8px 16px; border: 1.5px solid #fca5a5; border-radius: 9px; background: #fff; color: var(--gg-error); font-weight: 700; cursor: pointer; }
+.viewError { text-align: center; padding: 24px 0; color: var(--gg-error-text); font-size: .85rem; font-weight: 600; }
+.retryBtn { margin-top: 10px; padding: 8px 16px; border: 1.5px solid #fca5a5; border-radius: 9px; background: #fff; color: var(--gg-error-text); font-weight: 700; cursor: pointer; }

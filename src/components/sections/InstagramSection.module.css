@@ -15,7 +15,9 @@
   font-weight: var(--gg-weight-semibold);
   letter-spacing: var(--gg-tracking-wide);
   text-transform: uppercase;
-  color: var(--gg-accent);
+  /* gg-accent (rose) fails AA contrast on the blush background at this
+     size - wine reads as brand-appropriate and clears 4.5:1+ */
+  color: var(--gg-primary);
   margin-bottom: var(--gg-space-3);
 }
 

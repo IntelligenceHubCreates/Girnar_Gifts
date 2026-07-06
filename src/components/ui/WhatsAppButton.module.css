@@ -2,11 +2,18 @@
    WhatsAppButton — floating action button
    ══════════════════════════════════════════════════════════════ */
 
-.fab {
+/* Wrapper carries the fixed placement; the tooltip lives here as a sibling
+   of the <a> (not nested inside it) so the link's visible content is just
+   the icon, and its accessible name never mismatches visible text. */
+.wrap {
   position: fixed;
   bottom: 28px;
   right: 28px;
   z-index: 999;
+}
+
+.fab {
+  position: relative;
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -122,16 +129,18 @@
 
 /* Lift above the fixed bottom nav (≈64px) on tablet + mobile */
 @media (max-width: 1024px) {
-  .fab {
+  .wrap {
     bottom: calc(72px + env(safe-area-inset-bottom));
     right: 20px;
   }
 }
 
 @media (max-width: 600px) {
-  .fab {
+  .wrap {
     bottom: calc(72px + env(safe-area-inset-bottom));
     right: 16px;
+  }
+  .fab {
     width: 52px;
     height: 52px;
   }

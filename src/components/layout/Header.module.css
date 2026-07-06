@@ -368,8 +368,8 @@
   transition: background 0.15s, color 0.15s; min-height: 44px;
 }
 .userMenuItem:hover { background: var(--gg-muted-fill); color: var(--gg-primary); }
-.userMenuSignOut { color: var(--gg-error); }
-.userMenuSignOut:hover { background: var(--gg-muted-fill); color: var(--gg-error); }
+.userMenuSignOut { color: var(--gg-error-text); }
+.userMenuSignOut:hover { background: var(--gg-muted-fill); color: var(--gg-error-text); }
 
 /* Logged-out account dropdown */
 .userMenuLoginPrompt {
@@ -747,7 +747,7 @@
 
 .drawerSignOut {
   width: 100%; padding: 14px 18px; background: none; border: none;
-  border-top: 1px solid rgba(122,30,51,0.10); color: var(--gg-error);
+  border-top: 1px solid rgba(122,30,51,0.10); color: var(--gg-error-text);
   font-family: var(--gg-font-body);
   font-size: 14px; font-weight: 700;
   text-align: left; cursor: pointer; transition: background 0.15s;

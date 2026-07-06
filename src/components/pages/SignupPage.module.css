@@ -89,7 +89,7 @@
 .input::placeholder { color: var(--gg-muted); }
 .eyeBtn {
   position: absolute;
-  right: 14px;
+  right: 13px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -97,9 +97,11 @@
   cursor: pointer;
   font-size: 16px;
   padding: 0;
-  min-height: unset;
-  min-width: unset;
+  width: 24px;
+  height: 24px;
   display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ─── Password Strength ──────────────────────────────────────────────────── */
@@ -177,7 +179,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--gg-border);
+  /* the border color belongs on the ::before/::after lines only - using
+     it as the label's text color too made it nearly invisible */
+  color: var(--gg-muted);
   font-size: 13px;
   margin-bottom: 16px;
 }
@@ -215,7 +219,7 @@
 
 /* ─── Error ──────────────────────────────────────────────────────────────── */
 .inputError { border-color: var(--gg-error) !important; }
-.errorMsg { font-size: 12px; color: var(--gg-error); margin-top: 5px; display: block; }
+.errorMsg { font-size: 12px; color: var(--gg-error-text); margin-top: 5px; display: block; }
 
 /* ─── Right Promo Panel ──────────────────────────────────────────────────── */
 .rightPanel {

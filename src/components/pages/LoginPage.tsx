@@ -185,7 +185,6 @@ export default function LoginPage() {
             className={styles.googleBtn}
             onClick={handleGoogle}
             disabled={anyLoading}
-            aria-label="Sign in with Google"
           >
             {googleLoading ? <span className={styles.spinner} /> : <GoogleLogo />}
             <span>{googleLoading ? 'Connecting to Google…' : 'Continue with Google'}</span>

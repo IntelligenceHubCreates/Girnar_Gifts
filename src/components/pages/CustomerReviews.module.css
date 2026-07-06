@@ -360,7 +360,7 @@
   z-index: 2; padding: 0; line-height: 1;
 }
 
-.submitError   { font-size: 13px; color: var(--gg-error); background: #fff3f2; border: 1px solid #ffccc8; border-radius: 9px; padding: 9px 13px; }
+.submitError   { font-size: 13px; color: var(--gg-error-text); background: #fff3f2; border: 1px solid #ffccc8; border-radius: 9px; padding: 9px 13px; }
 .submitSuccess { font-size: 13px; color: var(--gg-success); background: #e8fff3; border: 1px solid #b2ebd4; border-radius: 9px; padding: 9px 13px; font-weight: 600; }
 
 .submitBtn {

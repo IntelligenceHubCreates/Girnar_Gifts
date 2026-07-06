@@ -252,7 +252,7 @@
 .offersMore:focus-visible { outline: 2px solid var(--gg-primary); outline-offset: 2px; }
 
 /* Stock warn */
-.stockWarn { display: inline-flex; align-items: center; gap: 7px; background: linear-gradient(135deg,var(--gg-muted-fill),var(--gg-muted-fill)); border: 1px solid var(--gg-accent); color: var(--gg-accent); font-size: 13px; font-weight: 700; padding: 9px 15px; border-radius: 11px; width: fit-content; }
+.stockWarn { display: inline-flex; align-items: center; gap: 7px; background: var(--gg-muted-fill); border: 1px solid var(--gg-warning); color: var(--gg-warning-text); font-size: 13px; font-weight: 700; padding: 9px 15px; border-radius: 11px; width: fit-content; }
 
 /* CTA */
 .ctaWrap { display: flex; gap: 11px; }
@@ -269,9 +269,9 @@
 .btnAddCart:active:not(:disabled) { transform: scale(.985); }
 .btnAddCart:focus-visible { outline: 3px solid rgba(122,30,51,.4); outline-offset: 2px; }
 .btnAddCart:disabled { opacity: .5; cursor: not-allowed; }
-.btnAdded { background: var(--gg-success) !important; color: var(--gg-success) !important; border-color: var(--gg-success) !important; animation: pulseOk .5s ease; }
+.btnAdded { background: var(--gg-success) !important; color: #fff !important; border-color: var(--gg-success) !important; animation: pulseOk .5s ease; }
 @keyframes pulseOk { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,.4); } 100% { box-shadow: 0 0 0 14px rgba(16,185,129,0); } }
-.btnErr { background: var(--gg-error) !important; color: var(--gg-error) !important; border-color: var(--gg-accent) !important; }
+.btnErr { background: var(--gg-error) !important; color: #fff !important; border-color: var(--gg-error) !important; }
 .btnDis { opacity: .45 !important; cursor: not-allowed !important; }
 
 .btnBuyNow {
@@ -292,8 +292,8 @@
 
 .cartFb    { padding: 11px 15px; border-radius: 11px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; animation: fbIn .25s ease; }
 @keyframes fbIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-.cartFbOk  { background: var(--gg-success); border: 1px solid var(--gg-success); color: var(--gg-success); }
-.cartFbErr { background: var(--gg-error); border: 1px solid var(--gg-error); color: var(--gg-error); }
+.cartFbOk  { background: var(--gg-muted-fill); border: 1px solid var(--gg-success); color: var(--gg-success-text); }
+.cartFbErr { background: var(--gg-muted-fill); border: 1px solid var(--gg-error); color: var(--gg-error-text); }
 .cartLink  { color: var(--gg-primary); font-weight: 800; text-decoration: none; margin-left: auto; border-radius: 4px; }
 .cartLink:hover { text-decoration: underline; }
 .cartLink:focus-visible { outline: 2px solid var(--gg-primary); outline-offset: 2px; }
@@ -323,8 +323,8 @@
 .pinSpin { width: 15px; height: 15px; border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .pinMsg { font-size: 12.5px; font-weight: 600; margin: 0; padding: 8px 11px; border-radius: 9px; line-height: 1.45; animation: fbIn .25s ease; }
-.pinOk  { color: var(--gg-success); background: var(--gg-success); border: 1px solid var(--gg-success); }
-.pinErr { color: var(--gg-error); background: var(--gg-error); border: 1px solid var(--gg-error); }
+.pinOk  { color: var(--gg-success-text); background: var(--gg-muted-fill); border: 1px solid var(--gg-success); }
+.pinErr { color: var(--gg-error-text); background: var(--gg-muted-fill); border: 1px solid var(--gg-error); }
 
 /* ═══════════════════════════════════════════════
    SECTION TITLES — coral tick accent
@@ -665,7 +665,7 @@
 .stickyCart { flex: 1; height: 43px; border-radius: 11px; border: 2px solid var(--gg-primary); background: #fff; color: var(--gg-primary); font-family: var(--font-baloo,'Baloo 2',cursive); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: background .15s, transform .12s; }
 .stickyCart:active:not(:disabled) { transform: scale(.97); }
 .stickyCart:disabled { opacity: .5; cursor: not-allowed; }
-.stickyCartAdded { background: var(--gg-success) !important; color: var(--gg-success) !important; border-color: var(--gg-success) !important; }
+.stickyCartAdded { background: var(--gg-success) !important; color: #fff !important; border-color: var(--gg-success) !important; }
 .stickyBuy { height: 43px; padding: 0 17px; border-radius: 11px; border: none; background: linear-gradient(135deg,var(--gg-primary),var(--gg-primary-hover)); color: #fff; font-family: var(--font-baloo,'Baloo 2',cursive); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; box-shadow: 0 4px 14px rgba(95,21,38,.35); transition: transform .12s; }
 .stickyBuy:active:not(:disabled) { transform: scale(.97); }
 .stickyBuy:disabled { opacity: .5; cursor: not-allowed; }

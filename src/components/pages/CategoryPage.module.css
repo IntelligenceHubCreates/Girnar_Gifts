@@ -291,7 +291,7 @@
 /* Error banner */
 .errorBanner {
   background: var(--gg-muted-fill); border: 1.5px solid var(--gg-error); border-radius: 12px;
-  padding: 11px 15px; font-size: 13px; color: var(--gg-error); font-weight: 600;
+  padding: 11px 15px; font-size: 13px; color: var(--gg-error-text); font-weight: 600;
   margin-bottom: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
 .errorBanner button {

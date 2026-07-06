@@ -113,7 +113,7 @@
   background: var(--gg-muted-fill);
   border: 1.5px solid var(--gg-error);
   border-radius: var(--radius-sm);
-  color: var(--gg-error);
+  color: var(--gg-error-text);
   font-size: 13px; font-weight: 600;
   padding: 11px 14px; margin-bottom: 16px;
 }
@@ -143,9 +143,10 @@
 }
 .input::placeholder { color: var(--gg-muted); }
 .eyeBtn {
-  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
   background: none; border: none; cursor: pointer; font-size: 16px;
-  padding: 0; min-height: unset; min-width: unset; display: flex;
+  padding: 0; width: 24px; height: 24px; display: flex;
+  align-items: center; justify-content: center;
 }
 
 /* ─── Remember / Forgot ──────────────────────────────────────────────────── */
@@ -188,7 +189,10 @@
 /* ─── Divider ────────────────────────────────────────────────────────────── */
 .divider {
   display: flex; align-items: center; gap: 12px;
-  color: var(--gg-border); font-size: 13px; margin-bottom: 20px;
+  /* the border color belongs on the ::before/::after lines only - using
+     it as the label's text color too made "or continue with" nearly
+     invisible (1.23:1 contrast) */
+  color: var(--gg-muted); font-size: 13px; margin-bottom: 20px;
 }
 .divider::before, .divider::after {
   content: ''; flex: 1; height: 1px; background: var(--gg-border);
@@ -230,7 +234,7 @@
 
 /* ─── Field Errors ───────────────────────────────────────────────────────── */
 .inputError { border-color: var(--gg-error) !important; }
-.errorMsg { font-size: 12px; color: var(--gg-error); margin-top: 5px; display: block; }
+.errorMsg { font-size: 12px; color: var(--gg-error-text); margin-top: 5px; display: block; }
 
 /* ─── Toast ──────────────────────────────────────────────────────────────── */
 .toast {

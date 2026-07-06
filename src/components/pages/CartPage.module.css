@@ -541,7 +541,7 @@
 .summaryTotal    { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; }
 .summaryTotal > span:first-child { font-family: var(--font-baloo), 'Baloo 2', sans-serif; font-size: 16px; font-weight: 800; color: var(--navy); }
 .totalAmt        { font-family: var(--font-baloo), 'Baloo 2', sans-serif; font-size: clamp(20px, 4vw, 28px); font-weight: 800; color: var(--coral); flex-shrink: 0; }
-.totalSavingsBadge { background: linear-gradient(135deg, var(--gg-success), var(--gg-success)); color: var(--gg-success); border-radius: 10px; padding: 9px 12px; font-size: 12px; font-weight: 600; text-align: center; margin-bottom: 14px; border: 1px solid var(--gg-success); }
+.totalSavingsBadge { background: var(--gg-success); color: #fff; border-radius: 10px; padding: 9px 12px; font-size: 12px; font-weight: 600; text-align: center; margin-bottom: 14px; border: 1px solid var(--gg-success); }
 
 .checkoutBtn {
   display: flex; align-items: center; justify-content: center;
@@ -681,7 +681,7 @@
 .relCardPrice  { display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; margin-top: 1px; }
 .relPriceNow   { font-size: 0.95rem; font-weight: 800; color: var(--navy); }
 .relPriceWas   { font-size: 0.75rem; color: var(--gg-muted); text-decoration: line-through; }
-.relPriceSave  { font-size: 0.7rem; font-weight: 700; color: var(--gg-success); background: var(--gg-success); padding: 1px 5px; border-radius: 10px; }
+.relPriceSave  { font-size: 0.7rem; font-weight: 700; color: var(--gg-success-text); background: var(--gg-muted-fill); padding: 1px 5px; border-radius: 10px; }
 
 .relAddBtn {
   margin-top: auto; padding: 8px 0;
@@ -756,7 +756,7 @@
 .qvPrice    { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .qvPriceNow { font-family: var(--font-baloo, 'Baloo 2', sans-serif); font-size: 26px; font-weight: 800; color: var(--coral); }
 .qvPriceWas { font-size: 15px; color: var(--gg-muted); text-decoration: line-through; }
-.qvPriceSave { background: linear-gradient(135deg,var(--gg-success),var(--gg-success)); color: var(--gg-success); font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 50px; }
+.qvPriceSave { background: var(--gg-muted-fill); color: var(--gg-success-text); font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 50px; }
 .qvInStock  { font-size: 12px; font-weight: 700; color: var(--gg-success); }
 .qvOutStock { font-size: 12px; font-weight: 700; color: var(--coral); }
 .qvDesc     { font-size: 12px; color: var(--gg-muted); line-height: 1.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -789,10 +789,10 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    ADDED: availability notices, checkout guard, skeleton, error, toast
    ═══════════════════════════════════════════════════════════════════════════ */
-.itemUnavailable { margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--gg-error); background: var(--gg-error); border: 1px solid var(--gg-error); border-radius: 8px; padding: 4px 9px; display: inline-block; }
-.itemLowStock    { margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--gg-warning); background: var(--gg-warning); border: 1px solid var(--gg-warning); border-radius: 8px; padding: 4px 9px; display: inline-block; }
+.itemUnavailable { margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--gg-error-text); background: var(--gg-muted-fill); border: 1px solid var(--gg-error); border-radius: 8px; padding: 4px 9px; display: inline-block; }
+.itemLowStock    { margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--gg-warning-text); background: var(--gg-muted-fill); border: 1px solid var(--gg-warning); border-radius: 8px; padding: 4px 9px; display: inline-block; }
 
-.checkoutBlockNote   { background: var(--gg-error); border: 1px solid var(--gg-error); color: var(--gg-error); border-radius: 10px; padding: 9px 12px; font-size: 12px; font-weight: 600; text-align: center; margin-bottom: 12px; }
+.checkoutBlockNote   { background: var(--gg-muted-fill); border: 1px solid var(--gg-error); color: var(--gg-error-text); border-radius: 10px; padding: 9px 12px; font-size: 12px; font-weight: 600; text-align: center; margin-bottom: 12px; }
 .checkoutBtnDisabled       { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
 .checkoutBtnDisabled:hover { transform: none; box-shadow: none; }
 
@@ -836,8 +836,8 @@
 .cartItemMuted { opacity: 0.72; }
 
 /* ── Availability notices ── */
-.itemUnavailable { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--gg-error); background: var(--gg-error); border: 1px solid var(--gg-error); border-radius: 8px; padding: 4px 9px; }
-.itemLowStock    { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--gg-warning); background: var(--gg-warning); border: 1px solid var(--gg-warning); border-radius: 8px; padding: 4px 9px; }
+.itemUnavailable { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--gg-error-text); background: var(--gg-muted-fill); border: 1px solid var(--gg-error); border-radius: 8px; padding: 4px 9px; }
+.itemLowStock    { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--gg-warning-text); background: var(--gg-muted-fill); border: 1px solid var(--gg-warning); border-radius: 8px; padding: 4px 9px; }
 
 /* ── Save-for-later button (icon) ── */
 .saveBtn { display: inline-flex; align-items: center; gap: 6px; }
@@ -856,7 +856,7 @@
 .checkoutBtn { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .checkoutBtnDisabled       { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
 .checkoutBtnDisabled:hover { transform: none; box-shadow: none; }
-.checkoutBlockNote { background: var(--gg-error); border: 1px solid var(--gg-error); color: var(--gg-error); border-radius: 10px; padding: 9px 12px; font-size: 12px; font-weight: 600; text-align: center; margin-bottom: 12px; }
+.checkoutBlockNote { background: var(--gg-muted-fill); border: 1px solid var(--gg-error); color: var(--gg-error-text); border-radius: 10px; padding: 9px 12px; font-size: 12px; font-weight: 600; text-align: center; margin-bottom: 12px; }
 
 /* ── Payment icons ── */
 .payIcon { display: inline-flex; align-items: center; justify-content: center; color: var(--navy); }
