@@ -1,0 +1,77 @@
+.section {
+  background: var(--gg-canvas);
+  padding: var(--gg-space-24) var(--gg-space-8);
+}
+
+.inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  align-items: center;
+  gap: var(--gg-space-16);
+}
+
+.visual {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--gg-radius-xl);
+  background: linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-blush-deep) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.visualGlow {
+  position: absolute;
+  inset: -20%;
+  background: var(--gg-gradient-signature);
+  opacity: 0.28;
+  filter: blur(60px);
+}
+
+.visualEmoji {
+  position: relative;
+  font-size: 96px;
+  filter: drop-shadow(0 12px 24px rgba(122, 30, 51, 0.18));
+}
+
+.eyebrow {
+  font-family: var(--gg-font-body);
+  font-size: var(--gg-text-overline);
+  font-weight: var(--gg-weight-semibold);
+  letter-spacing: var(--gg-tracking-wide);
+  text-transform: uppercase;
+  color: var(--gg-accent);
+  margin-bottom: var(--gg-space-4);
+}
+
+.quote {
+  font-family: var(--gg-font-display);
+  font-size: var(--gg-text-h1);
+  line-height: var(--gg-leading-snug);
+  color: var(--gg-ink);
+  margin: 0 0 var(--gg-space-6);
+  font-style: normal;
+}
+
+.body {
+  font-family: var(--gg-font-body);
+  font-size: 1.0625rem;
+  line-height: var(--gg-leading-relaxed);
+  color: var(--gg-body);
+  max-width: 56ch;
+}
+
+@media (max-width: 900px) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: var(--gg-space-8);
+  }
+  .visual { max-width: 320px; margin: 0 auto; }
+}
+
+@media (max-width: 480px) {
+  .section { padding: var(--gg-space-16) var(--gg-space-5); }
+}

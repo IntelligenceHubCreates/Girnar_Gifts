@@ -4,15 +4,21 @@ import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import GirnarHeroSection from '@/components/sections/GirnarHeroSection';
 import CategoriesSection from '@/components/sections/CategoriesSection';
 import FeaturedProducts from '@/components/sections/FeaturedProducts';
-import PromoGrid from '@/components/sections/PromoGrid';
-import StationerySpotlight from '@/components/sections/StationerySpotlight';
 import ThreeColumnSection from '@/components/sections/ThreeColumnSection';
+import TrustBar from '@/components/sections/TrustBar';
+import EditorialStory from '@/components/sections/EditorialStory';
 import TestimonialsSection from '@/components/sections/TestimonialsSection';
-import BlogSection from '@/components/sections/BlogSection';
 import NewsletterSection from '@/components/sections/NewsletterSection';
+import InstagramSection from '@/components/sections/InstagramSection';
 import WhatsAppButton from '@/components/ui/WhatsAppButton';
 import styles from './HomePage.module.css';
 
+// PromoGrid, StationerySpotlight, and BlogSection were Little Loot's
+// kids/stationery-specific modules (fake blog posts, "Toys & Games"/"Back
+// to School" promo tiles, a stationery-category spotlight fetching a
+// category slug that doesn't exist for Girnar). Left in place, unused,
+// rather than force a fabricated Girnar-themed rewrite - see
+// DESIGN_SYSTEM.md.
 export default function HomePage() {
   return (
     <>
@@ -22,12 +28,12 @@ export default function HomePage() {
         <GirnarHeroSection />
         <CategoriesSection />
         <FeaturedProducts />
-        <TestimonialsSection />
-        <PromoGrid />
-        <StationerySpotlight />
         <ThreeColumnSection />
-        <BlogSection />
+        <TrustBar />
+        <EditorialStory />
+        <TestimonialsSection />
         <NewsletterSection />
+        <InstagramSection />
       </main>
 
       <div className={styles.footerWrap}>

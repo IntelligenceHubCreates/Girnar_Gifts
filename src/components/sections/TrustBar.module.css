@@ -35,7 +35,7 @@
 
 .trustText span {
   font-size: 12px;
-  color: #888;
+  color: var(--gg-muted);
 }
 
 /* ── Responsive ─────────────────────────────────────── */

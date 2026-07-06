@@ -1,6 +1,6 @@
 /* ── Section ─────────────────────────────────────────────────────────────── */
 .testimonialSection {
-  background: linear-gradient(135deg, #1C1F3E 0%, #1a1838 50%, #21244a 100%);
+  background: linear-gradient(135deg, var(--gg-ink) 0%, #3a1620 50%, var(--gg-wine-dark) 100%);
   padding: 48px 56px;
   text-align: center;
   overflow: hidden;
@@ -236,7 +236,7 @@
 
 /* ── Avatar initial letter ───────────────────────────────────────────────── */
 .avatarInitial {
-  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-family: var(--gg-font-display);
   font-weight: 800;
   font-size: 28px;
   line-height: 1;
@@ -257,7 +257,7 @@
 /* ── Quote mark ──────────────────────────────────────────────────────────── */
 .testiQuote {
   font-size: 56px;
-  color: #F97316;
+  color: var(--gg-accent);
   line-height: 0.6;
   font-family: Georgia, serif;
   margin-bottom: 10px;
@@ -271,7 +271,7 @@
 
 /* ── Quote text ──────────────────────────────────────────────────────────── */
 .testiText {
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 14px;
   line-height: 1.8;
   color: rgba(255, 255, 255, 0.82);
@@ -292,7 +292,7 @@
 @media (max-width: 480px) { .testiMeta { justify-content: center; } }
 
 .testiName {
-  font-family: var(--font-baloo), 'Baloo 2', sans-serif;
+  font-family: var(--gg-font-display);
   font-size: 14px;
   font-weight: 800;
   color: #fff;
@@ -306,7 +306,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 11px;
   color: rgba(255, 255, 255, 0.6);
   font-weight: 600;
@@ -319,7 +319,7 @@
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  background: #4caf7d;
+  background: var(--gg-success);
   color: #fff;
   font-size: 9px;
   font-weight: 800;
@@ -344,7 +344,7 @@
 }
 
 .statNumber {
-  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-family: var(--gg-font-display);
   font-size: 42px;
   font-weight: 800;
   color: #fff;
@@ -356,7 +356,7 @@
 @media (max-width: 480px) { .statNumber { font-size: 38px; letter-spacing: -0.03em; } }
 
 .statLabel {
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 12px;
   color: rgba(255, 255, 255, 0.65);
   line-height: 1.5;
@@ -408,7 +408,7 @@
 .statAvatarInner .avatarInitial {
   font-size: 10px;
   font-weight: 800;
-  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-family: var(--gg-font-display);
   line-height: 1;
   user-select: none;
 }
@@ -419,7 +419,7 @@
 }
 
 .andMore {
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 11px;
   color: rgba(255, 255, 255, 0.45);
   margin-left: 8px;

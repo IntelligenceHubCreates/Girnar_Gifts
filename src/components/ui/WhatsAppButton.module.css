@@ -64,8 +64,8 @@
   bottom: 50%;
   transform: translateY(50%);
   background: #fff;
-  color: #1a1a2e;
-  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  color: var(--gg-ink);
+  font-family: var(--gg-font-body);
   font-size: 13px;
   font-weight: 700;
   padding: 9px 14px;
@@ -102,7 +102,7 @@
   padding: 0;
   cursor: pointer;
   font-size: 10px;
-  color: #aaa;
+  color: var(--gg-muted);
   line-height: 1;
   display: flex;
   align-items: center;
@@ -114,8 +114,8 @@
   transition: background 0.15s, color 0.15s;
 }
 .tooltipClose:hover {
-  background: #f0ece8;
-  color: #555;
+  background: var(--gg-muted-fill);
+  color: var(--gg-body);
 }
 
 /* ── Responsive ── */

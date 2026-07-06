@@ -9,16 +9,16 @@
   grid-template-columns: repeat(3, 1fr);
   align-items: start;
   gap: 0;
-  background: #FDFAF6;
-  border-top: 1px solid #F0EAE0;
-  border-bottom: 1px solid #F0EAE0;
+  background: var(--gg-canvas);
+  border-top: 1px solid var(--gg-border);
+  border-bottom: 1px solid var(--gg-border);
 }
 
 /* Inner padding + column dividers */
 .threeCol > * { padding: 0 32px; }
 .threeCol > *:first-child { padding-left: 0; }
 .threeCol > *:last-child  { padding-right: 0; }
-.threeCol > * + * { border-left: 1px solid #F0EAE0; }
+.threeCol > * + * { border-left: 1px solid var(--gg-border); }
 
 /* Tablet */
 @media (max-width: 1100px) {
@@ -41,12 +41,12 @@
     overflow: hidden;   /* clip the track so overflow-x:auto on the track creates the scroll */
     padding: 20px 16px 24px;
     border-left: none;
-    border-bottom: 1px solid #EDE8E0;
+    border-bottom: 1px solid var(--gg-border);
   }
 
   /* Alternate cream / white to visually separate the 3 carousels */
-  .threeCol > *:nth-child(odd)  { background: #FDFAF6; }
-  .threeCol > *:nth-child(even) { background: #ffffff; }
+  .threeCol > *:nth-child(odd)  { background: var(--gg-canvas); }
+  .threeCol > *:nth-child(even) { background: var(--gg-surface); }
 
   /* Override the desktop zero-padding rules which have higher specificity (0,2,0) */
   .threeCol > *:first-child { padding-left: 16px; }

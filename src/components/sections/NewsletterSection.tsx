@@ -73,7 +73,7 @@ export default function NewsletterSection() {
         <div className={styles.copy}>
           <p className={styles.heading}>Join the {brand.name} Family</p>
           <p className={styles.sub}>
-            Get exclusive offers, parenting tips, and new arrivals straight to your inbox.
+            Get exclusive offers, gifting inspiration, and new arrivals straight to your inbox.
           </p>
         </div>
 

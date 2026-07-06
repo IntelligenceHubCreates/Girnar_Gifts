@@ -60,10 +60,10 @@ export interface TrustItem {
 // ─── Data ───
 
 export const TRUST_ITEMS: TrustItem[] = [
-  { icon: '🚚', title: 'Free Shipping', sub: 'On orders over ₹499' },
-  { icon: '🔄', title: 'Easy Returns', sub: '30-day hassle-free returns' },
-  { icon: '🛡️', title: 'Safe & Certified', sub: 'All toys are BIS certified' },
-  { icon: '💬', title: '24/7 Support', sub: 'Always here to help' },
+  { icon: '🎁', title: 'Complimentary Gift Wrap', sub: 'On every order, no extra cost' },
+  { icon: '🚚', title: 'Pan-India Delivery', sub: 'Fast & reliable shipping' },
+  { icon: '🔒', title: 'Secure Payments', sub: '100% safe checkout' },
+  { icon: '🔄', title: 'Easy Returns', sub: '7-day hassle-free returns' },
 ];
 
 export const CATEGORIES: Category[] = [

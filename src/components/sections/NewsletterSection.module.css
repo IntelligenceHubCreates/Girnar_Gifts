@@ -8,7 +8,7 @@
   width: 100%;
   padding: 0;
   box-sizing: border-box;
-  background: linear-gradient(135deg, #FF9A3C 0%, #F97316 45%, #EA580C 100%);
+  background: var(--gg-gradient-signature);
   position: relative;
   overflow: hidden;
 }
@@ -68,7 +68,7 @@
 }
 
 .heading {
-  font-family: var(--font-baloo), 'Baloo 2', cursive;
+  font-family: var(--gg-font-display);
   font-size: 22px;
   font-weight: 900;
   color: #fff;
@@ -79,7 +79,7 @@
 }
 
 .sub {
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 13.5px;
   color: rgba(255, 255, 255, 0.82);
   margin: 0;
@@ -118,15 +118,15 @@
   border: none;
   outline: none;
   padding: 13px 20px;
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 14px;
-  color: #1a1a1a;
+  color: var(--gg-ink);
   background: transparent;
   min-width: 0;
 }
 
 .input::placeholder {
-  color: #aaa;
+  color: var(--gg-muted);
 }
 
 .input:disabled {
@@ -137,13 +137,13 @@
 /* ── Subscribe button ── */
 .btn {
   flex-shrink: 0;
-  background: #F97316;
+  background: var(--gg-primary);
   color: #fff;
   border: none;
   border-radius: 50px;
   padding: 11px 22px;
   margin: 4px;
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 13.5px;
   font-weight: 800;
   cursor: pointer;
@@ -158,7 +158,7 @@
 }
 
 .btn:hover:not(:disabled) {
-  background: #EA580C;
+  background: var(--gg-primary-hover);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(249, 115, 22, 0.55);
 }
@@ -189,7 +189,7 @@
 
 /* ── Error message ── */
 .errorMsg {
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 12.5px;
   color: rgba(255, 255, 255, 0.9);
   margin: 8px 0 0 16px;
@@ -209,7 +209,7 @@
   border: 1.5px solid rgba(255, 255, 255, 0.4);
   border-radius: 50px;
   padding: 12px 22px;
-  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-family: var(--gg-font-body);
   font-size: 14px;
   font-weight: 700;
   color: #fff;
@@ -224,7 +224,7 @@
   width: 22px;
   height: 22px;
   background: rgba(255, 255, 255, 0.9);
-  color: #22c55e;
+  color: var(--gg-success);
   border-radius: 50%;
   font-size: 12px;
   font-weight: 900;

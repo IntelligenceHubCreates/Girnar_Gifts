@@ -16,14 +16,19 @@ interface Category {
   txtclr: string;
 }
 
+// Girnar's real seeded gift categories (see MANUAL_STEPS.md - no fabricated
+// product photography exists yet, so tiles use tasteful emoji + brand-tint
+// gradients instead of category images).
+const catHref = (name: string) => `/products?category=${encodeURIComponent(name)}`;
+
 const CATEGORIES: Category[] = [
-  { image: '/stationery.png',     name: 'Stationery',       bg: 'linear-gradient(160deg,#FFDCC7 0%,#FFC6A4 100%)', txtclr: '#7A4322',  href: '/stationery' },
-  { image: '/bags.png',           name: 'Bags & Pouches',   bg: 'linear-gradient(160deg,#FFF1C7 0%,#FFE59A 100%)', txtclr: '#7B5A00',  href: '/bags' },
-  { image: '/Tumbler.png',        name: 'Bottles & Lunch',   bg: 'linear-gradient(160deg,#DDF6E8 0%,#BDECCC 100%)', txtclr: '#1F5C45', href: '/bottles', dots: true },
-  { image: '/toys.png',           name: 'Toys & Games',     bg: 'linear-gradient(160deg,#FFD8E2 0%,#FFBFD0 100%)', txtclr: '#8A3652', href: '/toys' },
-  { image: '/beauty.png',         name: 'Beauty & Hair',    bg: 'linear-gradient(160deg,#EEE0FF 0%,#DCC7FF 100%)', txtclr: '#5F3D99', href: '/beauty' },
-  { image: '/keychains.png',      name: 'Keychains',         bg: 'linear-gradient(160deg,#FFF0D4 0%,#FFE2A8 100%)', txtclr: '#7A5715', href: '/keychains' },
-  { emoji: '🎁',                  name: 'Gift Sets',         bg: 'linear-gradient(160deg,#E9ECF3 0%,#D8DDE8 100%)', txtclr: '#4A5568', href: '/gifts' },
+  { emoji: '🎁', name: 'Personalised Gifts',  bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-blush-deep) 100%)', txtclr: 'var(--gg-primary)', href: catHref('Personalised Gifts') },
+  { emoji: '🧺', name: 'Gift Hampers',        bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-petal) 100%)', txtclr: 'var(--gg-primary)', href: catHref('Gift Hampers') },
+  { emoji: '🎉', name: 'Festive & Occasion',  bg: 'linear-gradient(160deg, var(--gg-petal) 0%, var(--gg-accent) 100%)',     txtclr: '#fff',              href: catHref('Festive & Occasion'), dots: true },
+  { emoji: '💼', name: 'Corporate Gifts',     bg: 'linear-gradient(160deg, var(--gg-muted-fill) 0%, var(--gg-border) 100%)', txtclr: 'var(--gg-ink)',    href: catHref('Corporate Gifts') },
+  { emoji: '🏡', name: 'Home & Decor',        bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-border) 100%)',    txtclr: 'var(--gg-ink)',     href: catHref('Home & Decor') },
+  { emoji: '🍫', name: 'Chocolates & Sweets', bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-rose) 100%)', txtclr: '#fff',              href: catHref('Chocolates & Sweets') },
+  { emoji: '🌸', name: 'Flowers & Plants',    bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-petal) 100%)',    txtclr: 'var(--gg-primary)', href: catHref('Flowers & Plants') },
 ];
 
 const DOTS_COUNT    = 3;

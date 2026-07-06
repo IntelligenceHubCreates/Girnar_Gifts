@@ -12,15 +12,15 @@ import { useCart } from '@/context/CartContext';
 
 
 const BADGE_BG: Record<string, string> = {
-  sale:       '#F4621A',
-  new:        '#3ECFB2',
-  hot:        '#FFD336',
-  bestseller: '#3ECFB2',
+  sale:       'var(--gg-accent)',
+  new:        'var(--gg-primary)',
+  hot:        'var(--gg-primary)',
+  bestseller: 'var(--gg-primary)',
 };
 const BADGE_TEXT: Record<string, string> = {
   sale:       '#fff',
   new:        '#fff',
-  hot:        '#1A2540',
+  hot:        '#fff',
   bestseller: '#fff',
 };
 

@@ -39,10 +39,10 @@
 
 .title {
   margin: 0;
-  font-family: var(--font-baloo, 'Baloo 2', cursive);
+  font-family: var(--gg-font-display);
   font-size: clamp(18px, 1.8vw, 22px);
   font-weight: 900;
-  color: #1A1A2E;
+  color: var(--gg-ink);
   line-height: 1.1;
   letter-spacing: -0.025em;
 }
@@ -51,7 +51,7 @@
   display: block;
   width: 34px;
   height: 3.5px;
-  background: #EC4899;
+  background: var(--gg-primary);
   border-radius: 4px;
 }
 
@@ -59,10 +59,10 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-family: var(--gg-font-body);
   font-size: 13px;
   font-weight: 700;
-  color: #EC4899;
+  color: var(--gg-primary);
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
@@ -107,7 +107,7 @@
   min-width: 130px;
   background: #ffffff;
   border-radius: 14px;
-  border: 1px solid #EDE8E2;
+  border: 1px solid var(--gg-border);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.22s ease;
@@ -140,9 +140,9 @@
   position: absolute;
   top: 7px;
   left: 7px;
-  background: #EC4899;
+  background: var(--gg-primary);
   color: #fff;
-  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-family: var(--gg-font-body);
   font-size: 9px;
   font-weight: 800;
   padding: 2px 7px;
@@ -172,7 +172,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F7F3EE;
+  background: var(--gg-muted-fill);
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -199,10 +199,10 @@
 
 .name {
   margin: 0;
-  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  font-family: var(--gg-font-body);
   font-size: 11.5px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--gg-ink);
   line-height: 1.35;
   min-height: 30px;
   display: -webkit-box;
@@ -221,16 +221,16 @@
 }
 
 .price {
-  font-family: var(--font-baloo, 'Baloo 2', cursive);
+  font-family: var(--gg-font-display);
   font-size: 14px;
   font-weight: 800;
-  color: #1a1a2e;
+  color: var(--gg-ink);
   line-height: 1;
 }
 
 .mrp {
   font-size: 10.5px;
-  color: #bbb;
+  color: var(--gg-muted);
   text-decoration: line-through;
   font-weight: 400;
 }
@@ -239,8 +239,8 @@
 .empty {
   text-align: center;
   padding: 28px 0;
-  color: #b0aab5;
-  font-family: var(--font-nunito, 'Nunito', sans-serif);
+  color: var(--gg-muted);
+  font-family: var(--gg-font-body);
   font-size: 13px;
 }
 
