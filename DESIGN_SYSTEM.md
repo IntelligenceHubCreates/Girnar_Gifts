@@ -1,6 +1,6 @@
 # DESIGN_SYSTEM.md — Girnar Gifts Redesign
 
-**Status: Phase 0 checkpoint approved — sitewide rollout in progress.** Branch `feat/girnar-redesign`, committing per surface. See `MIGRATION_PROGRESS.md` for the running phase-by-phase log.
+**Status: sitewide rollout complete.** Branch `feat/girnar-redesign`, every surface committed individually (global shell → home → PLP → PDP → cart → checkout → auth/account/wishlist → static/legal/404 → motion system → admin → a11y/performance pass). See `MIGRATION_PROGRESS.md` for the running phase-by-phase log and git log on `feat/girnar-redesign` for the full commit history.
 
 ## Confirmed dead/unused code (found during rollout, left untouched)
 
@@ -185,14 +185,43 @@ Verified: typechecks clean, production build succeeds, and the homepage was rend
 
 ---
 
-## 7. What is NOT done yet (deliberately, pending this checkpoint)
+## 7. Rollout log (Phase 0 checkpoint → completion)
 
-- The legacy `--ll-*`/`--h-*` rainbow tokens in `globals.css` are untouched — `ProductCard`, `Header`, `Footer`, `NavBar`, `TopBar`, and every other component still render the old Little Loot silhouette. Only the hero has been swapped.
-- No motion-system-wide rollout (scroll reveals, cart drawer, nav transitions) yet — that's §2 of the brief, after this checkpoint.
-- No PLP/PDP/cart/checkout/auth/account/admin restyling yet — that's §3-8.
-- No a11y/performance pass yet (though the new hero was built with AA-safe token pairings, `transform`/`opacity`-only motion, and a reduced-motion fallback from the start).
+Every surface was restyled and committed individually on `feat/girnar-redesign`:
+
+1. Phase 0 checkpoint — divergence matrix, token system, signature hero.
+2. Token system rollout — `globals.css`'s legacy `--ll-*`/`--h-*`/`--coral`/`--navy`/etc. variable **names** were repointed to resolve to the new `--gg-*` palette (values changed, names kept stable), so every not-yet-individually-migrated component inherited the new identity immediately instead of waiting for a file-by-file pass.
+3. Global shell — Header (real Girnar category taxonomy replacing Little Loot's kids/stationery nav), Footer, MobileBottomNav.
+4. Homepage — all 9 sections token-migrated; two new sections built (`EditorialStory`, `InstagramSection`) to fill gaps left by removing Little Loot's kids-specific `PromoGrid`/`StationerySpotlight`/`BlogSection`.
+5. PLP (`CategoryPage`), PDP (`ProductPage` — including trust-strip/cert-chip copy fixes and a live "Are the products safe for kids?"-style FAQ removed from Account page later).
+6. Cart, Checkout.
+7. Auth (Login/Signup), Account, Wishlist.
+8. Static/legal pages, a new branded `not-found.tsx` (404) and `global-error.tsx` (root error boundary) — neither existed before, the app fell back to Next.js defaults.
+9. Motion system utilities (§2 of the brief) — `MotionConfig reducedMotion="user"` wraps the whole app so every framer-motion animation respects the OS reduced-motion setting automatically; `lib/motion.ts` centralizes the entrance/scroll-reveal variants (`fadeUp`, `fadeIn`, `scaleIn`) using the same duration/easing tokens as the CSS system; a generic `<Reveal>` wrapper applies the treatment without touching a section's internals.
+10. Admin panel — `styles/admin.css`'s brand-token `:root` block repointed the same way `globals.css` was, plus the remaining inline hex in `OrderReceipt`/`OrdersPage`/`ProductsPage`.
+11. A11y + performance pass — see §9 below.
+
+A project-wide grep swept for every previously-found old-brand hex pattern after each surface, which repeatedly turned up stragglers a per-file pass had missed (a page-level background gradient in `HomePage.module.css`, inline hex in `style=` props across `Header`/`FeaturedProducts`/`ProductPage`/mobile-account components, and old-brand colors expressed as decimal `rgba()` rather than hex). Each was fixed as found; see the git log for the itemized breakdown per commit.
 
 ## 8. Open items for `MANUAL_STEPS.md`
 
 - If pixel-exact match to the logo's inscribed serif wordmark is wanted, identifying/licensing that exact typeface (vs. Cinzel, its close free kin) is a manual step.
 - The signature hero currently uses an original vector gift-box illustration, not real product photography — real photography can complement or eventually replace it once available.
+- PDP personalisation/engraving input (backend field exists, no frontend UI yet — see §"Flagged for MANUAL_STEPS.md" above).
+- Instagram feed is an honest follow-CTA, not a live feed (needs Instagram API credentials).
+
+## 9. A11y + performance pass
+
+Ran Lighthouse (mobile, simulated throttling) against a local production build (`npm run build && npm run start`) for the homepage, cart, checkout, login, and wishlist.
+
+**Accessibility: every surface checked is now 100/100** (homepage started at 88/100). Real findings fixed, not just score-chased:
+- Header search input's `aria-expanded`/`aria-haspopup` weren't valid on its implicit role — made it a proper ARIA combobox (`role="combobox"` + `aria-controls` + `aria-autocomplete`).
+- WhatsAppButton's tooltip text was nested inside the same link as its aria-label (a content/label mismatch, and invalid nested-interactive HTML) — moved the tooltip to a sibling of the link.
+- LoginPage's Google button had an aria-label that didn't match its own visible text — removed the redundant label.
+- CategoriesSection's carousel dots and the Login/Signup password-visibility toggle were under the 24×24px touch-target minimum — hit areas enlarged without changing the visual design.
+- `--gg-muted` and the three semantic status colors (success/warning/error) only reached ~2.6–4.1:1 contrast on light backgrounds, short of AA's 4.5:1 for text. Darkened `--gg-muted` slightly and added `--gg-success-text`/`--gg-warning-text`/`--gg-error-text` variants for text-on-light-background use (the base tokens are still correct for badges/borders/dots).
+- Found and fixed a **pre-existing invisible-text bug** (not introduced by this redesign): several success/warning/error badges and buttons across PDP, Cart, and Login/Signup had `background` and `color` set to the *literal same token* — 1:1 contrast, completely unreadable. Fixed each to either white-on-solid (buttons) or dark-text-on-light-tint (inline badges).
+
+**Performance: homepage sits at 87–89/100** (mobile, simulated throttling), just under the 90 budget; cart/checkout/login/wishlist all score 95–97. CLS is a clean 0 everywhere. The homepage gap traces almost entirely to Largest Contentful Paint (~3.5s) driven by ~450ms of render-blocking CSS parse cost under Lighthouse's simulated mobile network+CPU throttle — this is being measured against a bare `next start` on localhost with no CDN, no HTTP/2 multiplexing, and no edge compression in front of it. A real production deploy (Vercel or similar, with a CDN and HTTP/2) would very likely close most or all of this gap on its own; restructuring the CSS bundling/splitting to chase it locally would mean touching Next.js build configuration, which is outside a presentation-layer redesign's guardrails. Recommend re-measuring against the actual production deployment before investing further here.
+
+Also worth noting: `errors-in-console` (a `best-practices` audit) flags three network 500s on every page — these come from local API routes failing because no backend/`NEXT_PUBLIC_API_URL` is configured in this local test environment, not from anything introduced by the redesign.
