@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAdminFetch } from '@/hooks/useAdminFetch'
 import {
-  fetchAdminProducts, fetchCategories, createProduct, updateProduct, deleteProduct,
+  fetchAdminProducts, fetchCategories, createProduct, updateProduct, deleteProduct, createCategory,
   type ApiProduct, type ApiCategory,
 } from '@/lib/adminApi'
 
@@ -33,6 +33,10 @@ function flattenCategories(
     if (c.children?.length) result.push(...flattenCategories(c.children, depth + 1))
   }
   return result
+}
+
+function slugify(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
 function fileToPreview(file: File): Promise<string> {
@@ -150,16 +154,25 @@ function ColorVariantEditor({ variants, onChange }: ColorVariantEditorProps) {
 
 interface ProductFormProps {
   product?: ApiProduct | null
-  categories: { id: string; name: string; slug: string }[]
+  categoryTree: ApiCategory[]
   onClose: () => void
   onSaved: () => void
 }
 
-function ProductForm({ product, categories, onClose, onSaved }: ProductFormProps) {
+function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormProps) {
   const isEdit = !!product
   const [saving, setSaving]   = useState(false)
   const [error,  setError]    = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  // Sub-category picker: pick an existing child of the selected main category,
+  // or type a brand-new name to create it inline when the product is saved
+  // (see MANUAL_STEPS.md — subcategories are added by the admin from here now,
+  // instead of requiring a trip to the separate Categories screen first).
+  const [selectedCategoryName, setSelectedCategoryName] = useState(product?.category ?? '')
+  const selectedCategoryNode = categoryTree.find((c) => c.name === selectedCategoryName)
+  const subcategoryOptions = selectedCategoryNode?.children ?? []
+  const [subcategoryInput, setSubcategoryInput] = useState(product?.sub_category_name ?? '')
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [details, setDetails] = useState<string[]>(product?.details?.length ? product.details : [''])
   const fileRef = useRef<HTMLInputElement>(null)
@@ -242,10 +255,32 @@ function ProductForm({ product, categories, onClose, onSaved }: ProductFormProps
     setSaving(true)
 
     try {
+      // Resolve the sub-category before touching uploads: reuse an existing
+      // child of the selected main category if the typed name matches one,
+      // otherwise create it now (parented under the selected category) so
+      // the product can reference it immediately.
+      let subcategorySlug = ''
+      const typedSubcat = subcategoryInput.trim()
+      if (typedSubcat) {
+        const existing = subcategoryOptions.find(
+          (c) => c.name.toLowerCase() === typedSubcat.toLowerCase(),
+        )
+        if (existing) {
+          subcategorySlug = existing.slug
+        } else if (selectedCategoryNode) {
+          const created = await createCategory({
+            name: typedSubcat,
+            slug: slugify(typedSubcat),
+            parent_id: selectedCategoryNode.id,
+          })
+          subcategorySlug = created.slug
+        }
+      }
+
       const form = new FormData()
       form.append('productName',           (fd.elements.namedItem('name')            as HTMLInputElement).value)
       form.append('productCategory',       (fd.elements.namedItem('category')        as HTMLInputElement).value)
-      form.append('productCategorySlug',   (fd.elements.namedItem('categorySlug')    as HTMLInputElement).value)
+      form.append('productCategorySlug',   subcategorySlug)
       form.append('productDescription',    (fd.elements.namedItem('description')     as HTMLTextAreaElement).value)
       form.append('productPrice',          (fd.elements.namedItem('price')           as HTMLInputElement).value)
       form.append('productCount',          (fd.elements.namedItem('count')           as HTMLInputElement).value)
@@ -345,18 +380,34 @@ function ProductForm({ product, categories, onClose, onSaved }: ProductFormProps
             <div className="form-grid form-grid-2">
               <div className="form-group">
                 <label className="form-label">Category *</label>
-                <select name="category" className="form-select" defaultValue={product?.category ?? ''} style={errStyle('category')}>
+                <select
+                  name="category"
+                  className="form-select"
+                  defaultValue={product?.category ?? ''}
+                  style={errStyle('category')}
+                  onChange={(e) => { setSelectedCategoryName(e.target.value); setSubcategoryInput('') }}
+                >
                   <option value="">Select category</option>
-                  {categories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  {categoryTree.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
                 </select>
                 {errMsg('category')}
               </div>
               <div className="form-group">
-                <label className="form-label">Category Slug</label>
-                <select name="categorySlug" className="form-select" defaultValue={product?.sub_category_slug ?? ''}>
-                  <option value="">Select slug</option>
-                  {categories.map((c) => <option key={c.id} value={c.slug}>{c.slug}</option>)}
-                </select>
+                <label className="form-label">
+                  Sub-category <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional — type a new one to create it)</span>
+                </label>
+                <input
+                  className="form-input"
+                  list="subcategory-options"
+                  value={subcategoryInput}
+                  onChange={(e) => setSubcategoryInput(e.target.value)}
+                  placeholder={selectedCategoryName ? 'e.g. Birthday' : 'Pick a category first'}
+                  disabled={!selectedCategoryName}
+                  autoComplete="off"
+                />
+                <datalist id="subcategory-options">
+                  {subcategoryOptions.map((c) => <option key={c.id} value={c.name} />)}
+                </datalist>
               </div>
             </div>
 
@@ -708,7 +759,7 @@ export default function ProductsPage() {
       )}
 
       {editProduct !== undefined && (
-        <ProductForm product={editProduct} categories={flatCats} onClose={() => setEditProduct(undefined)} onSaved={refetch} />
+        <ProductForm product={editProduct} categoryTree={categoriesRes ?? []} onClose={() => setEditProduct(undefined)} onSaved={refetch} />
       )}
       {deleteTarget && (
         <DeleteConfirm name={deleteTarget.name} onConfirm={() => handleDelete(deleteTarget)} onCancel={() => setDeleteTarget(null)} />
