@@ -39,6 +39,21 @@ function slugify(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
+// Unprefixed flatten (unlike flattenCategories above, which prefixes names
+// with "— " for display in a dropdown) - used to check a typed sub-category
+// name/slug against every category that exists anywhere in the tree, not
+// just the children of whichever main category is currently selected.
+// Category slugs are globally unique, so a name that already exists under a
+// *different* main category still needs to be reused rather than re-created.
+function flattenAll(cats: ApiCategory[]): ApiCategory[] {
+  const result: ApiCategory[] = []
+  for (const c of cats) {
+    result.push(c)
+    if (c.children?.length) result.push(...flattenAll(c.children))
+  }
+  return result
+}
+
 function fileToPreview(file: File): Promise<string> {
   return new Promise((res, rej) => {
     const reader = new FileReader()
@@ -256,24 +271,37 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
 
     try {
       // Resolve the sub-category before touching uploads: reuse an existing
-      // child of the selected main category if the typed name matches one,
-      // otherwise create it now (parented under the selected category) so
-      // the product can reference it immediately.
+      // one if the typed name (or the slug it would generate) matches any
+      // category anywhere in the tree - not just children of the currently
+      // selected main category. Slugs are globally unique, so a name that
+      // already exists under a *different* category would otherwise fail
+      // with a 409 "slug already exists" when we tried to create a
+      // duplicate instead of just reusing it. Only create a new one if it
+      // truly doesn't exist anywhere yet.
       let subcategorySlug = ''
       const typedSubcat = subcategoryInput.trim()
       if (typedSubcat) {
-        const existing = subcategoryOptions.find(
-          (c) => c.name.toLowerCase() === typedSubcat.toLowerCase(),
+        const typedSlug = slugify(typedSubcat)
+        const existing = flattenAll(categoryTree).find(
+          (c) => c.slug === typedSlug || c.name.toLowerCase() === typedSubcat.toLowerCase(),
         )
         if (existing) {
           subcategorySlug = existing.slug
         } else if (selectedCategoryNode) {
-          const created = await createCategory({
-            name: typedSubcat,
-            slug: slugify(typedSubcat),
-            parent_id: selectedCategoryNode.id,
-          })
-          subcategorySlug = created.slug
+          try {
+            const created = await createCategory({
+              name: typedSubcat,
+              slug: typedSlug,
+              parent_id: selectedCategoryNode.id,
+            })
+            subcategorySlug = created.slug
+          } catch (err: any) {
+            throw new Error(
+              /already exists/i.test(err?.message ?? '')
+                ? `A sub-category named "${typedSubcat}" already exists — pick it from the suggestions instead of retyping it.`
+                : (err?.message ?? 'Could not create the sub-category'),
+            )
+          }
         }
       }
 
@@ -589,7 +617,7 @@ export default function ProductsPage() {
     [page, search, categoryFilter, stockFilter, flagFilter, sortBy],
   )
 
-  const { data: categoriesRes } = useAdminFetch(fetchCategories, [])
+  const { data: categoriesRes, refetch: refetchCategories } = useAdminFetch(fetchCategories, [])
   const flatCats = categoriesRes ? flattenCategories(categoriesRes) : []
 
   useEffect(() => { setPage(0) }, [search, categoryFilter, stockFilter, flagFilter, sortBy])
@@ -759,7 +787,12 @@ export default function ProductsPage() {
       )}
 
       {editProduct !== undefined && (
-        <ProductForm product={editProduct} categoryTree={categoriesRes ?? []} onClose={() => setEditProduct(undefined)} onSaved={refetch} />
+        <ProductForm
+          product={editProduct}
+          categoryTree={categoriesRes ?? []}
+          onClose={() => setEditProduct(undefined)}
+          onSaved={() => { refetch(); refetchCategories() }}
+        />
       )}
       {deleteTarget && (
         <DeleteConfirm name={deleteTarget.name} onConfirm={() => handleDelete(deleteTarget)} onCancel={() => setDeleteTarget(null)} />
