@@ -23,13 +23,13 @@ interface Category {
 const catHref = (name: string) => `/products?category=${encodeURIComponent(name)}`;
 
 const CATEGORIES: Category[] = [
-  { emoji: '🎁', name: 'Personalised Gifts',  bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-blush-deep) 100%)', txtclr: 'var(--gg-primary)', href: catHref('Personalised Gifts') },
-  { emoji: '🧺', name: 'Gift Hampers',        bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-petal) 100%)', txtclr: 'var(--gg-primary)', href: catHref('Gift Hampers') },
-  { emoji: '🎉', name: 'Festive & Occasion',  bg: 'linear-gradient(160deg, var(--gg-petal) 0%, var(--gg-accent) 100%)',     txtclr: '#fff',              href: catHref('Festive & Occasion'), dots: true },
-  { emoji: '💼', name: 'Corporate Gifts',     bg: 'linear-gradient(160deg, var(--gg-muted-fill) 0%, var(--gg-border) 100%)', txtclr: 'var(--gg-ink)',    href: catHref('Corporate Gifts') },
-  { emoji: '🏡', name: 'Home & Decor',        bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-border) 100%)',    txtclr: 'var(--gg-ink)',     href: catHref('Home & Decor') },
-  { emoji: '🍫', name: 'Chocolates & Sweets', bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-rose) 100%)', txtclr: '#fff',              href: catHref('Chocolates & Sweets') },
-  { emoji: '🌸', name: 'Flowers & Plants',    bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-petal) 100%)',    txtclr: 'var(--gg-primary)', href: catHref('Flowers & Plants') },
+  { emoji: '🎁', name: 'Personalised Gifts', bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-blush-deep) 100%)',  txtclr: 'var(--gg-primary)', href: catHref('Personalised Gifts') },
+  { emoji: '🧺', name: 'Gift Hampers',       bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-petal) 100%)',  txtclr: 'var(--gg-primary)', href: catHref('Gift Hampers') },
+  { emoji: '🎉', name: 'Festive & Occasion', bg: 'linear-gradient(160deg, var(--gg-petal) 0%, var(--gg-accent) 100%)',      txtclr: '#fff',              href: catHref('Festive & Occasion'), dots: true },
+  { emoji: '✏️', name: 'Stationery',         bg: 'linear-gradient(160deg, var(--gg-muted-fill) 0%, var(--gg-border) 100%)', txtclr: 'var(--gg-ink)',    href: catHref('Stationery') },
+  { emoji: '👝', name: 'Bags & Pouches',     bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-border) 100%)',      txtclr: 'var(--gg-ink)',     href: catHref('Bags & Pouches') },
+  { emoji: '🧴', name: 'Bottles',            bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-rose) 100%)',   txtclr: '#fff',              href: catHref('Bottles') },
+  { emoji: '🧸', name: 'Toys',               bg: 'linear-gradient(160deg, var(--gg-petal) 0%, var(--gg-blush) 100%)',      txtclr: 'var(--gg-primary)', href: catHref('Toys') },
 ];
 
 const DOTS_COUNT    = 3;

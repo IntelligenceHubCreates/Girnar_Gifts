@@ -29,10 +29,10 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Personalised Gifts',  href: catHref('Personalised Gifts'),  emoji: '🎁' },
   { label: 'Gift Hampers',        href: catHref('Gift Hampers'),        emoji: '🧺' },
   { label: 'Festive & Occasion',  href: catHref('Festive & Occasion'),  emoji: '🎉' },
-  { label: 'Corporate Gifts',     href: catHref('Corporate Gifts'),     emoji: '💼' },
-  { label: 'Home & Decor',        href: catHref('Home & Decor'),        emoji: '🏡' },
-  { label: 'Chocolates & Sweets', href: catHref('Chocolates & Sweets'), emoji: '🍫' },
-  { label: 'Flowers & Plants',    href: catHref('Flowers & Plants'),    emoji: '🌸' },
+  { label: 'Stationery',          href: catHref('Stationery'),          emoji: '✏️' },
+  { label: 'Bags & Pouches',      href: catHref('Bags & Pouches'),      emoji: '👝' },
+  { label: 'Bottles',             href: catHref('Bottles'),             emoji: '🧴' },
+  { label: 'Toys',                href: catHref('Toys'),                emoji: '🧸' },
 ];
 
 const CAT_ITEMS = NAV_ITEMS; // show all items including Home
