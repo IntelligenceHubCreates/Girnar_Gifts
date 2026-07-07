@@ -3,9 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence, Transition } from 'framer-motion';
+import { motion, useMotionValue, useSpring, Transition } from 'framer-motion';
 import styles from './GirnarHeroSection.module.css';
-import { brand } from '@/config/brand';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { _get } from '@/shared/fetchwrapper';
 import { normaliseProduct, unwrapList, fmtINR } from '@/lib/normalise';
@@ -19,17 +18,17 @@ const up = (delay = 0) => ({
   transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] } as Transition,
 });
 
-const AUTO_MS = 4200;
-const CARD_TINTS = ['var(--gg-blush)', 'var(--gg-petal)', 'var(--gg-blush-deep)'];
+const CARD_TINTS = ['var(--gg-blush)', 'var(--gg-rose-tint)', 'var(--gg-muted-fill)'];
 
 /**
- * Flat illustrated hamper glyph — shown whenever a product has no uploaded
- * photo yet, so the showcase always has something honest to display rather
- * than a broken image (see DESIGN_SYSTEM.md - Hero showcase). Three palette
- * variants so a run of un-photographed products still reads as "different
- * items" rather than one glyph repeated.
+ * Flat illustrated gift-hamper cutout — stands in for the "signature Girnar
+ * gift" hero photo and for any mini-card product without an uploaded photo.
+ * No real cutout photography exists yet (see MANUAL_STEPS.md), so this is an
+ * honest vector placeholder rather than a stand-in claiming to be final
+ * photography. Three palette variants so a run of un-photographed products
+ * still reads as "different items."
  */
-function HamperGlyph({ variant = 0 }: { variant?: 0 | 1 | 2 }) {
+function HamperGlyph({ variant = 0, className }: { variant?: 0 | 1 | 2; className?: string }) {
   const palettes = [
     { basket: 'var(--gg-wine)', ribbon: 'var(--gg-rose)', dot: 'var(--gg-petal)' },
     { basket: 'var(--gg-rose)', ribbon: 'var(--gg-petal)', dot: 'var(--gg-blush)' },
@@ -37,7 +36,7 @@ function HamperGlyph({ variant = 0 }: { variant?: 0 | 1 | 2 }) {
   ] as const;
   const p = palettes[variant];
   return (
-    <svg viewBox="0 0 200 200" className={styles.glyph} aria-hidden="true">
+    <svg viewBox="0 0 200 200" className={className ?? styles.glyph} aria-hidden="true">
       <rect x="38" y="90" width="124" height="86" rx="14" fill={p.basket} />
       <rect x="38" y="90" width="124" height="16" fill="rgba(0,0,0,0.08)" />
       <circle cx="70" cy="86" r="16" fill={p.dot} />
@@ -51,20 +50,42 @@ function HamperGlyph({ variant = 0 }: { variant?: 0 | 1 | 2 }) {
   );
 }
 
-function ShowcaseImg({ product, variant }: { product: UiProduct | undefined; variant: number }) {
-  if (product?.images?.[0]) {
-    return (
-      <Image
-        src={product.images[0]}
-        alt={product.name}
-        fill
-        sizes="(max-width: 1024px) 60vw, 420px"
-        className={styles.stageImg}
-        priority
-      />
-    );
-  }
-  return <HamperGlyph variant={(variant % 3) as 0 | 1 | 2} />;
+interface MiniCardProps {
+  product: UiProduct;
+  tint: string;
+  variant: number;
+  cartState: 'idle' | 'loading' | 'added' | 'error';
+  onAddToCart: () => void;
+}
+
+function MiniCard({ product, tint, variant, cartState, onAddToCart }: MiniCardProps) {
+  return (
+    <div className={styles.miniCard} style={{ background: tint }}>
+      <div className={styles.miniCardImgWrap}>
+        {product.images[0] ? (
+          <Image
+            src={product.images[0]}
+            alt={product.name}
+            fill
+            sizes="90px"
+            className={styles.miniCardImg}
+          />
+        ) : (
+          <HamperGlyph variant={(variant % 3) as 0 | 1 | 2} className={styles.miniCardGlyph} />
+        )}
+      </div>
+      <p className={styles.miniCardName}>{product.name}</p>
+      <p className={styles.miniCardPrice}>{fmtINR(product.price)}</p>
+      <button
+        type="button"
+        className={styles.miniCardBtn}
+        onClick={onAddToCart}
+        disabled={cartState === 'loading'}
+      >
+        {cartState === 'loading' ? 'Adding…' : cartState === 'added' ? 'Added ✓' : cartState === 'error' ? 'Try again' : 'Add to Cart'}
+      </button>
+    </div>
+  );
 }
 
 export default function GirnarHeroSection() {
@@ -72,9 +93,16 @@ export default function GirnarHeroSection() {
   const { addItem } = useCart();
 
   const [products, setProducts] = useState<UiProduct[]>([]);
-  const [activeIdx, setActiveIdx] = useState(0);
   const [cartStates, setCartStates] = useState<Record<string, 'idle' | 'loading' | 'added' | 'error'>>({});
-  const hoverRef = useRef(false);
+
+  // Cursor-follow parallax on the hero image — desktop pointer only,
+  // disabled entirely under reduced motion. Spring-smoothed so it reads as
+  // a gentle drift, not a snap.
+  const mvX = useMotionValue(0);
+  const mvY = useMotionValue(0);
+  const springX = useSpring(mvX, { stiffness: 120, damping: 20, mass: 0.4 });
+  const springY = useSpring(mvY, { stiffness: 120, damping: 20, mass: 0.4 });
+  const visualRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     _get('/api/product/all?limit=4&in_stock=true')
@@ -82,15 +110,21 @@ export default function GirnarHeroSection() {
       .catch(() => setProducts([]));
   }, []);
 
-  // Auto-advance the showcase; pauses on hover/focus, stops entirely under
-  // reduced motion (index only changes via explicit card clicks then).
-  useEffect(() => {
-    if (reduceMotion || products.length < 2) return;
-    const id = setInterval(() => {
-      if (!hoverRef.current) setActiveIdx((i) => (i + 1) % products.length);
-    }, AUTO_MS);
-    return () => clearInterval(id);
-  }, [products.length, reduceMotion]);
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (reduceMotion || e.pointerType !== 'mouse') return;
+      const rect = visualRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      mvX.set(((e.clientX - rect.left) / rect.width - 0.5) * 24);
+      mvY.set(((e.clientY - rect.top) / rect.height - 0.5) * 24);
+    },
+    [reduceMotion, mvX, mvY],
+  );
+
+  const handlePointerLeave = useCallback(() => {
+    mvX.set(0);
+    mvY.set(0);
+  }, [mvX, mvY]);
 
   const handleAddToCart = useCallback(
     async (p: UiProduct) => {
@@ -106,100 +140,108 @@ export default function GirnarHeroSection() {
     [addItem, cartStates],
   );
 
-  const cards = products.slice(0, 3);
-  const active = products[activeIdx];
+  // First product is the big "signature gift" hero image; the next three
+  // are the independent mini cards below the CTAs (so nothing repeats).
+  const heroProduct = products[0];
+  const miniProducts = products.slice(1, 4);
 
   return (
     <section className={styles.hero}>
       <div className={styles.inner}>
         <div className={styles.copy}>
-          <motion.p className={styles.eyebrow} {...up(0)}>
-            {brand.name} &middot; The art of gifting
-          </motion.p>
-
-          <motion.h1 className={styles.headline} {...up(0.08)}>
-            Gifts worth
+          <motion.h1 className={styles.headline} {...up(0)}>
+            The Art of
             <br />
-            <span className={styles.headlineAccent}>unwrapping.</span>
+            Thoughtful Gifting
           </motion.h1>
 
-          <motion.p className={styles.subhead} {...up(0.16)}>
-            {brand.description}
+          <motion.p className={styles.subhead} {...up(0.1)}>
+            Curated hampers, personalised keepsakes, and festive collections — thoughtfully
+            wrapped and delivered across India. Find something they&rsquo;ll remember.
           </motion.p>
 
-          <motion.div className={styles.ctaRow} {...up(0.24)}>
+          <motion.div className={styles.ctaRow} {...up(0.2)}>
             <Link href="/products" className={styles.btnPrimary}>
-              Shop the collection
+              Shop Gifts
             </Link>
             <Link href="/products" className={styles.btnSecondary}>
-              Explore by occasion <span aria-hidden="true">&rarr;</span>
+              Explore Collections
             </Link>
           </motion.div>
 
-          {cards.length > 0 && (
-            <motion.div className={styles.cardsRow} {...up(0.32)}>
-              {cards.map((p, i) => {
-                const state = cartStates[p.id] ?? 'idle';
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    className={`${styles.miniCard} ${i === activeIdx ? styles.miniCardActive : ''}`}
-                    style={{ background: CARD_TINTS[i % CARD_TINTS.length] }}
-                    onClick={() => setActiveIdx(i)}
-                    onMouseEnter={() => { hoverRef.current = true; }}
-                    onMouseLeave={() => { hoverRef.current = false; }}
-                    aria-pressed={i === activeIdx}
-                    aria-label={`Show ${p.name} in the showcase`}
-                  >
-                    <div className={styles.miniCardImgWrap}>
-                      <ShowcaseImg product={p} variant={i} />
-                    </div>
-                    <p className={styles.miniCardName}>{p.name}</p>
-                    <p className={styles.miniCardPrice}>{fmtINR(p.price)}</p>
-                    <span
-                      className={styles.miniCardBtn}
-                      role="button"
-                      tabIndex={0}
-                      onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); e.preventDefault(); handleAddToCart(p); }
-                      }}
-                    >
-                      {state === 'loading' ? 'Adding…' : state === 'added' ? 'Added ✓' : state === 'error' ? 'Try again' : 'Add to Cart'}
-                    </span>
-                  </button>
-                );
-              })}
+          {miniProducts.length > 0 && (
+            <motion.div className={styles.cardsRow} {...up(0.3)}>
+              {miniProducts.map((p, i) => (
+                <MiniCard
+                  key={p.id}
+                  product={p}
+                  tint={CARD_TINTS[i % CARD_TINTS.length]}
+                  variant={i}
+                  cartState={cartStates[p.id] ?? 'idle'}
+                  onAddToCart={() => handleAddToCart(p)}
+                />
+              ))}
             </motion.div>
           )}
         </div>
 
         <div
+          ref={visualRef}
           className={styles.visual}
-          onMouseEnter={() => { hoverRef.current = true; }}
-          onMouseLeave={() => { hoverRef.current = false; }}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={handlePointerLeave}
         >
-          <div className={styles.blobA} aria-hidden="true" />
-          <div className={styles.blobB} aria-hidden="true" />
-          <p className={styles.watermark} aria-hidden="true">Choose your gift</p>
+          <motion.div
+            className={styles.blob}
+            aria-hidden="true"
+            animate={reduceMotion ? undefined : { y: [0, -10, 0] }}
+            transition={reduceMotion ? undefined : { duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <div className={styles.circle} aria-hidden="true" />
+          <div className={styles.decorBleed} aria-hidden="true" />
 
-          <div className={styles.stage}>
-            <div className={styles.stageTilt}>
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={active?.id ?? 'placeholder'}
-                  className={styles.stageImgWrap}
-                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, rotateY: -140, scale: 0.86 }}
-                  animate={reduceMotion ? { opacity: 1 } : { opacity: 1, rotateY: 0, scale: 1 }}
-                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, rotateY: 140, scale: 0.86 }}
-                  transition={{ duration: reduceMotion ? 0.25 : 0.85, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <ShowcaseImg product={active} variant={activeIdx} />
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
+          <motion.p
+            className={styles.script}
+            aria-hidden="true"
+            initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            animate={reduceMotion ? undefined : {
+              opacity: 1,
+              rotate: [-6, -4.5, -6],
+            }}
+            transition={reduceMotion ? undefined : {
+              opacity: { duration: 0.8, delay: 0.5 },
+              rotate: { duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 0.5 },
+            }}
+          >
+            wrapped with love
+          </motion.p>
+
+          <motion.div
+            className={styles.stage}
+            style={reduceMotion ? undefined : { x: springX, y: springY }}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <motion.div
+              className={styles.stageFloat}
+              animate={reduceMotion ? undefined : { rotate: [6, 4.5, 6] }}
+              transition={reduceMotion ? undefined : { duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              {heroProduct?.images[0] ? (
+                <Image
+                  src={heroProduct.images[0]}
+                  alt={heroProduct.name}
+                  fill
+                  sizes="(max-width: 1024px) 60vw, 460px"
+                  className={styles.stageImg}
+                  priority
+                />
+              ) : (
+                <HamperGlyph variant={0} className={styles.heroGlyph} />
+              )}
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </section>

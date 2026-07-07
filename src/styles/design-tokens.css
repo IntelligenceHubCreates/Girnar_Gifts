@@ -16,6 +16,9 @@
   --gg-petal:        #F49FB3;
   --gg-blush:        #F6D7DE;
   --gg-blush-deep:   #F1C6CF;
+  /* Third mini-card tint, introduced by the hero-showcase brief's exact
+     colour-mapping table - sits between blush and rose. */
+  --gg-rose-tint:    #FBDCE8;
 
   /* ── Neutrals (warm, pink undertone) ── */
   --gg-canvas:       #FFFBFC;
