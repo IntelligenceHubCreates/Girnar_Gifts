@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Baloo_2, Nunito, Cinzel, Manrope } from 'next/font/google';
+import { Baloo_2, Nunito, Cinzel, Manrope, Dancing_Script } from 'next/font/google';
 import '@/styles/globals.css';
 import '@/styles/design-tokens.css';
 import SessionProvider from '@/components/SessionProvider';
@@ -41,6 +41,16 @@ const manrope = Manrope({
   display: 'swap',
 });
 
+// One-off decorative script - used only for the hero's large watermark
+// text (see DESIGN_SYSTEM.md - Hero showcase), never for body/UI/display
+// type. The locked Cinzel + Manrope pairing still governs everything else.
+const dancingScript = Dancing_Script({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  variable: '--font-dancing-script',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(brand.url),
   title: { default: brand.name, template: `%s | ${brand.name}` },
@@ -67,7 +77,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${baloo2.variable} ${nunito.variable} ${cinzel.variable} ${manrope.variable}`}>
+    <html lang="en" className={`${baloo2.variable} ${nunito.variable} ${cinzel.variable} ${manrope.variable} ${dancingScript.variable}`}>
       <body>
         <MotionProvider>
           <SessionProvider>

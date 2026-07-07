@@ -65,6 +65,9 @@
 
   --gg-font-display: var(--font-cinzel), 'Cinzel', Georgia, serif;
   --gg-font-body:    var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  /* One-off decorative watermark script - hero showcase only, never
+     body/display type. Not part of the locked Cinzel + Manrope pairing. */
+  --gg-font-script:  var(--font-dancing-script), 'Dancing Script', cursive;
 
   --gg-weight-regular:  400;
   --gg-weight-medium:   500;

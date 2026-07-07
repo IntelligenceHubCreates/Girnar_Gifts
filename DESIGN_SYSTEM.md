@@ -126,13 +126,17 @@ Every brand-on-neutral and text-on-fill pairing in the locked palette passes WCA
 
 `src/components/sections/GirnarHeroSection.tsx` + `.module.css`, currently swapped into `src/app/page.tsx` in place of the old `HeroSection` (which is left untouched/unused for easy side-by-side comparison or revert — nothing was deleted).
 
-**What it does:**
-- Editorial asymmetric split: headline column (eyebrow → Cinzel display headline "Gifts worth *unwrapping*" → Manrope subhead → primary/secondary CTA → a quiet three-item trust list) opposite a **signature "gift reveal"**.
-- The gift reveal is an SVG gift box (wine base, rose lid, blush ribbon, rose-dark bow) that lifts its lid open once on mount — `transform`/`opacity` only, choreographed with framer-motion — revealing a soft radial bloom in the signature gradient plus two petals drifting upward. It runs once and settles; it does not loop forever the way Little Loot's hero float/pulse does.
-- Under `prefers-reduced-motion: reduce` (read via the new shared `usePrefersReducedMotion` hook), the lid renders already-open and the bloom/petals render static/omitted instead of animating — no motion is lost as *information*, only as *movement*.
-- No fabricated photography: the gift box is an original vector illustration built from the locked palette, not a stand-in claiming to be final photography (flagged in `MANUAL_STEPS.md` that real product photography should eventually feature alongside/instead of it).
+**Revision (post-rollout):** the original one-shot "gift reveal" SVG animation (described in the original checkpoint text below) was superseded by explicit user direction, referencing a competitor hero layout (product photo showcase with rotating imagery, color-blob backdrop, script watermark, and small "pick a product" cards) as the target structure, with an instruction to keep Girnar's own locked wine/rose/blush palette rather than copy the reference's colors. The current hero is now a **rotating product showcase**, not the gift-box-opening moment:
 
-Verified: typechecks clean, production build succeeds, and the homepage was rendered on a local dev server and confirmed to output "Gifts worth" / "unwrapping" with zero references to the old mascot image and no console errors.
+- **Layout**: unchanged editorial split — headline column (eyebrow → Cinzel headline → Manrope subhead → primary/secondary CTA) opposite a visual column. The quiet three-item trust row was removed from the visual column *and* replaced with 3 clickable "mini cards" (real products, real prices, real **Add to Cart** wired to the existing `useCart().addItem()` — same guardrail-safe reuse pattern as `FeaturedProducts.tsx`) — the trust messaging isn't lost, it's already duplicated a few sections down in the dedicated `TrustBar` section, so keeping it in both places was redundant.
+- **Visual column**: two overlapping solid-color circles (`--gg-blush` / `--gg-blush-deep`) behind a large script watermark ("Choose your gift", a new one-off decorative font — see below) and a tilted product-image "stage" that bleeds off the section's bottom-right edge, cross-fading + 3D-flipping (`rotateY`, `transform`-only) between up to 4 real in-stock products (`/api/product/all?limit=4&in_stock=true`) on a 4.2s auto-advance timer. Hovering the visual or a mini card pauses auto-advance; clicking a mini card jumps the showcase straight to that product (satisfies WCAG 2.2.2's pause/user-control requirement for auto-updating content).
+- **No fabricated photography**: when a product has no uploaded photo, the showcase falls back to a flat illustrated "hamper glyph" (inline SVG, three palette variants) rather than inventing or stand-in-claiming real product photography — see `MANUAL_STEPS.md` §12 for what to upload to get the full effect.
+- **New one-off decorative font**: `Dancing Script` (via `next/font/google`), exposed as `--gg-font-script`, used *only* for the hero's watermark text. This does not change the locked Cinzel + Manrope pairing for body/display/UI type anywhere else — it's a third, narrowly-scoped decorative role, the same way the signature gradient is scoped to the hero/CTA only.
+- **Reduced motion**: auto-advance stops entirely (the showcase only changes via explicit mini-card clicks), and the flip/scale transition degrades to a plain opacity cross-fade.
+
+The original signature-reveal description (kept for history): an SVG gift box that lifted its lid open once on mount, revealing a radial bloom + drifting petals, degrading to a static already-open box under reduced motion. That component's code was fully replaced, not left dead, since the hero can only show one visual at a time.
+
+Verified: typechecks clean, production build succeeds; visually confirmed via local headless-Chrome screenshots (desktop + mobile) against the reference layout, with the product-fetch path exercised against the real `/api/product/all` endpoint (falls back to the illustrated glyph in this environment since no local backend was running to serve real photos).
 
 ---
 
@@ -181,7 +185,7 @@ Verified: typechecks clean, production build succeeds, and the homepage was rend
 [Mobile] sticky bottom nav: home · search · wishlist · cart · account
 ```
 
-**The signature element** the brand will be remembered by: the **gift-reveal hero** — one orchestrated unwrap moment using the logo's own gradient, appearing exactly once per page load, never repeated as a gimmick elsewhere on the site. Everything else stays quiet by comparison, per the brief's "boldness spent in one place" rule.
+**The signature element** (superseded — see §5's "Revision" note): originally the one-shot **gift-reveal hero**. Per explicit later direction, the hero's visual was rebuilt around a rotating real-product showcase (color-blob backdrop, script watermark, auto-advancing product image) instead — see §5 for the current design and the reasoning. Everything else on the page still stays quiet by comparison, per the brief's "boldness spent in one place" rule; the showcase is still the one place bold/animated attention is spent.
 
 ---
 
