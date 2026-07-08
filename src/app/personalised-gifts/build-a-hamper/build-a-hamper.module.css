@@ -1,0 +1,8 @@
+.pageMain { background: var(--gg-canvas); }
+
+.footerWrap { display: block; }
+
+@media (max-width: 1024px) {
+  .footerWrap { display: none; }
+  .pageMain { padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
+}

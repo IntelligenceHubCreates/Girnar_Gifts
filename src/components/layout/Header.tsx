@@ -27,7 +27,12 @@ const catHref = (name: string) => `/products?category=${encodeURIComponent(name)
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home', href: '/', emoji: '🏠' },
-  { label: 'Personalised Gifts',  href: catHref('Personalised Gifts'),  emoji: '🎁' },
+  {
+    label: 'Personalised Gifts', href: catHref('Personalised Gifts'), emoji: '🎁',
+    subItems: [
+      { emoji: '🧺', label: 'Build Your Own Hamper', sub: 'Pick items, we price it for you', href: '/personalised-gifts/build-a-hamper' },
+    ],
+  },
   { label: 'Gift Hampers',        href: catHref('Gift Hampers'),        emoji: '🧺' },
   { label: 'Festive & Occasion',  href: catHref('Festive & Occasion'),  emoji: '🎉' },
   { label: 'Stationery',          href: catHref('Stationery'),          emoji: '✏️' },
