@@ -270,9 +270,6 @@ export default function ProductPage({ productId }: { productId: string|number })
   const dispatch = cart?.dispatch;
   const addItem = cart?.addItem as (input: any) => Promise<{ ok: boolean; error?: string }>;
   const pushToast = cart?.pushToast as (m: string, k?: 'error' | 'success') => void;
-  // Cart count for the mobile bottom-nav badge (defensive about the context shape).
-  const cartItems: any[] = Array.isArray(cart?.state?.items) ? cart.state.items : [];
-  const cartCount = cartItems.reduce((n: number, it: any) => n + (Number(it?.quantity) || 0), 0);
 
   const [product,   setProduct]   = useState<Product|null>(null);
   const [loading,   setLoading]   = useState(true);
@@ -877,7 +874,7 @@ async function handleQvAdd(qty: number) {
 
   {/* ── TRUST BAR ── */}
   <div className={styles.trustBar}>
-    {[{i:'🏅',t:'100% Original',s:'Sourced from trusted brands'},{i:'🌿',t:'Safe & Non-Toxic',s:'Child-safe & eco-friendly'},{i:'🔄',t:'Easy Returns',s:'7-day hassle-free'},{i:'🔒',t:'Secure Payments',s:'Multiple safe options'}].map(x=>(
+    {[{i:'🏅',t:'100% Genuine',s:'Quality checked before dispatch'},{i:'🎁',t:'Gift-Ready',s:'Complimentary wrapping included'},{i:'🔄',t:'Easy Returns',s:'7-day hassle-free'},{i:'🔒',t:'Secure Payments',s:'Multiple safe options'}].map(x=>(
       <div key={x.t} className={styles.trustBarItem}><span className={styles.trustBarI}>{x.i}</span><div><div className={styles.trustBarT}>{x.t}</div><div className={styles.trustBarS}>{x.s}</div></div></div>
     ))}
   </div>
@@ -894,30 +891,15 @@ async function handleQvAdd(qty: number) {
       <span className={styles.stickyQN}>{qty}</span>
       <button type="button" className={styles.stickyQB} onClick={()=>setQty(q=>Math.min(product.stockCount||99,q+1))} disabled={!product.inStock || qty >= (product.stockCount||99)}>+</button>
     </div>
-    <button type="button" className={[styles.stickyCart, cartSt==='added'?styles.stickyCartAdded:''].filter(Boolean).join(' ')} onClick={handleCart} disabled={!product.inStock||cartSt==='loading'}>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-      {cartSt==='loading'?'…':cartSt==='added'?'Added':'Add to Cart'}
+    <button type="button" className={[styles.stickyCart, cartSt==='added'?styles.stickyCartAdded:''].filter(Boolean).join(' ')} onClick={handleCart} disabled={!product.inStock||cartSt==='loading'} aria-label="Add to cart">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      {(cartSt==='loading'||cartSt==='added') && <span className={styles.stickyCartLabel}>{cartSt==='loading'?'…':'Added'}</span>}
     </button>
     <button type="button" className={styles.stickyBuy} onClick={handleBuy} disabled={!product.inStock||buySt==='loading'}>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg>
       {buySt==='loading'?'…':'Buy Now'}
     </button>
   </div>
-
-  {/* ── MOBILE BOTTOM NAV ── */}
-  <nav className={styles.mobileNav}>
-    <Link href="/" className={styles.mobileNavItem}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></Link>
-    <Link href="/categories" className={styles.mobileNavItem}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Categories</span></Link>
-    <Link href="/wishlist" className={styles.mobileNavItem}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>Wishlist</span></Link>
-    <Link href="/cart" className={styles.mobileNavItem}>
-      <span className={styles.mobileCartIcon}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-        {cartCount > 0 && <span className={styles.mobileCartBadge}>{cartCount > 99 ? '99+' : cartCount}</span>}
-      </span>
-      <span>Cart</span>
-    </Link>
-    <Link href="/account" className={styles.mobileNavItem}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Account</span></Link>
-  </nav>
 
   {/* ── QUICK VIEW ── */}
   {qvP && <QV p={qvP} onClose={closeQv} onAdd={handleQvAdd} cs={qvCS}/>}

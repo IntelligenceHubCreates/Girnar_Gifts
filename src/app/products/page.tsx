@@ -32,9 +32,7 @@ export default function AllProductsPage({
               ? `Thoughtful ${category.toLowerCase()}, curated for every occasion.`
               : 'Discover our wide range of thoughtful gifts for every occasion.'
           }
-          bgEmojis={['🎁', '🧺', '🎉', '🍫', '🌸']}
-          parentLabel="Home"
-          parentHref="/"
+          bgEmojis={['🎁', '🧺', '🎉', '👝', '🧸']}
           apiCategory={category}
           // No categorySlug → fetchAllProducts is used, filtered by apiCategory when present
         />

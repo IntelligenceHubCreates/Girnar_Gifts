@@ -127,17 +127,20 @@
 
 /* ── Responsive ── */
 
-/* Lift above the fixed bottom nav (≈64px) on tablet + mobile */
+/* Lift above the fixed bottom nav (~73px tall, sitting 12px + safe-area
+   off the viewport bottom, so its top edge is ~85px up) on tablet + mobile.
+   94px leaves a small real gap - measured via getBoundingClientRect after
+   the previous 72px guess turned out to overlap the nav by ~13px. */
 @media (max-width: 1024px) {
   .wrap {
-    bottom: calc(72px + env(safe-area-inset-bottom));
+    bottom: calc(94px + env(safe-area-inset-bottom));
     right: 20px;
   }
 }
 
 @media (max-width: 600px) {
   .wrap {
-    bottom: calc(72px + env(safe-area-inset-bottom));
+    bottom: calc(94px + env(safe-area-inset-bottom));
     right: 16px;
   }
   .fab {

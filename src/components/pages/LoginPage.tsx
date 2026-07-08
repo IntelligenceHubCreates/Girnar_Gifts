@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { _post } from '@/shared/fetchwrapper';
+import { brand } from '@/config/brand';
 import styles from './LoginPage.module.css';
 
 const GoogleLogo = () => (
@@ -98,15 +99,15 @@ export default function LoginPage() {
     <div className={styles.page}>
       <div className={styles.leftPanel}>
         <div className={styles.brandMark}>
-          🌟 Little<span className={styles.brandDot}>Loot</span>
+          🎁 {brand.shortName}<span className={styles.brandDot}>{brand.name.replace(brand.shortName, '').trim()}</span>
         </div>
         <div className={styles.illustGrid}>
-          {['🚀', '🦕', '🎨', '🧸', '🔮', '🎭'].map((e, i) => (
+          {['🎁', '🧺', '🎉', '👝', '🧴', '🌸'].map((e, i) => (
             <div key={i} className={styles.illustCard}>{e}</div>
           ))}
         </div>
-        <p className={styles.panelHeading}>Welcome back, Explorer! 🎉</p>
-        <p className={styles.panelSub}>Your little one's wishlist is waiting.</p>
+        <p className={styles.panelHeading}>Welcome back</p>
+        <p className={styles.panelSub}>Your wishlist and orders are right where you left them.</p>
       </div>
 
       <div className={styles.rightPanel}>

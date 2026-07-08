@@ -646,7 +646,11 @@
    MOBILE STICKY BAR
    ═══════════════════════════════════════════════ */
 .stickyBar {
-  display: none; position: fixed; bottom: calc(82px + env(safe-area-inset-bottom, 0px)); left: 14px; right: 14px; z-index: 100;
+  /* Shared MobileBottomNav sits at bottom: calc(12px + safe-area) and is
+     ~73px tall, so its top edge is ~85px above the viewport bottom - clear
+     it with a real gap instead of the 82px this previously used, which
+     put the two 3px into each other. */
+  display: none; position: fixed; bottom: calc(94px + env(safe-area-inset-bottom, 0px)); left: 14px; right: 14px; z-index: 100;
   background: rgba(255,255,255,.94); backdrop-filter: blur(10px);
   border-radius: 22px;
   border: 1.5px solid rgba(255,255,255,0.72);
@@ -662,31 +666,19 @@
 .stickyQB { width: 32px; height: 38px; border: none; background: transparent; font-size: 18px; font-weight: 700; color: var(--gg-ink); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .stickyQB:disabled { opacity: .35; }
 .stickyQN { width: 30px; text-align: center; font-family: var(--font-baloo,'Baloo 2',cursive); font-size: 14px; font-weight: 800; color: var(--gg-ink); border-left: 1px solid var(--gg-muted-fill); border-right: 1px solid var(--gg-muted-fill); }
-.stickyCart { flex: 1; height: 43px; border-radius: 11px; border: 2px solid var(--gg-primary); background: #fff; color: var(--gg-primary); font-family: var(--font-baloo,'Baloo 2',cursive); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: background .15s, transform .12s; }
+/* Icon-only by default (idle state) - a fixed-size square button so it
+   never gets squeezed by the price block + qty stepper + Buy Now button
+   all sharing one narrow mobile row. Only "…"/"Added" ever add a label,
+   both short enough to fit without pushing Buy Now off-row. */
+.stickyCart { flex: 0 0 auto; width: 43px; height: 43px; border-radius: 11px; border: 2px solid var(--gg-primary); background: #fff; color: var(--gg-primary); font-family: var(--font-baloo,'Baloo 2',cursive); font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: background .15s, transform .12s, width .15s; }
+.stickyCartLabel { white-space: nowrap; }
+.stickyCart:has(.stickyCartLabel) { width: auto; padding: 0 12px; }
 .stickyCart:active:not(:disabled) { transform: scale(.97); }
 .stickyCart:disabled { opacity: .5; cursor: not-allowed; }
 .stickyCartAdded { background: var(--gg-success) !important; color: #fff !important; border-color: var(--gg-success) !important; }
-.stickyBuy { height: 43px; padding: 0 17px; border-radius: 11px; border: none; background: linear-gradient(135deg,var(--gg-primary),var(--gg-primary-hover)); color: #fff; font-family: var(--font-baloo,'Baloo 2',cursive); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; box-shadow: 0 4px 14px rgba(95,21,38,.35); transition: transform .12s; }
+.stickyBuy { flex: 1; height: 43px; padding: 0 17px; border-radius: 11px; border: none; background: linear-gradient(135deg,var(--gg-primary),var(--gg-primary-hover)); color: #fff; font-family: var(--font-baloo,'Baloo 2',cursive); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; box-shadow: 0 4px 14px rgba(95,21,38,.35); transition: transform .12s; }
 .stickyBuy:active:not(:disabled) { transform: scale(.97); }
 .stickyBuy:disabled { opacity: .5; cursor: not-allowed; }
-
-/* ═══════════════════════════════════════════════
-   MOBILE BOTTOM NAV
-   ═══════════════════════════════════════════════ */
-.mobileNav {
-  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 101;
-  background: rgba(255,255,255,.97); backdrop-filter: blur(10px);
-  border-top: 1px solid var(--gg-muted-fill);
-  padding: 7px 0 max(7px, env(safe-area-inset-bottom));
-  justify-content: space-around; align-items: center;
-}
-@media (max-width: 899px) { .mobileNav { display: none; } }
-.mobileNavItem { display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: var(--gg-muted); font-size: 10px; font-weight: 700; min-width: 52px; transition: color .15s; border-radius: 6px; }
-.mobileNavItem span { line-height: 1; }
-.mobileNavItem svg { transition: color .15s, transform .15s; }
-.mobileNavItem:hover, .mobileNavItem:hover svg { color: var(--gg-primary); }
-.mobileNavItem:active svg { transform: scale(.9); }
-.mobileNavItem:focus-visible { outline: 2px solid var(--gg-primary); outline-offset: 2px; }
 
 /* ═══════════════════════════════════════════════
    QUICK VIEW
@@ -762,18 +754,6 @@
 .qtyNum { width: 46px; text-align: center; font-family: var(--font-baloo,'Baloo 2',cursive); font-size: 15px; font-weight: 800; color: var(--gg-ink); border-left: 1.5px solid var(--gg-muted-fill); border-right: 1.5px solid var(--gg-muted-fill); }
 .qtyMax { font-size: 11.5px; font-weight: 700; color: var(--gg-accent); }
 @media (max-width: 899px) { .qtyBlock { display: none; } } /* mobile uses the sticky bar stepper */
-
-/* ═══════════════════════════════════════════════
-   MOBILE BOTTOM-NAV CART BADGE (new)
-   ═══════════════════════════════════════════════ */
-.mobileCartIcon { position: relative; display: inline-flex; }
-.mobileCartBadge {
-  position: absolute; top: -6px; right: -9px;
-  min-width: 16px; height: 16px; padding: 0 4px;
-  border-radius: 8px; background: var(--gg-primary); color: #fff;
-  font-size: 9.5px; font-weight: 800; line-height: 16px; text-align: center;
-  box-shadow: 0 1px 4px rgba(122,30,51,.45);
-}
 
 /* ═══════════════════════════════════════════════
    INFO PANEL — hierarchy & rhythm pass
