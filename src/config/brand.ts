@@ -1,12 +1,11 @@
-// Single source of truth for Girnar Gifts branding — see MANUAL_STEPS.md for
-// which values below are still placeholders that need real business details.
+// Single source of truth for Girnar Gifts branding.
 export const brand = {
   name: 'Girnar Gifts',
   legalName: 'Girnar Gifts',
   shortName: 'Girnar',
   tagline: 'Thoughtful gifts, beautifully delivered',
   description:
-    'Girnar Gifts — curated hampers, personalised presents and festive collections delivered across India.',
+    'Girnar Gifts — curated hampers, Kid Return Gifts, Cute Kawaii Stationary, personalised presents and festive collections delivered across India.',
 
   url: 'https://girnargifts.com',
   email: {
@@ -14,28 +13,26 @@ export const brand = {
     orders: 'orders@girnargifts.com',
     noReply: 'no-reply@girnargifts.com',
   },
-  phone: '+91-00000-00000',
-  whatsapp: '910000000000',
+  phone: '+91-8660971801',
+  whatsapp: '91-8660971801',
 
   business: {
-    address: 'Door No, Street, City, State, PIN',
-    gstin: 'GSTIN-HERE',
+    address: '1st Floor, 397, Avenue Rd, above SLV Hotel, Ragipet, Old Tharagupet, Mamulpet, Chickpet, Bengaluru, Karnataka 560002',
+    gstin: '29BCSPJ0655F2ZB',
   },
 
   social: {
-    instagram: 'https://instagram.com/girnargifts',
+    instagram: 'https://www.instagram.com/girnargifts1008?igsh=MTBrN2piMHNxdm9vdw==',
     facebook: 'https://facebook.com/girnargifts',
   },
 
   currency: { code: 'INR', symbol: '₹', locale: 'en-IN' },
 
-  // Placeholder assets — see MANUAL_STEPS.md for the real files to swap in
-  // (favicon needs a real .ico/.png, ogImage needs a real 1200x630 .jpg).
   assets: {
-    logoLight: '/brand/logo-light.svg',
-    logoDark: '/brand/logo-dark.svg',
-    favicon: '/brand/favicon.svg',
-    ogImage: '/brand/og-default.svg',
+    logoLight: '/brand/logo-light.png',
+    logoDark: '/brand/logo-dark.png',
+    favicon: '/brand/favicon.png',
+    ogImage: '/brand/og-default.jpeg',
   },
 } as const;
 

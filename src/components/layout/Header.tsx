@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -291,7 +292,9 @@ export default function Header() {
 
           {/* Logo */}
           <Link href="/" className={styles.logo}>
-            <div className={styles.logoIcon}>🎁</div>
+            <div className={styles.logoIcon}>
+              <Image src={brand.assets.favicon} alt="" fill sizes="44px" priority />
+            </div>
             <div className={styles.logoText}>
               <span className={styles.logoName}>{brand.name}</span>
               <span className={styles.logoTagline}>{brand.tagline}</span>

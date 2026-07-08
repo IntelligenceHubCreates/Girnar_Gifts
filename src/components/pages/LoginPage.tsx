@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
@@ -99,7 +100,10 @@ export default function LoginPage() {
     <div className={styles.page}>
       <div className={styles.leftPanel}>
         <div className={styles.brandMark}>
-          🎁 {brand.shortName}<span className={styles.brandDot}>{brand.name.replace(brand.shortName, '').trim()}</span>
+          <span className={styles.brandIcon}>
+            <Image src={brand.assets.favicon} alt="" fill sizes="34px" />
+          </span>
+          {brand.shortName}<span className={styles.brandDot}>{brand.name.replace(brand.shortName, '').trim()}</span>
         </div>
         <div className={styles.illustGrid}>
           {['🎁', '🧺', '🎉', '👝', '🧴', '🌸'].map((e, i) => (

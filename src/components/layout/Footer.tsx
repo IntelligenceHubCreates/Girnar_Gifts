@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { FOOTER_INFO_LINKS, FOOTER_ACCOUNT_LINKS } from '@/lib/data';
 import styles from './Footer.module.css';
@@ -114,7 +115,9 @@ export default function Footer() {
         {/* ── Brand ── */}
         <div className={styles.footerBrand}>
           <Link href="/" className={styles.logo}>
-            <div className={styles.logoIcon}>🎁</div>
+            <div className={styles.logoIcon}>
+              <Image src={brand.assets.favicon} alt="" fill sizes="40px" />
+            </div>
             <div className={styles.logoText}>
               <span className={styles.logoName}>
                 {brand.shortName}<span className={styles.logoDot}>{brand.name.replace(brand.shortName, '').trim()}</span>

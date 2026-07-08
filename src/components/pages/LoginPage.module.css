@@ -49,6 +49,13 @@
   z-index: 1;
 }
 .brandDot { color: var(--sun); }
+.brandIcon {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
 
 .illustGrid {
   display: grid;
