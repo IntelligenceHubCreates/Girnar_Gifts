@@ -39,6 +39,8 @@ function slugify(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
+const NEW_SUBCAT_VALUE = '__new__'
+
 // Unprefixed flatten (unlike flattenCategories above, which prefixes names
 // with "— " for display in a dropdown) - used to check a typed sub-category
 // name/slug against every category that exists anywhere in the tree, not
@@ -180,14 +182,18 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
   const [error,  setError]    = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  // Sub-category picker: pick an existing child of the selected main category,
-  // or type a brand-new name to create it inline when the product is saved
-  // (see MANUAL_STEPS.md — subcategories are added by the admin from here now,
-  // instead of requiring a trip to the separate Categories screen first).
+  // Sub-category picker: a real dropdown listing every sub-category that
+  // already exists under the selected main category, so the admin can see
+  // and reuse one at a glance - plus a "+ Create new" option that reveals a
+  // text input, instead of requiring them to already know/retype an exact
+  // existing name (see MANUAL_STEPS.md — subcategories are added by the
+  // admin from here now, instead of requiring a trip to the separate
+  // Categories screen first).
   const [selectedCategoryName, setSelectedCategoryName] = useState(product?.category ?? '')
   const selectedCategoryNode = categoryTree.find((c) => c.name === selectedCategoryName)
   const subcategoryOptions = selectedCategoryNode?.children ?? []
-  const [subcategoryInput, setSubcategoryInput] = useState(product?.sub_category_name ?? '')
+  const [subcategorySelectValue, setSubcategorySelectValue] = useState(product?.sub_category_slug ?? '')
+  const [subcategoryInput, setSubcategoryInput] = useState('')
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [details, setDetails] = useState<string[]>(product?.details?.length ? product.details : [''])
   const fileRef = useRef<HTMLInputElement>(null)
@@ -270,39 +276,42 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
     setSaving(true)
 
     try {
-      // Resolve the sub-category before touching uploads: reuse an existing
-      // one if the typed name (or the slug it would generate) matches any
-      // category anywhere in the tree - not just children of the currently
-      // selected main category. Slugs are globally unique, so a name that
-      // already exists under a *different* category would otherwise fail
-      // with a 409 "slug already exists" when we tried to create a
-      // duplicate instead of just reusing it. Only create a new one if it
-      // truly doesn't exist anywhere yet.
+      // Resolve the sub-category before touching uploads. Picking an
+      // existing one from the dropdown already gives us its slug directly.
+      // "+ Create new" needs a name typed in - reuse an existing category
+      // anywhere in the tree if the typed name (or the slug it would
+      // generate) already matches one, since slugs are globally unique and
+      // creating a duplicate would 409. Only create a new one if it truly
+      // doesn't exist anywhere yet.
       let subcategorySlug = ''
-      const typedSubcat = subcategoryInput.trim()
-      if (typedSubcat) {
-        const typedSlug = slugify(typedSubcat)
-        const existing = flattenAll(categoryTree).find(
-          (c) => c.slug === typedSlug || c.name.toLowerCase() === typedSubcat.toLowerCase(),
-        )
-        if (existing) {
-          subcategorySlug = existing.slug
-        } else if (selectedCategoryNode) {
-          try {
-            const created = await createCategory({
-              name: typedSubcat,
-              slug: typedSlug,
-              parent_id: selectedCategoryNode.id,
-            })
-            subcategorySlug = created.slug
-          } catch (err: any) {
-            throw new Error(
-              /already exists/i.test(err?.message ?? '')
-                ? `A sub-category named "${typedSubcat}" already exists — pick it from the suggestions instead of retyping it.`
-                : (err?.message ?? 'Could not create the sub-category'),
-            )
+      if (subcategorySelectValue === NEW_SUBCAT_VALUE) {
+        const typedSubcat = subcategoryInput.trim()
+        if (typedSubcat) {
+          const typedSlug = slugify(typedSubcat)
+          const existing = flattenAll(categoryTree).find(
+            (c) => c.slug === typedSlug || c.name.toLowerCase() === typedSubcat.toLowerCase(),
+          )
+          if (existing) {
+            subcategorySlug = existing.slug
+          } else if (selectedCategoryNode) {
+            try {
+              const created = await createCategory({
+                name: typedSubcat,
+                slug: typedSlug,
+                parent_id: selectedCategoryNode.id,
+              })
+              subcategorySlug = created.slug
+            } catch (err: any) {
+              throw new Error(
+                /already exists/i.test(err?.message ?? '')
+                  ? `A sub-category named "${typedSubcat}" already exists — pick it from the dropdown instead.`
+                  : (err?.message ?? 'Could not create the sub-category'),
+              )
+            }
           }
         }
+      } else if (subcategorySelectValue) {
+        subcategorySlug = subcategorySelectValue
       }
 
       const form = new FormData()
@@ -413,7 +422,11 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
                   className="form-select"
                   defaultValue={product?.category ?? ''}
                   style={errStyle('category')}
-                  onChange={(e) => { setSelectedCategoryName(e.target.value); setSubcategoryInput('') }}
+                  onChange={(e) => {
+                    setSelectedCategoryName(e.target.value)
+                    setSubcategorySelectValue('')
+                    setSubcategoryInput('')
+                  }}
                 >
                   <option value="">Select category</option>
                   {categoryTree.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
@@ -422,20 +435,33 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
               </div>
               <div className="form-group">
                 <label className="form-label">
-                  Sub-category <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional — type a new one to create it)</span>
+                  Sub-category <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional)</span>
                 </label>
-                <input
-                  className="form-input"
-                  list="subcategory-options"
-                  value={subcategoryInput}
-                  onChange={(e) => setSubcategoryInput(e.target.value)}
-                  placeholder={selectedCategoryName ? 'e.g. Birthday' : 'Pick a category first'}
+                <select
+                  className="form-select"
+                  value={subcategorySelectValue}
+                  onChange={(e) => {
+                    setSubcategorySelectValue(e.target.value)
+                    if (e.target.value !== NEW_SUBCAT_VALUE) setSubcategoryInput('')
+                  }}
                   disabled={!selectedCategoryName}
-                  autoComplete="off"
-                />
-                <datalist id="subcategory-options">
-                  {subcategoryOptions.map((c) => <option key={c.id} value={c.name} />)}
-                </datalist>
+                >
+                  <option value="">{selectedCategoryName ? 'None' : 'Pick a category first'}</option>
+                  {subcategoryOptions.map((c) => (
+                    <option key={c.id} value={c.slug}>{c.name}</option>
+                  ))}
+                  <option value={NEW_SUBCAT_VALUE}>+ Create new sub-category…</option>
+                </select>
+                {subcategorySelectValue === NEW_SUBCAT_VALUE && (
+                  <input
+                    className="form-input"
+                    style={{ marginTop: 8 }}
+                    value={subcategoryInput}
+                    onChange={(e) => setSubcategoryInput(e.target.value)}
+                    placeholder="e.g. Birthday"
+                    autoFocus
+                  />
+                )}
               </div>
             </div>
 
