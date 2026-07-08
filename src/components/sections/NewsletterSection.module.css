@@ -278,7 +278,13 @@
     display: none;
   }
 
+  /* .copy's flex:1 is meant to share horizontal space with the illustration
+     + form in the desktop row layout - once .inner switches to a column
+     above, that same flex:1 makes .copy greedily fill vertical space
+     instead, opening a large dead gap before the form. Pin it to its
+     natural content height here. */
   .copy {
+    flex: none;
     width: 100%;
   }
 

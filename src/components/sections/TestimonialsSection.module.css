@@ -169,6 +169,13 @@
     padding-right: 0;
     gap: 12px;
   }
+  /* .quoteCol's flex:1 only governs height once .colLeft stacks to a
+     column - align-items:center above shrinks it to content width
+     instead of stretching, so the paragraph wraps into an unreadable
+     one-word-per-line sliver. Force full width explicitly. */
+  .quoteCol {
+    width: 100%;
+  }
 }
 
 /* ── Right column: stat block ────────────────────────────────────────────── */
