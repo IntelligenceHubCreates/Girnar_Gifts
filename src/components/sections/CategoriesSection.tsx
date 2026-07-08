@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { DURATION, EASE } from '@/lib/motion';
+import { _get } from '@/shared/fetchwrapper';
+import { unwrapList } from '@/lib/normalise';
 import styles from './CategoriesSection.module.css';
 
 interface Category {
@@ -17,9 +19,9 @@ interface Category {
   txtclr: string;
 }
 
-// Girnar's real seeded gift categories (see MANUAL_STEPS.md - no fabricated
-// product photography exists yet, so tiles use tasteful emoji + brand-tint
-// gradients instead of category images).
+// Girnar's real seeded gift categories (see MANUAL_STEPS.md). Each tile
+// shows a real photo of an actual product in that category once one
+// exists (fetched below); until then it falls back to the emoji + tint.
 const catHref = (name: string) => `/products?category=${encodeURIComponent(name)}`;
 
 const CATEGORIES: Category[] = [
@@ -69,6 +71,36 @@ export default function CategoriesSection() {
   const [maxPage, setMaxPage] = useState(CATEGORIES.length - 1);
   const isPaused              = useRef(false);
   const autoRef               = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  /* ── Pull one real product photo per category (first product found) ── */
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const controller = new AbortController();
+    _get('/api/product/all?limit=100', { signal: controller.signal })
+      .then((res) => {
+        const images: Record<string, string> = {};
+        for (const p of unwrapList(res)) {
+          const category = String(p.category ?? '');
+          if (!category || images[category]) continue;
+          const raw = p.product_image ?? p.images ?? [];
+          const first = Array.isArray(raw)
+            ? raw.map((img: any) => (typeof img === 'string' ? img : img?.url ?? img?.secure_url ?? '')).find(Boolean)
+            : null;
+          if (first) images[category] = first;
+        }
+        setCategoryImages(images);
+      })
+      .catch(() => {
+        // decorative — keep the emoji fallback tiles on any failure
+      });
+    return () => controller.abort();
+  }, []);
+
+  const categories = CATEGORIES.map((cat) => ({
+    ...cat,
+    image: categoryImages[cat.name],
+  }));
 
   /* ── Recalculate maxPage on resize ── */
   useEffect(() => {
@@ -179,7 +211,7 @@ export default function CategoriesSection() {
               if (Math.abs(dx) > 30) go(dx < 0 ? page + 1 : page - 1);
             }}
           >
-            {CATEGORIES.map((cat, i) => (
+            {categories.map((cat, i) => (
               <motion.div
                 key={cat.name}
                 className={styles.card}

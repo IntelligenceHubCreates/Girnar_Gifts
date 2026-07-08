@@ -202,7 +202,12 @@
 .productImg {
    width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* contain, not cover: admin-uploaded product photos vary wildly in
+     canvas padding/aspect ratio (e.g. a tall bottle shot on a mostly-
+     transparent canvas) - cover crops to an arbitrary center square and
+     can land entirely on empty space. contain always shows the full
+     product regardless of source composition. */
+  object-fit: contain;
   object-position: center;
 }
 
