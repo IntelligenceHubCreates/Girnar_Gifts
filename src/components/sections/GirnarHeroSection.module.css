@@ -179,7 +179,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 460px;
+  min-height: 540px;
   touch-action: pan-y;
 }
 
@@ -188,8 +188,8 @@
   position: absolute;
   top: -8%;
   right: -10%;
-  width: clamp(300px, 38vw, 460px);
-  height: clamp(300px, 38vw, 460px);
+  width: clamp(320px, 40vw, 500px);
+  height: clamp(320px, 40vw, 500px);
   border-radius: 42% 58% 63% 37% / 45% 42% 58% 55%;
   background: var(--gg-blush-deep);
   z-index: 0;
@@ -199,8 +199,8 @@
   position: absolute;
   bottom: -2%;
   left: 4%;
-  width: clamp(180px, 22vw, 260px);
-  height: clamp(180px, 22vw, 260px);
+  width: clamp(190px, 23vw, 280px);
+  height: clamp(190px, 23vw, 280px);
   border-radius: 50%;
   background: var(--gg-muted-fill);
   z-index: 0;
@@ -238,15 +238,33 @@
   position: relative;
   z-index: 3;
   width: 100%;
-  max-width: 400px;
+  max-width: 480px;
   aspect-ratio: 4 / 5;
   margin: 0 auto;
+  perspective: 1100px;
+}
+
+/* Soft contact shadow grounding the tilted image, sold as depth rather
+   than a flat cutout sitting on the page. */
+.stage::after {
+  content: '';
+  position: absolute;
+  bottom: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 62%;
+  height: 30px;
+  background: radial-gradient(ellipse, rgba(95, 21, 38, 0.32) 0%, transparent 72%);
+  filter: blur(10px);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .stageFloat {
   width: 100%;
   height: 100%;
-  transform: rotate(6deg);
+  transform: rotateY(-18deg) rotateX(5deg);
+  transform-style: preserve-3d;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -254,7 +272,9 @@
 
 .stageImg {
   object-fit: contain;
-  filter: drop-shadow(0 24px 32px rgba(122, 30, 51, 0.28));
+  filter:
+    drop-shadow(0 10px 14px rgba(122, 30, 51, 0.22))
+    drop-shadow(0 34px 38px rgba(122, 30, 51, 0.26));
 }
 
 .heroGlyph {
@@ -271,8 +291,8 @@
     gap: var(--gg-space-10);
   }
   .copy { max-width: none; }
-  .visual { order: -1; min-height: 340px; }
-  .stage { max-width: 300px; margin: 0 auto; }
+  .visual { order: -1; min-height: 400px; }
+  .stage { max-width: 360px; margin: 0 auto; }
   .script { right: 12%; }
 }
 

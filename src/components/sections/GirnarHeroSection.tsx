@@ -227,7 +227,7 @@ export default function GirnarHeroSection() {
           >
             <motion.div
               className={styles.stageFloat}
-              animate={reduceMotion ? undefined : { rotate: [6, 4.5, 6] }}
+              animate={reduceMotion ? undefined : { rotateY: [-18, -12, -18], rotateX: [5, 8, 5] }}
               transition={reduceMotion ? undefined : { duration: 5, repeat: Infinity, ease: 'easeInOut' }}
             >
               <Image
