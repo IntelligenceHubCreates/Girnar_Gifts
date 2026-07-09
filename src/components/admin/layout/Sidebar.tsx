@@ -22,7 +22,7 @@ export default function Sidebar({ activePage, onNavigate, open = false, onClose,
       <div className="s-logo">
         <div className="s-logo-icon">🎀</div>
         <div className="s-logo-text-wrap">
-          <div className="s-logo-text">Little<em>Loot</em></div>
+          <div className="s-logo-text">Girnar<em>Gifts</em></div>
           <div className="s-logo-sub">Admin Panel</div>
         </div>
         {/* Drawer-only close (hidden on desktop via CSS) */}

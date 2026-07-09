@@ -1482,8 +1482,8 @@ export default function AccountPage() {
         <div className={styles.sidebarLogoRow}>
           <div className={styles.sidebarLogoIcon}>🧸</div>
           <div className={styles.sidebarLogoText}>
-            <span className={styles.sidebarLogoName}>Little</span>
-            <span className={styles.sidebarLogoAccent}>Loot</span>
+            <span className={styles.sidebarLogoName}>Girnar</span>
+            <span className={styles.sidebarLogoAccent}>Gifts</span>
           </div>
         </div>
 
@@ -1511,12 +1511,12 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* ── Loot points mini-bar ── */}
+        {/* ── Reward points mini-bar ── */}
         <div className={styles.sbLootBar} onClick={() => setTab('coupons')}>
           <div className={styles.sbLootLeft}>
             <span className={styles.sbLootStar}>⭐</span>
             <div>
-              <div className={styles.sbLootLabel}>Loot Points</div>
+              <div className={styles.sbLootLabel}>Reward Points</div>
               <div className={styles.sbLootNum}>320 pts</div>
             </div>
           </div>
@@ -1673,7 +1673,7 @@ export default function AccountPage() {
             <li><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Early access to new launches</li>
             <li><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Exclusive member discounts</li>
             <li><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Birthday special rewards</li>
-            <li><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Earn extra Loot Points</li>
+            <li><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Earn extra Reward Points</li>
           </ul>
           <button type="button" className={styles.sbClubBtn}>Join Now →</button>
         </div>
@@ -1917,11 +1917,11 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                {/* Loot Points */}
+                {/* Reward Points */}
                 <div className={styles.dashLootCard}>
                   <div className={styles.dashLootBg} />
                   <div className={styles.dashLootIcon}>⭐</div>
-                  <div className={styles.dashLootLabel}>Loot Points</div>
+                  <div className={styles.dashLootLabel}>Reward Points</div>
                   <div className={styles.dashLootNum}>320</div>
                   <div className={styles.dashLootSub}>Available Points</div>
                   <div className={styles.dashLootProgress}>
