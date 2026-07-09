@@ -179,7 +179,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 540px;
+  min-height: 620px;
   touch-action: pan-y;
 }
 
@@ -234,14 +234,18 @@
   z-index: 1;
 }
 
+/* Sized like Little Loot's boy hero: a fixed height on the image itself
+   (not a fill-in-a-box), width auto, bottom-anchored - the photo dictates
+   its own footprint instead of being cropped to a fixed aspect box. */
 .stage {
   position: relative;
   z-index: 3;
   width: 100%;
   max-width: 480px;
-  aspect-ratio: 4 / 5;
   margin: 0 auto;
   perspective: 1100px;
+  display: flex;
+  justify-content: center;
 }
 
 /* Soft contact shadow grounding the tilted image, sold as depth rather
@@ -249,7 +253,7 @@
 .stage::after {
   content: '';
   position: absolute;
-  bottom: 2%;
+  bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
   width: 62%;
@@ -261,17 +265,19 @@
 }
 
 .stageFloat {
-  width: 100%;
-  height: 100%;
+  display: flex;
+  justify-content: center;
   transform: rotateY(-18deg) rotateX(5deg);
   transform-style: preserve-3d;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .stageImg {
+  display: block;
+  width: auto;
+  height: 620px;
+  max-width: none;
   object-fit: contain;
+  object-position: center bottom;
   filter:
     drop-shadow(0 10px 14px rgba(122, 30, 51, 0.22))
     drop-shadow(0 34px 38px rgba(122, 30, 51, 0.26));
@@ -291,8 +297,9 @@
     gap: var(--gg-space-10);
   }
   .copy { max-width: none; }
-  .visual { order: -1; min-height: 400px; }
+  .visual { order: -1; min-height: 460px; }
   .stage { max-width: 360px; margin: 0 auto; }
+  .stageImg { height: 440px; }
   .script { right: 12%; }
 }
 
@@ -300,6 +307,8 @@
   .hero { padding: var(--gg-space-10) var(--gg-space-5); }
   .ctaRow { gap: 10px; }
   .btnPrimary, .btnSecondary { padding: 12px 22px; font-size: 0.88rem; }
+  .visual { min-height: 380px; }
+  .stageImg { height: 360px; }
   /* overflow-x:auto implicitly makes overflow-y auto too, which would clip
      miniCardImgWrap's upward bleed (top:-22px) at the row's own box edge -
      padding-top reserves room for it, margin-top cancels the resulting
