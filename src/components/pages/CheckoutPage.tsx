@@ -77,6 +77,10 @@ function extractFirstImage(productImage: any): string {
 export default function CheckoutPage() {
   const { data: session } = useSession();
   const userEmail = session?.user?.email ?? '';
+  // AccountPage's address calls attach this same Bearer token; without it the
+  // backend has no way to identify the user (the FastAPI login cookie is set
+  // server-side inside NextAuth's callbacks and never reaches the browser).
+  const token = (session as any)?.backendToken as string | undefined;
   const { state: cartState, dispatch: cartDispatch } = useCart();
   const router = useRouter();
   const [appliedCoupon, setAppliedCoupon] = useState<{ code?: string; discountAmount?: number } | null>(null);
@@ -145,9 +149,9 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     // FIX: read color and color_hex from cart API response
-   
+    if (!token) return;
 
-    _get('/api/address/addresses').then((res: any) => {
+    _get('/api/address/addresses', { token }).then((res: any) => {
       const addrs: any[] = Array.isArray(res) ? res : (res?.addresses || res?.data || []);
       const mapped: SavedAddress[] = addrs.map((a: any, idx: number) => ({
         id:        idx + 1,
@@ -174,7 +178,7 @@ export default function CheckoutPage() {
       }
       if (mapped.length === 0) setShowNewForm(true);
     }).catch(() => { setShowNewForm(true); });
-  }, []);
+  }, [token]);
 
   function validateAddress(): boolean {
     if (selectedSaved !== null) return true;
@@ -200,8 +204,8 @@ export default function CheckoutPage() {
           landmark: address.landmark, city: address.city, state: address.state,
           postal_code: address.pincode, country: 'India',
           address_type: address.type, is_default: savedAddresses.length === 0,
-        });
-        const res: any = await _get('/api/address/addresses');
+        }, { token });
+        const res: any = await _get('/api/address/addresses', { token });
         const addrs: any[] = Array.isArray(res) ? res : (res?.addresses || res?.data || []);
         const mapped: SavedAddress[] = addrs.map((a: any, idx: number) => ({
           id: idx+1, backendId: String(a.id),
@@ -230,7 +234,10 @@ export default function CheckoutPage() {
     cartDispatch({ type: 'CLEAR_CART' });
     // Backend has no /cart/clear endpoint — delete each item individually
     try {
-      const res = await fetch('/api/cart', { credentials: 'include' });
+      const res = await fetch('/api/cart', {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       if (res.ok) {
         const data = await res.json();
         const items: any[] = data?.cart_items ?? [];
@@ -241,6 +248,7 @@ export default function CheckoutPage() {
             return fetch(`/api/cart/items/${id}`, {
               method: 'DELETE',
               credentials: 'include',
+              headers: token ? { Authorization: `Bearer ${token}` } : undefined,
             }).catch(() => {});
           })
         );

@@ -3,6 +3,7 @@
 import React, {
   createContext, useContext, useReducer, useEffect, useRef, useCallback, useMemo,
 } from 'react';
+import { useSession } from 'next-auth/react';
 import { _get, _post, _put, _delete } from '@/shared/fetchwrapper';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -234,7 +235,12 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 // ── Provider ───────────────────────────────────────────────────────────────
-async function mergeLocalIntoServer(local: CartItem[]) {
+// The FastAPI login cookie is only ever set for credentials-based logins
+// (LoginPage makes an extra browser-side call before signIn()); Google OAuth
+// runs entirely server-side inside NextAuth's callbacks, so that cookie never
+// reaches the browser. Every call here must carry the Bearer token too, or
+// Google-authenticated users silently fall back to guest/local-only carts.
+async function mergeLocalIntoServer(local: CartItem[], token?: string) {
   for (const it of local) {
     try {
       await _post('/api/cart/items', {
@@ -243,23 +249,27 @@ async function mergeLocalIntoServer(local: CartItem[]) {
         color:      it.color || undefined,
         color_hex:  it.color_hex || undefined,
         image:      it.image || undefined,
-      });
+      }, { token });
     } catch { /* best-effort merge */ }
   }
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, status: sessionStatus } = useSession();
+  const token = (session as any)?.backendToken as string | undefined;
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const loadedRef   = useRef(false);
   const itemsRef    = useRef(state.items);
   const authedRef   = useRef(state.authed);
   const hydratedRef = useRef(state.hydrated);
+  const tokenRef    = useRef(token);
   const putTimers   = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const toastTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { itemsRef.current  = state.items;    }, [state.items]);
   useEffect(() => { authedRef.current = state.authed;   }, [state.authed]);
   useEffect(() => { hydratedRef.current = state.hydrated; }, [state.hydrated]);
+  useEffect(() => { tokenRef.current  = token;          }, [token]);
 
   // Persist to localStorage on every change once we've loaded.
   useEffect(() => { if (state.hydrated) writeLocal(state.items); }, [state.items, state.hydrated]);
@@ -272,14 +282,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const loadCart = useCallback(async () => {
     const local = readLocal();
+    const tok = tokenRef.current;
     try {
-      const data = await _get('/api/cart');                // authenticated path (token via wrapper)
+      const data = await _get('/api/cart', { token: tok });
       let serverItems = mapServerItems(data);
 
       const guestPending = typeof window !== 'undefined' && localStorage.getItem(LS_GUEST_FLAG) === '1';
       if (guestPending && local.length > 0) {
-        await mergeLocalIntoServer(local);                 // merge once, only after a guest→login transition
-        try { serverItems = mapServerItems(await _get('/api/cart')); } catch {}
+        await mergeLocalIntoServer(local, tok);            // merge once, only after a guest→login transition
+        try { serverItems = mapServerItems(await _get('/api/cart', { token: tok })); } catch {}
         try { localStorage.removeItem(LS_GUEST_FLAG); } catch {}
       }
       dispatch({ type: 'HYDRATE', payload: { items: serverItems, authed: true } });
@@ -296,10 +307,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (sessionStatus === 'loading') return;   // wait for the real session/token before deciding guest vs authed
     if (loadedRef.current) return;
     loadedRef.current = true;
     loadCart();
-  }, [loadCart]);
+  }, [sessionStatus, loadCart]);
 
   const addItem = useCallback(async (input: AddItemInput): Promise<ActionResult> => {
     // Still resolving auth state — do nothing yet
@@ -343,7 +355,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         color: color || undefined,
         color_hex: input.color_hex || undefined,
         image: input.image || undefined,
-      });
+      }, { token: tokenRef.current });
       if (res && (res.id != null || typeof res.quantity === 'number')) {
         dispatch({
           type: 'RECONCILE_LINE',
@@ -390,7 +402,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (putTimers.current[rowId]) clearTimeout(putTimers.current[rowId]);
     putTimers.current[rowId] = setTimeout(async () => {
       try {
-        await _put(`/api/cart/items/${rowId}`, { quantity: q });
+        await _put(`/api/cart/items/${rowId}`, { quantity: q }, { token: tokenRef.current });
       } catch (e: any) {
         if (statusOf(e) === 401) { dispatch({ type: 'SET_AUTHED', payload: false }); markGuestPending(); return; }
         pushToast(messageFromError(e), 'error');
@@ -411,7 +423,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const rowId = cur.cartItemId ?? ref.cartItemId ?? (cur.backendId != null ? String(cur.backendId) : undefined);
     if (!rowId) return;
 
-    _delete(`/api/cart/items/${rowId}`).catch((e: any) => {
+    _delete(`/api/cart/items/${rowId}`, { token: tokenRef.current }).catch((e: any) => {
       if (statusOf(e) === 401) { dispatch({ type: 'SET_AUTHED', payload: false }); markGuestPending(); return; }
       pushToast(messageFromError(e), 'error');
       loadCart();                                          // restores the line from server truth
