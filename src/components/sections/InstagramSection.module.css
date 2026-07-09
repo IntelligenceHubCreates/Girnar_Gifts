@@ -21,13 +21,6 @@
   margin-bottom: var(--gg-space-3);
 }
 
-.heading {
-  font-family: var(--gg-font-display);
-  font-size: var(--gg-text-h2);
-  color: var(--gg-ink);
-  margin: 0 0 var(--gg-space-3);
-}
-
 .body {
   font-family: var(--gg-font-body);
   font-size: 1rem;

@@ -9,7 +9,6 @@ export default function InstagramSection() {
     <section className={styles.section}>
       <div className={styles.inner}>
         <p className={styles.eyebrow}>Follow along</p>
-        <h2 className={styles.heading}>@{brand.social.instagram.split('/').pop()}</h2>
         <p className={styles.body}>
           Gifting ideas, behind-the-scenes, and new arrivals on Instagram.
         </p>
