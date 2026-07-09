@@ -27,10 +27,6 @@ const SORT_OPTIONS = [
 
 const PAGE_SIZE = 20;
 
-// Direct backend URL — browser calls FastAPI directly (no Next.js proxy needed)
-// Set NEXT_PUBLIC_BACKEND_URL=http://localhost:8000 in .env.local
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
-
 function getImgUrl(imgs: Product['product_image']): string | null {
   if (!imgs?.length) return null;
   const f = imgs[0];
@@ -79,9 +75,7 @@ export default function SearchClient() {
         sort_by: sort,
       });
 
-      // Call FastAPI directly from browser — works on localhost and Vercel
-      // (Vercel: set NEXT_PUBLIC_BACKEND_URL to your deployed API URL)
-      const res  = await fetch(`${BACKEND}/api/product/search?${params}`, {
+      const res  = await fetch(`/api/product/search?${params}`, {
         signal: abortRef.current.signal,
       });
 
@@ -102,7 +96,7 @@ export default function SearchClient() {
   function addToCart(e: React.MouseEvent, product: Product) {
     e.preventDefault();
     setAddedId(product.id);
-    fetch(`${BACKEND}/api/cart/items`, {
+    fetch(`/api/cart/items`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ product_id: product.id, quantity: 1 }),

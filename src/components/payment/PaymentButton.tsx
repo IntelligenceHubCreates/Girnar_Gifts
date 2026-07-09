@@ -7,8 +7,6 @@ import { useRazorpay, RazorpaySuccessResponse } from '@/hooks/useRazorpay';
 import styles from './PaymentButton.module.css';
 import { brand } from '@/config/brand';
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
-
 // FIX: added color, color_hex, image so they reach POST /api/payments/create-order
 // which forwards cart_items to POST /api/orders → services.create_order → OrderItem.color
 interface CartItem {
@@ -71,7 +69,7 @@ export default function PaymentButton({
       // Step 1 — Create Razorpay order
       // cart_items now includes color/color_hex/image so the backend
       // can persist them on OrderItem via services.create_order
-      const orderRes = await fetch(`${BACKEND}/api/payments/create-order`, {
+      const orderRes = await fetch(`/api/payments/create-order`, {
         method:      'POST',
         headers:     { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -112,7 +110,7 @@ export default function PaymentButton({
           setLoading('verifying');
           try {
             // Step 3 — Verify signature
-            const verifyRes = await fetch(`${BACKEND}/api/payments/verify`, {
+            const verifyRes = await fetch(`/api/payments/verify`, {
               method:      'POST',
               headers:     { 'Content-Type': 'application/json' },
               credentials: 'include',

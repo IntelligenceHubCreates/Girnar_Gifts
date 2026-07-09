@@ -363,8 +363,7 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
         const videoBuf = await videoFile.arrayBuffer()
         const uploadFd = new FormData()
         uploadFd.append('file', new File([videoBuf], videoFile.name, { type: videoFile.type }))
-        const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000'
-        const vRes = await fetch(`${BACKEND}/api/product/upload/video`, { method: 'POST', body: uploadFd, credentials: 'include' })
+        const vRes = await fetch(`/api/product/upload/video`, { method: 'POST', body: uploadFd, credentials: 'include' })
         if (!vRes.ok) { let detail = `Video upload failed (HTTP ${vRes.status})`; try { const er = await vRes.json(); if (er?.detail) detail = er.detail } catch {} ; throw new Error(detail) }
         const vData = await vRes.json()
         form.append('productVideo', vData.url ?? '')

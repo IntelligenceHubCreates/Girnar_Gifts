@@ -470,8 +470,6 @@ export async function fetchAdminProducts(params: {
   return adminFetch<ApiProductListResponse>(`/api/product/all?${qs}`)
 }
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000'
-
 export async function createProduct(form: FormData): Promise<ApiProduct> {
   return adminFormFetch<ApiProduct>('/api/product', form, 'POST')
 }
@@ -481,7 +479,7 @@ export async function updateProduct(id: string, form: FormData): Promise<ApiProd
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  await adminFetch(`${BACKEND}/api/product/${id}`, { method: 'DELETE' })
+  await adminFetch(`/api/product/${id}`, { method: 'DELETE' })
 }
 
 export async function fetchProductById(id: string): Promise<ApiProduct | null> {

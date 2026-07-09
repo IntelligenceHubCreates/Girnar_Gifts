@@ -1,10 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { brand } from '@/config/brand';
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ??
-  process.env.NEXT_PUBLIC_BACKEND_URL ??
-  '';
+// Runs server-side only (no 'use client'), so the non-public BACKEND_URL
+// can be read directly — no NEXT_PUBLIC_* / browser proxy needed here.
+const API_BASE = process.env.BACKEND_URL ?? '';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = brand.url;

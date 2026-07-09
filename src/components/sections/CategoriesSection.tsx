@@ -142,9 +142,10 @@ export default function CategoriesSection() {
     return () => { if (autoRef.current) clearInterval(autoRef.current); };
   }, [maxPage]);
 
-  /* ── Touch swipe ── */
-  const touchX = useRef(0);
-  const moved  = useRef(false);
+  /* ── Touch swipe — live drag-follow, snaps to the nearest page on release ── */
+  const touchX    = useRef(0);
+  const moved     = useRef(false);
+  const dragDelta = useRef(0);
 
   /* ── Dot mapping ── */
   const activeDot = maxPage === 0
@@ -199,16 +200,39 @@ export default function CategoriesSection() {
             className={styles.track}
             ref={trackRef}
             onTouchStart={(e) => {
-              touchX.current   = e.touches[0].clientX;
-              moved.current    = false;
-              isPaused.current = true;
+              touchX.current    = e.touches[0].clientX;
+              moved.current     = false;
+              dragDelta.current = 0;
+              isPaused.current  = true;
+              const track = trackRef.current;
+              if (track) track.style.transition = 'none';
             }}
-            onTouchMove={() => { moved.current = true; }}
-            onTouchEnd={(e) => {
+            onTouchMove={(e) => {
+              const dx = e.touches[0].clientX - touchX.current;
+              dragDelta.current = dx;
+              if (Math.abs(dx) > 4) moved.current = true;
+              const track = trackRef.current;
+              if (!track) return;
+              const step = getStep(track);
+              const base = -page * step;
+              // Rubber-band resistance past the first/last page.
+              const atStart = page === 0 && dx > 0;
+              const atEnd    = page === maxPage && dx < 0;
+              const eased    = atStart || atEnd ? dx * 0.35 : dx;
+              track.style.transform = `translateX(${base + eased}px)`;
+            }}
+            onTouchEnd={() => {
               isPaused.current = false;
-              if (!moved.current) return;
-              const dx = e.changedTouches[0].clientX - touchX.current;
-              if (Math.abs(dx) > 30) go(dx < 0 ? page + 1 : page - 1);
+              const track = trackRef.current;
+              if (!track) return;
+              track.style.transition = ''; // restore CSS transition for the snap animation
+              const dx = dragDelta.current;
+              const step   = getStep(track);
+              const target = moved.current && Math.abs(dx) > 30
+                ? Math.max(0, Math.min(maxPage, page + (dx < 0 ? 1 : -1)))
+                : page;
+              track.style.transform = `translateX(-${target * step}px)`;
+              go(target);
             }}
           >
             {categories.map((cat, i) => (

@@ -7,8 +7,6 @@ import Link from 'next/link';
 import styles from './OrderConfirmation.module.css';
 import { brand } from '@/config/brand';
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
-
 interface OrderItem {
   product_id: string;
   name:       string;
@@ -55,7 +53,7 @@ export default function OrderConfirmationClient() {
         // The order is already created server-side in /verify. Just read it.
         if (paymentId) {
           const res = await fetch(
-            `${BACKEND}/api/payments/order-by-payment/${paymentId}`,
+            `/api/payments/order-by-payment/${paymentId}`,
             { credentials: 'include' }
           );
           if (!cancelled && res.ok) fetchedOrder = await res.json();
@@ -66,7 +64,7 @@ export default function OrderConfirmationClient() {
           const withImages = await Promise.all(
             fetchedOrder.items.map(async (item) => {
               try {
-                const res = await fetch(`${BACKEND}/api/product/${item.product_id}`);
+                const res = await fetch(`/api/product/${item.product_id}`);
                 if (res.ok) {
                   const data = await res.json();
                   const product = data?.product_details ?? data;

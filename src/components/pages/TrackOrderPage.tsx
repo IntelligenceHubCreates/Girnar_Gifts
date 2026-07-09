@@ -6,8 +6,6 @@ import { useSearchParams } from 'next/navigation';
 import styles from './TrackOrderPage.module.css';
 import { brand } from '@/config/brand';
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
-
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 type OrderStatus = 'confirmed' | 'packed' | 'shipped' | 'out_for_delivery' | 'delivered' |
                    'processing' | 'pending' | 'cancelled' | 'returned';
@@ -216,7 +214,7 @@ export default function TrackOrderPage() {
     setLoading(true); setNotFound(false); setOrder(null); setSearched(false); setTracking(null);
 
     try {
-      const res = await fetch(`${BACKEND}/api/orders/${trimmed}`, { credentials: 'include' });
+      const res = await fetch(`/api/orders/${trimmed}`, { credentials: 'include' });
       if (!res.ok) { setNotFound(true); return; }
 
       const data: OrderData = await res.json();
@@ -227,7 +225,7 @@ export default function TrackOrderPage() {
           data.items.map(async (item) => {
             if (!item.product_id) return { ...item, image: null };
             try {
-              const r = await fetch(`${BACKEND}/api/product/${item.product_id}`);
+              const r = await fetch(`/api/product/${item.product_id}`);
               if (r.ok) {
                 const pd = await r.json();
                 const product = pd?.product_details ?? pd;
@@ -244,7 +242,7 @@ export default function TrackOrderPage() {
 
       /* Phase 14: pull the real shipment tracking (if a shipment exists). */
       try {
-        const tr = await fetch(`${BACKEND}/api/orders/${trimmed}/tracking`, { credentials: 'include' });
+        const tr = await fetch(`/api/orders/${trimmed}/tracking`, { credentials: 'include' });
         if (tr.ok) {
           const td = await tr.json();
           setTracking(td?.has_shipment ? td : null);

@@ -145,7 +145,6 @@ export default function Header() {
 
   /* ── Derived ── */
   const cartCount = state.items.reduce((acc, item) => acc + item.quantity, 0);
-  const BACKEND   = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
   const showDrop      = dropOpen && search.trim().length >= 2;
   const showNoResults = showDrop && !searching && results.length === 0;
   const userName    = session?.user?.name  || '';
@@ -198,7 +197,7 @@ export default function Header() {
     setSearching(true);
     try {
       const params = new URLSearchParams({ q, limit: '8' });
-      const res    = await fetch(`${BACKEND}/api/product/search?${params}`);
+      const res    = await fetch(`/api/product/search?${params}`);
       const json   = await res.json();
       const raw: any[] = Array.isArray(json) ? json : (json?.data ?? []);
       const list: SearchProduct[] = raw.map((p) => ({
@@ -212,7 +211,7 @@ export default function Header() {
     } catch {
       setResults([]); setDropOpen(false);
     } finally { setSearching(false); }
-  }, [BACKEND]);
+  }, []);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
