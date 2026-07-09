@@ -33,6 +33,7 @@ export const brand = {
     logoDark: '/brand/logo-dark.png',
     favicon: '/brand/favicon.png',
     ogImage: '/brand/og-default.jpeg',
+    heroImage: '/brand/girnar-gift-hero.png',
   },
 } as const;
 

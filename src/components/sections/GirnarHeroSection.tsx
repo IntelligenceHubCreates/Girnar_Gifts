@@ -9,6 +9,7 @@ import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { _get } from '@/shared/fetchwrapper';
 import { normaliseProduct, unwrapList, fmtINR } from '@/lib/normalise';
 import { useCart } from '@/context/CartContext';
+import { brand } from '@/config/brand';
 import type { UiProduct } from '@/types/product';
 
 /* ── entrance helpers (transform + opacity only) ──────────────────────── */
@@ -105,7 +106,7 @@ export default function GirnarHeroSection() {
   const visualRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    _get('/api/product/all?limit=4&in_stock=true')
+    _get('/api/product/all?limit=3&in_stock=true')
       .then((res) => setProducts(unwrapList(res).map(normaliseProduct)))
       .catch(() => setProducts([]));
   }, []);
@@ -141,10 +142,10 @@ export default function GirnarHeroSection() {
     [addItem, cartStates],
   );
 
-  // First product is the big "signature gift" hero image; the next three
-  // are the independent mini cards below the CTAs (so nothing repeats).
-  const heroProduct = products[0];
-  const miniProducts = products.slice(1, 4);
+  // The hero visual is a fixed lifestyle photo (not a per-product image),
+  // so all fetched products are free to use as the three mini cards below
+  // the CTAs.
+  const miniProducts = products.slice(0, 3);
 
   return (
     <section className={styles.hero}>
@@ -229,18 +230,14 @@ export default function GirnarHeroSection() {
               animate={reduceMotion ? undefined : { rotate: [6, 4.5, 6] }}
               transition={reduceMotion ? undefined : { duration: 5, repeat: Infinity, ease: 'easeInOut' }}
             >
-              {heroProduct?.images[0] ? (
-                <Image
-                  src={heroProduct.images[0]}
-                  alt={heroProduct.name}
-                  fill
-                  sizes="(max-width: 1024px) 60vw, 460px"
-                  className={styles.stageImg}
-                  priority
-                />
-              ) : (
-                <HamperGlyph variant={0} className={styles.heroGlyph} />
-              )}
+              <Image
+                src={brand.assets.heroImage}
+                alt="Kids joyfully showing off their Girnar Gifts hampers"
+                fill
+                sizes="(max-width: 1024px) 60vw, 460px"
+                className={styles.stageImg}
+                priority
+              />
             </motion.div>
           </motion.div>
         </div>
