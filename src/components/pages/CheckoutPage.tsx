@@ -492,6 +492,7 @@ export default function CheckoutPage() {
                   }))}
                   shippingAddress={shippingAddressForPayment}
                   userEmail={userEmail}
+                  userToken={token}
                   disabled={false}
                   onSuccess={async (paymentId, orderId) => {
                     await clearCartAfterPayment();

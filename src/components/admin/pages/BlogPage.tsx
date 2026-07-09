@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import FilterTabs from '../ui/FilterTabs'
 import { useAdminFetch } from '@/hooks/useAdminFetch'
 import { fetchBlogPosts, createBlogPost, updateBlogPost, deleteBlogPost, type ApiBlogPost } from '@/lib/adminApi'
@@ -8,6 +9,8 @@ import { fetchBlogPosts, createBlogPost, updateBlogPost, deleteBlogPost, type Ap
 // ── Blog Post Form ────────────────────────────────────────────────
 
 function BlogPostForm({ post, onClose, onSaved }: { post?: ApiBlogPost | null; onClose: () => void; onSaved: () => void }) {
+  const { data: adminSession } = useSession()
+  const adminToken = (adminSession as any)?.accessToken as string | undefined
   const [saving, setSaving]   = useState(false)
   const [error,  setError]    = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -34,7 +37,10 @@ function BlogPostForm({ post, onClose, onSaved }: { post?: ApiBlogPost | null; o
     try {
       const fd = new FormData()
       fd.append('file', file)
-      const res = await fetch('/api/admin/blog/upload-image', { method: 'POST', body: fd, credentials: 'include' })
+      const res = await fetch('/api/admin/blog/upload-image', {
+        method: 'POST', body: fd, credentials: 'include',
+        headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : undefined,
+      })
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || 'Upload failed')
       const { url } = await res.json()
       setForm(f => ({ ...f, image_url: url }))

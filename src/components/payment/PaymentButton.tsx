@@ -35,6 +35,7 @@ interface Props {
   cartItems:       CartItem[];
   shippingAddress: ShippingAddress;
   userEmail:       string;
+  userToken?:      string;
   couponCode?:     string | null;
   giftMessage?:    string | null;
   disabled?:       boolean;
@@ -43,7 +44,7 @@ interface Props {
 }
 
 export default function PaymentButton({
-  amount, cartItems, shippingAddress, userEmail,   couponCode = null,
+  amount, cartItems, shippingAddress, userEmail, userToken, couponCode = null,
   giftMessage = null,
   disabled = false, onSuccess, onFailure,
 }: Props) {
@@ -71,7 +72,10 @@ export default function PaymentButton({
       // can persist them on OrderItem via services.create_order
       const orderRes = await fetch(`/api/payments/create-order`, {
         method:      'POST',
-        headers:     { 'Content-Type': 'application/json' },
+        headers:     {
+          'Content-Type': 'application/json',
+          ...(userToken ? { Authorization: `Bearer ${userToken}` } : {}),
+        },
         credentials: 'include',
         body: JSON.stringify({
           amount:           Math.round(amount),
@@ -112,7 +116,10 @@ export default function PaymentButton({
             // Step 3 — Verify signature
             const verifyRes = await fetch(`/api/payments/verify`, {
               method:      'POST',
-              headers:     { 'Content-Type': 'application/json' },
+              headers:     {
+                'Content-Type': 'application/json',
+                ...(userToken ? { Authorization: `Bearer ${userToken}` } : {}),
+              },
               credentials: 'include',
               body: JSON.stringify({
                 razorpay_order_id:   response.razorpay_order_id,

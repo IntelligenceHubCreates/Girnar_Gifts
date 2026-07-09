@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './SearchPage.module.css';
+import { useCart } from '@/context/CartContext';
 
 interface Product {
   id: string;
@@ -50,6 +51,7 @@ export default function SearchClient() {
   const searchParams = useSearchParams();
   const router       = useRouter();
   const q            = searchParams.get('q') ?? '';
+  const { addItem } = useCart();
 
   const [products,   setProducts]   = useState<Product[]>([]);
   const [loading,    setLoading]    = useState(false);
@@ -96,11 +98,15 @@ export default function SearchClient() {
   function addToCart(e: React.MouseEvent, product: Product) {
     e.preventDefault();
     setAddedId(product.id);
-    fetch(`/api/cart/items`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ product_id: product.id, quantity: 1 }),
-      credentials: 'include',
+    const price = (product.original_price ?? 0) - (product.amount_discount ?? 0);
+    addItem({
+      id: product.id,
+      name: product.name,
+      price,
+      originalPrice: product.original_price ?? price,
+      quantity: 1,
+      image: getImgUrl(product.product_image) ?? undefined,
+      category: product.category ?? product.sub_category_name,
     }).catch(() => {});
     setTimeout(() => setAddedId(null), 1800);
   }

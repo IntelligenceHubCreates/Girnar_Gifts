@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 import styles from './ProductPage.module.css';
 import { _get, _post, _delete } from '@/shared/fetchwrapper';
 import { useCart } from '@/context/CartContext';
@@ -265,6 +266,8 @@ function useZoom() {
    ═══════════════════════════════════════════════ */
 export default function ProductPage({ productId }: { productId: string|number }) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const token = (session as any)?.backendToken as string | undefined;
   // Cast loosely so this stays correct regardless of your exact CartContext value type.
   const cart: any = useCart();
   const dispatch = cart?.dispatch;
@@ -323,12 +326,12 @@ export default function ProductPage({ productId }: { productId: string|number })
 
   useEffect(() => {
     if (!productId) return;
-    _get('/api/favorite').then((res: any) => {
+    _get('/api/favorite', { token }).then((res: any) => {
       const items: any[] = Array.isArray(res) ? res : (res?.data ?? []);
       const ids = items.map((i: any) => typeof i==='string' ? i : String(i.product_id ?? i.id ?? ''));
       setWished(ids.includes(String(productId))); setRelWish(new Set(ids));
     }).catch(() => {});
-  }, [productId]);
+  }, [productId, token]);
 
   // Collapse variant families (and any accidental dupes) to one card each.
 function dedupeFamilies(list: Product[], excludeId: string): Product[] {
@@ -450,8 +453,8 @@ async function handleBuy() {
     if (!product || wishSt==='loading') return;
     const was = wished; setWished(!was); setWishSt('loading');
     try {
-      if (was) await _delete(`/api/favorite/${product.id}`);
-      else     await _post(`/api/favorite/${product.id}`, {});
+      if (was) await _delete(`/api/favorite/${product.id}`, { token });
+      else     await _post(`/api/favorite/${product.id}`, {}, { token });
     } catch { setWished(was); }
     finally { setWishSt('idle'); }
   }
@@ -473,11 +476,11 @@ async function handleBuy() {
     setRelWish(p => { const n=new Set(p); was?n.delete(id):n.add(id); return n; });
     setRelWP(p => new Set(p).add(id));
     try {
-      if (was) await _delete(`/api/favorite/${id}`);
-      else     await _post(`/api/favorite/${id}`, {});
+      if (was) await _delete(`/api/favorite/${id}`, { token });
+      else     await _post(`/api/favorite/${id}`, {}, { token });
     } catch { setRelWish(p => { const n=new Set(p); was?n.add(id):n.delete(id); return n; }); }
     finally { setRelWP(p => { const n=new Set(p); n.delete(id); return n; }); }
-  }, [relWish, relWP]);
+  }, [relWish, relWP, token]);
 
 const addRelToCart = useCallback(async (p: Product) => {
     const id = String(p.id); if (relCS[id]==='loading') return;

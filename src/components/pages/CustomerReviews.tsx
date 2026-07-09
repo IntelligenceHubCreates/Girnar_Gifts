@@ -135,8 +135,10 @@ function SubmitReviewForm({ productId, onSubmitted }: { productId: string | numb
         files.forEach(f => fd.append('images', f));
       }
 
+      const reviewToken = (session as any)?.backendToken as string | undefined;
       const res = await fetch(`/api/product/${productId}/reviews`, {
         method: 'POST', body: fd, credentials: 'include',
+        headers: reviewToken ? { Authorization: `Bearer ${reviewToken}` } : undefined,
       });
       if (!res.ok) {
         let detail = 'Submission failed'

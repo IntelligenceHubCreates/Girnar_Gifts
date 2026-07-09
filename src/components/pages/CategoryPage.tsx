@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 import styles from './CategoryPage.module.css';
 import { fetchProductsByCategory, fetchAllProducts } from '@/lib/api';
 import { mapProducts } from '@/lib/mapProduct';
@@ -317,7 +318,9 @@ export default function CategoryPage({
   const [addedId, setAddedId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const { dispatch } = useCart();
+  const { dispatch, addItem: addItemToCart } = useCart();
+  const { data: session } = useSession();
+  const token = (session as any)?.backendToken as string | undefined;
 
   // Single place that picks the right endpoint (category slug vs. /all).
   const runFetch = useCallback(
@@ -580,42 +583,38 @@ export default function CategoryPage({
       const wasWishlisted = wishlist.includes(id);
       setWishlist((prev) => (wasWishlisted ? prev.filter((x) => x !== id) : [...prev, id]));
       try {
-        const res = await fetch(`/api/favorite/${id}`, { method: wasWishlisted ? 'DELETE' : 'POST' });
+        const res = await fetch(`/api/favorite/${id}`, {
+          method: wasWishlisted ? 'DELETE' : 'POST',
+          credentials: 'include',
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         if (!res.ok) throw new Error('wishlist request failed');
       } catch {
         setWishlist((prev) => (wasWishlisted ? [...prev, id] : prev.filter((x) => x !== id)));
       }
     },
-    [wishlist],
+    [wishlist, token],
   );
 
   const addToCart = useCallback(
-    (product: UiProduct) => {
-      dispatch({
-        type: 'ADD_ITEM',
-        payload: {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          originalPrice: product.originalPrice,
-          quantity: 1,
-          image: product.images[0] ?? '',
-          emoji: product.emoji || '🎁',
-          category: product.category,
-          color: product.colors[0]?.label ?? '',
-          product_count: product.stockCount,
-          is_available: product.inStock,
-        },
-      });
+    async (product: UiProduct) => {
       setAddedId(product.id);
-      fetch('/api/cart/items', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: product.id, quantity: 1 }),
-      }).catch(() => dispatch({ type: 'REMOVE_ITEM', payload: { id: product.id } }));
+      await addItemToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        quantity: 1,
+        image: product.images[0] ?? '',
+        emoji: product.emoji || '🎁',
+        category: product.category,
+        color: product.colors[0]?.label ?? '',
+        product_count: product.stockCount,
+        is_available: product.inStock,
+      });
       setTimeout(() => setAddedId(null), 1800);
     },
-    [dispatch],
+    [addItemToCart],
   );
 
   const activeFiltersCount =

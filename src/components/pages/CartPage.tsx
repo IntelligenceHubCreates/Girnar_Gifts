@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import styles from './CartPage.module.css';
 import { _get, _post, _delete } from '@/shared/fetchwrapper';
 import { useCart, type CartItem } from '@/context/CartContext';
@@ -273,6 +274,8 @@ export default function CartPage() {
   const { state, addItem, updateQuantity, removeItem, refresh, pushToast } = useCart();
   const router = useRouter();
   const items = state.items;
+  const { data: session } = useSession();
+  const token = (session as any)?.backendToken as string | undefined;
 
   const [coupon, setCoupon]           = useState<CouponState>({ code: '', applied: false, discountAmount: 0, message: '', error: false });
 const [couponLoading, setCouponLoading] = useState(false);
@@ -345,13 +348,13 @@ const [couponLoading, setCouponLoading] = useState(false);
 
   /* Fetch wishlist */
   useEffect(() => {
-    _get('/api/favorite')
+    _get('/api/favorite', { token })
       .then((res: any) => {
         const arr: any[] = Array.isArray(res) ? res : (res?.data ?? []);
         const ids = arr.map((i: any) => typeof i === 'string' ? i : String(i.product_id ?? i.productId ?? i.id ?? ''));
         setRelWishlist(new Set(ids));
       }).catch(() => {});
-  }, []);
+  }, [token]);
 
   /* Fetch related/featured products */
   useEffect(() => {
@@ -364,21 +367,21 @@ const [couponLoading, setCouponLoading] = useState(false);
 
   
 
-  /* Related: wishlist toggle (via wrapper → token attached) */
+  /* Related: wishlist toggle */
   const toggleRelWishlist = useCallback(async (id: string) => {
     if (relWishPend.has(id)) return;
     const was = relWishlist.has(id);
     setRelWishlist((prev) => { const n = new Set(prev); was ? n.delete(id) : n.add(id); return n; });
     setRelWishPend((prev) => new Set(prev).add(id));
     try {
-      if (was) await _delete(`/api/favorite/${id}`);
-      else     await _post(`/api/favorite/${id}`, {});
+      if (was) await _delete(`/api/favorite/${id}`, { token });
+      else     await _post(`/api/favorite/${id}`, {}, { token });
     } catch {
       setRelWishlist((prev) => { const n = new Set(prev); was ? n.add(id) : n.delete(id); return n; });
     } finally {
       setRelWishPend((prev) => { const n = new Set(prev); n.delete(id); return n; });
     }
-  }, [relWishlist, relWishPend]);
+  }, [relWishlist, relWishPend, token]);
 
   /* Related: add to cart (optimism + rollback handled in context) */
   const addRelToCart = useCallback(async (p: MappedProduct) => {

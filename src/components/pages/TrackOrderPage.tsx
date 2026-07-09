@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import styles from './TrackOrderPage.module.css';
 import { brand } from '@/config/brand';
 
@@ -194,6 +195,8 @@ function parseShipping(order: OrderData) {
 export default function TrackOrderPage() {
   const searchParams     = useSearchParams();
   const prefilledOrderId = searchParams.get('order_id') ?? '';
+  const { data: session, status: sessionStatus } = useSession();
+  const token = (session as any)?.backendToken as string | undefined;
 
   const [inputValue,  setInputValue]  = useState(prefilledOrderId);
   const [order,       setOrder]       = useState<OrderData | null>(null);
@@ -205,8 +208,9 @@ export default function TrackOrderPage() {
   const [tracking,    setTracking]    = useState<any | null>(null);
 
   useEffect(() => {
+    if (sessionStatus === 'loading') return;   // wait for the token before fetching
     if (prefilledOrderId) fetchOrder(prefilledOrderId);
-  }, [prefilledOrderId]);
+  }, [prefilledOrderId, sessionStatus]);
 
   async function fetchOrder(id: string) {
     const trimmed = id.trim();
@@ -214,7 +218,10 @@ export default function TrackOrderPage() {
     setLoading(true); setNotFound(false); setOrder(null); setSearched(false); setTracking(null);
 
     try {
-      const res = await fetch(`/api/orders/${trimmed}`, { credentials: 'include' });
+      const res = await fetch(`/api/orders/${trimmed}`, {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       if (!res.ok) { setNotFound(true); return; }
 
       const data: OrderData = await res.json();
@@ -242,7 +249,10 @@ export default function TrackOrderPage() {
 
       /* Phase 14: pull the real shipment tracking (if a shipment exists). */
       try {
-        const tr = await fetch(`/api/orders/${trimmed}/tracking`, { credentials: 'include' });
+        const tr = await fetch(`/api/orders/${trimmed}/tracking`, {
+          credentials: 'include',
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         if (tr.ok) {
           const td = await tr.json();
           setTracking(td?.has_shipment ? td : null);

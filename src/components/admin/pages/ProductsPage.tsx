@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { useAdminFetch } from '@/hooks/useAdminFetch'
 import {
   fetchAdminProducts, fetchCategories, createProduct, updateProduct, deleteProduct, createCategory,
@@ -178,6 +179,8 @@ interface ProductFormProps {
 
 function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormProps) {
   const isEdit = !!product
+  const { data: adminSession } = useSession()
+  const adminToken = (adminSession as any)?.accessToken as string | undefined
   const [saving, setSaving]   = useState(false)
   const [error,  setError]    = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
@@ -346,7 +349,10 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
         group.forEach(({ name, buf, type }) => uploadFd.append('files', new File([buf], name, { type })))
         let uploadRes: Response
         try {
-          uploadRes = await fetch('/api/product/upload/images', { method: 'POST', body: uploadFd, credentials: 'include' })
+          uploadRes = await fetch('/api/product/upload/images', {
+            method: 'POST', body: uploadFd, credentials: 'include',
+            headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : undefined,
+          })
         } catch { throw new Error(`Network error uploading images for "${cv.name}". Check your connection.`) }
         if (!uploadRes.ok) {
           let detail = `Upload failed for "${cv.name}" (status ${uploadRes.status})`
@@ -363,7 +369,10 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
         const videoBuf = await videoFile.arrayBuffer()
         const uploadFd = new FormData()
         uploadFd.append('file', new File([videoBuf], videoFile.name, { type: videoFile.type }))
-        const vRes = await fetch(`/api/product/upload/video`, { method: 'POST', body: uploadFd, credentials: 'include' })
+        const vRes = await fetch(`/api/product/upload/video`, {
+          method: 'POST', body: uploadFd, credentials: 'include',
+          headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : undefined,
+        })
         if (!vRes.ok) { let detail = `Video upload failed (HTTP ${vRes.status})`; try { const er = await vRes.json(); if (er?.detail) detail = er.detail } catch {} ; throw new Error(detail) }
         const vData = await vRes.json()
         form.append('productVideo', vData.url ?? '')

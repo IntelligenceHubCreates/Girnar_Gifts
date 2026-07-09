@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import styles from './OrderConfirmation.module.css';
 import { brand } from '@/config/brand';
@@ -38,11 +39,14 @@ export default function OrderConfirmationClient() {
   const params     = useSearchParams();
   const paymentId  = params.get('payment_id')       ?? '';
   const rzpOrderId = params.get('razorpay_order_id') ?? '';
+  const { data: session, status: sessionStatus } = useSession();
+  const token = (session as any)?.backendToken as string | undefined;
 
   const [order,   setOrder]   = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (sessionStatus === 'loading') return;   // wait for the token before fetching
     if (!paymentId && !rzpOrderId) { setLoading(false); return; }
     let cancelled = false;
 
@@ -54,7 +58,10 @@ export default function OrderConfirmationClient() {
         if (paymentId) {
           const res = await fetch(
             `/api/payments/order-by-payment/${paymentId}`,
-            { credentials: 'include' }
+            {
+              credentials: 'include',
+              headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            }
           );
           if (!cancelled && res.ok) fetchedOrder = await res.json();
         }
@@ -84,7 +91,7 @@ export default function OrderConfirmationClient() {
 
     init();
     return () => { cancelled = true; };
-  }, [paymentId, rzpOrderId]);
+  }, [paymentId, rzpOrderId, sessionStatus, token]);
 
   const shortId = order?.id?.slice(0, 8).toUpperCase()
     ?? paymentId.slice(-8).toUpperCase()
