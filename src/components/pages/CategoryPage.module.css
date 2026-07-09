@@ -6,7 +6,10 @@
 
 /* ── Page ─────────────────────────────────────────────────────────── */
 .page {
+  /* dvh avoids a blank-space-at-bottom bug on mobile Chrome/Safari - see
+     GirnarHeroSection.module.css .hero for the full explanation. */
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--gg-canvas);
   font-family: var(--gg-font-body);
   -webkit-font-smoothing: antialiased;

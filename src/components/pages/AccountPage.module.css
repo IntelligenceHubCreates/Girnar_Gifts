@@ -12,7 +12,10 @@
 /* ── Root shell ───────────────────────────────────────────────────────────── */
 .root {
   display: flex;
+  /* dvh avoids a blank-space-at-bottom bug on mobile Chrome/Safari - see
+     GirnarHeroSection.module.css .hero for the full explanation. */
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--ll-bg);
   font-family: var(--font-body);
   color: var(--ll-ink);
@@ -32,7 +35,7 @@
 .loadingScreen {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  min-height: 100vh; gap: 16px;
+  min-height: 100vh; min-height: 100dvh; gap: 16px;
   font-size: 14px; color: var(--ll-muted);
   font-family: var(--font-body);
   text-align: center; padding: 24px;
@@ -73,7 +76,7 @@
   background: var(--ll-card);
   display: flex; flex-direction: column;
   position: sticky; top: 0;
-  height: 100vh; overflow-y: auto; overflow-x: hidden;
+  height: 100vh; height: 100dvh; overflow-y: auto; overflow-x: hidden;
   z-index: 100;
   border-right: 1px solid var(--ll-line);
   scrollbar-width: none;

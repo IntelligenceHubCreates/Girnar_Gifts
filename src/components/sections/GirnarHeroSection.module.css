@@ -1,7 +1,13 @@
 .hero {
   position: relative;
   background: var(--gg-canvas);
+  /* 100vh on mobile Chrome is calculated against the address-bar-collapsed
+     (larger) viewport but renders against the address-bar-visible (smaller)
+     one - min-height then guarantees more box than fits on screen, showing
+     as blank space once the page is scrolled. dvh tracks the real visible
+     viewport; vh stays as the fallback for browsers that don't support it. */
   min-height: 92vh;
+  min-height: 92dvh;
   display: flex;
   align-items: center;
   padding: var(--gg-space-16) var(--gg-space-8);

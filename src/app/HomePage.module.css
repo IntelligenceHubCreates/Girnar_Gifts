@@ -16,7 +16,9 @@
     var(--gg-blush) 88%,      /* blush again toward newsletter */
     var(--gg-blush) 100%
   );
+  /* See GirnarHeroSection.module.css .hero for why dvh, not just vh. */
   min-height: 100vh;
+  min-height: 100dvh;
   isolation: isolate;
 }
 
