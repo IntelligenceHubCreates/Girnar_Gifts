@@ -762,20 +762,25 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   MOBILE HEADER — search-only, full-width premium bar (≤768px)
+   MOBILE HEADER — logo left, search fills the rest (≤768px)
    Everything here is inside the 768px query, so desktop/tablet
    (≥769px) are completely untouched.
    ════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* Hide every header-row item except the search */
+  /* Hide the hamburger + icon actions (wishlist/account/cart already
+     live in MobileBottomNav) - logo stays visible next to search. */
   .hamburger,
-  .logo,
   .iconActions { display: none !important; }
 
-  /* The right group becomes the entire row */
+  .headerInner { gap: 12px; }
+
+  /* The right group now shares the row with the logo instead of
+     taking the full width - search fills whatever space is left. */
   .rightGroup {
-    width: 100%;
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
     margin-left: 0;
     gap: 0;
   }
