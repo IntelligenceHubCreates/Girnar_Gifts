@@ -133,6 +133,7 @@ export default function GirnarHeroSection() {
       const res = await addItem({
         id: p.id, name: p.name, price: p.price, originalPrice: p.originalPrice,
         image: p.images[0], category: p.category,
+        product_count: p.stockCount, is_available: p.inStock,
       });
       setCartStates((s) => ({ ...s, [p.id]: res.ok ? 'added' : 'error' }));
       if (res.ok) setTimeout(() => setCartStates((s) => ({ ...s, [p.id]: 'idle' })), 1800);

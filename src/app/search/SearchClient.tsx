@@ -107,6 +107,8 @@ export default function SearchClient() {
       quantity: 1,
       image: getImgUrl(product.product_image) ?? undefined,
       category: product.category ?? product.sub_category_name,
+      product_count: product.count,
+      is_available: (product.count ?? 0) > 0,
     }).catch(() => {});
     setTimeout(() => setAddedId(null), 1800);
   }

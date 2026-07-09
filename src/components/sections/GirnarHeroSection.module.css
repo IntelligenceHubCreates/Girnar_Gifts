@@ -240,8 +240,7 @@
   width: 100%;
   max-width: 400px;
   aspect-ratio: 4 / 5;
-  margin-left: auto;
-  margin-right: -6%;
+  margin: 0 auto;
 }
 
 .stageFloat {
@@ -281,7 +280,15 @@
   .hero { padding: var(--gg-space-10) var(--gg-space-5); }
   .ctaRow { gap: 10px; }
   .btnPrimary, .btnSecondary { padding: 12px 22px; font-size: 0.88rem; }
-  .cardsRow { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  /* overflow-x:auto implicitly makes overflow-y auto too, which would clip
+     miniCardImgWrap's upward bleed (top:-22px) at the row's own box edge -
+     padding-top reserves room for it, margin-top cancels the resulting
+     layout shift so the row still sits in the same place. */
+  .cardsRow {
+    flex-wrap: nowrap; overflow-x: auto;
+    padding-top: 26px; margin-top: -26px;
+    padding-bottom: 4px; scrollbar-width: none;
+  }
   .cardsRow::-webkit-scrollbar { display: none; }
   .miniCard { width: 108px; flex-shrink: 0; padding: 38px 10px 12px; }
   .miniCardImgWrap { width: 62px; height: 62px; top: -22px; }
