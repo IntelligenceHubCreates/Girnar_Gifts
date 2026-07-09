@@ -234,7 +234,7 @@ export default function GirnarHeroSection() {
                 src={brand.assets.heroImage}
                 alt="Kids joyfully showing off their Girnar Gifts hampers"
                 width={1024}
-                height={1536}
+                height={1034}
                 draggable={false}
                 className={styles.stageImg}
                 priority

@@ -20,13 +20,19 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1.05fr 1fr;
-  align-items: center;
+  align-items: stretch;
   gap: var(--gg-space-16);
 }
 
 /* ── copy column ── */
+/* .inner now stretches both cells so .visual can fill the row's full
+   height edge to edge; .copy needs its own centering since it no longer
+   gets that for free from .inner's old align-items:center. */
 .copy {
   max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .headline {
@@ -174,11 +180,16 @@
 .miniCardBtn:disabled { opacity: 0.7; cursor: not-allowed; }
 
 /* ── visual column ── */
+/* height:100% (not min-height) so it genuinely fills .inner's stretched
+   row top-to-bottom - the image below inherits that same height through
+   the .stage/.stageFloat chain instead of using a fixed px/vh guess that
+   drifts out of sync with the row's real (text-driven) height. */
 .visual {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
   min-height: 620px;
   touch-action: pan-y;
 }
@@ -234,17 +245,18 @@
   z-index: 1;
 }
 
-/* Sized like Little Loot's boy hero: a fixed height on the image itself
-   (not a fill-in-a-box), width auto, bottom-anchored - the photo dictates
-   its own footprint instead of being cropped to a fixed aspect box. */
+/* Fills the row's full height (see .visual/.inner); the cropped photo is
+   close to square, so the box is wider than the original 2:3 crop needed. */
 .stage {
   position: relative;
   z-index: 3;
   width: 100%;
-  max-width: 480px;
+  height: 100%;
+  max-width: 600px;
   margin: 0 auto;
   perspective: 1100px;
   display: flex;
+  align-items: center;
   justify-content: center;
 }
 
@@ -265,7 +277,9 @@
 }
 
 .stageFloat {
+  height: 100%;
   display: flex;
+  align-items: center;
   justify-content: center;
   transform: rotateY(-18deg) rotateX(5deg);
   transform-style: preserve-3d;
@@ -273,9 +287,12 @@
 
 .stageImg {
   display: block;
-  width: auto;
-  height: 620px;
-  max-width: none;
+  /* Fill the box in both dimensions - contain then binds on whichever
+     side actually limits it, so the image genuinely reaches from the
+     top to the bottom of the section (no fixed px/vh guess to drift
+     out of sync with the row's real, text-driven height). */
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   object-position: center bottom;
   filter:
