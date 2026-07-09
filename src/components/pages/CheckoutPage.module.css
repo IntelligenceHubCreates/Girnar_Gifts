@@ -1912,13 +1912,13 @@
 }
 
 .couponAppliedIcon { font-size: 18px; }
-.couponAppliedText { flex: 1; font-size: 13px; color: var(--gg-success); font-weight: 600; min-width: 80px; }
+.couponAppliedText { flex: 1; font-size: 13px; color: #fff; font-weight: 600; min-width: 80px; }
 
 @media (max-width: 360px) {
   .couponAppliedText { font-size: 12px; }
 }
 
-.couponAppliedSaving { font-family: var(--gg-font-display); font-size: 14px; font-weight: 800; color: var(--gg-success); }
+.couponAppliedSaving { font-family: var(--gg-font-display); font-size: 14px; font-weight: 800; color: #fff; }
 
 @media (max-width: 360px) {
   .couponAppliedSaving { font-size: 13px; }
@@ -2009,8 +2009,8 @@
 }
 
 .savingsBadge {
-  background: linear-gradient(135deg, var(--gg-success), var(--gg-success));
-  color: var(--gg-success);
+  background: var(--gg-success);
+  color: #fff;
   border-radius: 12px;
   padding: 10px 14px;
   font-size: 13px;

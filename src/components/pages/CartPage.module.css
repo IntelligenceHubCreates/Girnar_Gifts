@@ -349,8 +349,8 @@
   text-decoration: line-through;
 }
 .itemSaveChip {
-  background: linear-gradient(135deg, var(--gg-success), var(--gg-success));
-  color: var(--gg-success);
+  background: var(--gg-success);
+  color: #fff;
   font-size: 10px; font-weight: 800;
   padding: 2px 8px; border-radius: 50px;
   white-space: nowrap;
@@ -477,10 +477,10 @@
 }
 .couponAppliedLeft  { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
 .couponCheckmark    { width: 30px; height: 30px; background: var(--gg-success); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; flex-shrink: 0; }
-.couponAppliedCode  { font-family: var(--font-baloo), 'Baloo 2', sans-serif; font-size: 14px; font-weight: 800; color: var(--gg-success); letter-spacing: 1px; }
-.couponAppliedMsg   { font-size: 11px; color: var(--gg-success); font-weight: 600; margin-top: 2px; }
-.removeCouponBtn    { background: transparent; border: 1.5px solid var(--gg-success); color: var(--gg-success); border-radius: 8px; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
-.removeCouponBtn:hover { background: var(--gg-success); color: #fff; }
+.couponAppliedCode  { font-family: var(--font-baloo), 'Baloo 2', sans-serif; font-size: 14px; font-weight: 800; color: #fff; letter-spacing: 1px; }
+.couponAppliedMsg   { font-size: 11px; color: #fff; font-weight: 600; margin-top: 2px; opacity: 0.9; }
+.removeCouponBtn    { background: transparent; border: 1.5px solid #fff; color: #fff; border-radius: 8px; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
+.removeCouponBtn:hover { background: #fff; color: var(--gg-success); }
 .couponMsg          { font-size: 12px; font-weight: 600; margin-top: 8px; }
 .couponError        { color: var(--coral); }
 .couponSuccess      { color: var(--gg-success); }

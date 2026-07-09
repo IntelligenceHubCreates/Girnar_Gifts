@@ -594,7 +594,6 @@ export default function CheckoutPage() {
 
             <div className={styles.priceLines}>
               <div className={styles.priceLine}><span>Subtotal</span><span>₹{SUBTOTAL.toLocaleString('en-IN')}</span></div>
-              <div className={`${styles.priceLine} ${styles.priceLineSaving}`}><span>Product discount</span><span>−₹{SAVINGS.toLocaleString('en-IN')}</span></div>
               {COUPON_CODE && (
                 <div className={`${styles.priceLine} ${styles.priceLineSaving}`}><span>Coupon ({COUPON_CODE})</span><span>−₹{COUPON_DISCOUNT.toLocaleString('en-IN')}</span></div>
               )}

@@ -152,6 +152,17 @@ function markGuestPending() {
   try { localStorage.setItem(LS_GUEST_FLAG, '1'); } catch {}
 }
 
+// Per-browser scratch data (gift message, applied coupon) that's only ever
+// meant to belong to whoever is CURRENTLY signed in on this device. On a
+// shared browser, a second person logging in — whether or not the first one
+// explicitly signed out first — must never see the previous person's draft.
+const LS_ACTIVE_USER = 'girnar_active_user_id';
+const PER_USER_SCRATCH_KEYS = ['girnar_gift_message', 'appliedCoupon'];
+function clearPerUserScratch() {
+  if (typeof window === 'undefined') return;
+  try { PER_USER_SCRATCH_KEYS.forEach((k) => localStorage.removeItem(k)); } catch {}
+}
+
 // ── Reducer ────────────────────────────────────────────────────────────────
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
@@ -270,6 +281,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { authedRef.current = state.authed;   }, [state.authed]);
   useEffect(() => { hydratedRef.current = state.hydrated; }, [state.hydrated]);
   useEffect(() => { tokenRef.current  = token;          }, [token]);
+
+  // Clear gift-message / applied-coupon scratch data whenever the signed-in
+  // user on this browser changes (covers explicit sign-out AND a second
+  // person logging straight in over an existing session, e.g. a shared
+  // computer where the first person just closed the tab).
+  useEffect(() => {
+    if (sessionStatus === 'loading' || typeof window === 'undefined') return;
+    const currentUserId = (session as any)?.user?.id || '';
+    const lastUserId = localStorage.getItem(LS_ACTIVE_USER) || '';
+    if (currentUserId !== lastUserId) {
+      clearPerUserScratch();
+      if (currentUserId) localStorage.setItem(LS_ACTIVE_USER, currentUserId);
+      else localStorage.removeItem(LS_ACTIVE_USER);
+    }
+  }, [sessionStatus, session]);
 
   // Persist to localStorage on every change once we've loaded.
   useEffect(() => { if (state.hydrated) writeLocal(state.items); }, [state.items, state.hydrated]);
