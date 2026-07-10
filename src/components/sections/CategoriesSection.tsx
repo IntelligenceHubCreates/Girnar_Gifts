@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { DURATION, EASE } from '@/lib/motion';
-import { _get } from '@/shared/fetchwrapper';
-import { unwrapList } from '@/lib/normalise';
+import { brand } from '@/config/brand';
 import styles from './CategoriesSection.module.css';
 
 interface Category {
@@ -14,24 +13,23 @@ interface Category {
   emoji?: string;
   name: string;
   bg: string;
-  dots?: boolean;
   href: string;
-  txtclr: string;
 }
 
-// Girnar's real seeded gift categories (see MANUAL_STEPS.md). Each tile
-// shows a real photo of an actual product in that category once one
-// exists (fetched below); until then it falls back to the emoji + tint.
+// Girnar's real seeded gift categories (see MANUAL_STEPS.md). Each tile is a
+// full-bleed curated lifestyle photo; categories without one yet (Toys) fall
+// back to a tinted glyph tile until real photography exists for them.
 const catHref = (name: string) => `/products?category=${encodeURIComponent(name)}`;
+const cImg = brand.assets.categoryImages;
 
 const CATEGORIES: Category[] = [
-  { emoji: '🎁', name: 'Personalised Gifts', bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-blush-deep) 100%)',  txtclr: 'var(--gg-primary)', href: catHref('Personalised Gifts') },
-  { emoji: '🧺', name: 'Gift Hampers',       bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-petal) 100%)',  txtclr: 'var(--gg-primary)', href: catHref('Gift Hampers') },
-  { emoji: '🎉', name: 'Festive & Occasion', bg: 'linear-gradient(160deg, var(--gg-petal) 0%, var(--gg-accent) 100%)',      txtclr: '#fff',              href: catHref('Festive & Occasion'), dots: true },
-  { emoji: '✏️', name: 'Stationery',         bg: 'linear-gradient(160deg, var(--gg-muted-fill) 0%, var(--gg-border) 100%)', txtclr: 'var(--gg-ink)',    href: catHref('Stationery') },
-  { emoji: '👝', name: 'Bags & Pouches',     bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-border) 100%)',      txtclr: 'var(--gg-ink)',     href: catHref('Bags & Pouches') },
-  { emoji: '🧴', name: 'Bottles',            bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-rose) 100%)',   txtclr: '#fff',              href: catHref('Bottles') },
-  { emoji: '🧸', name: 'Toys',               bg: 'linear-gradient(160deg, var(--gg-petal) 0%, var(--gg-blush) 100%)',      txtclr: 'var(--gg-primary)', href: catHref('Toys') },
+  { image: cImg.personalised, name: 'Personalised Gifts', bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-blush-deep) 100%)', href: catHref('Personalised Gifts') },
+  { image: cImg.hampers,      name: 'Gift Hampers',       bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-petal) 100%)', href: catHref('Gift Hampers') },
+  { image: cImg.festive,      name: 'Festive & Occasion', bg: 'linear-gradient(160deg, var(--gg-petal) 0%, var(--gg-accent) 100%)',      href: catHref('Festive & Occasion') },
+  { image: cImg.stationery,   name: 'Stationery',         bg: 'linear-gradient(160deg, var(--gg-muted-fill) 0%, var(--gg-border) 100%)', href: catHref('Stationery') },
+  { image: cImg.bags,         name: 'Bags & Pouches',     bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-border) 100%)',      href: catHref('Bags & Pouches') },
+  { image: cImg.bottles,      name: 'Bottles',            bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-rose) 100%)',   href: catHref('Bottles') },
+  { emoji: '🧸', name: 'Toys', bg: 'linear-gradient(160deg, var(--gg-petal) 0%, var(--gg-blush) 100%)', href: catHref('Toys') },
 ];
 
 const DOTS_COUNT    = 3;
@@ -71,36 +69,6 @@ export default function CategoriesSection() {
   const [maxPage, setMaxPage] = useState(CATEGORIES.length - 1);
   const isPaused              = useRef(false);
   const autoRef               = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  /* ── Pull one real product photo per category (first product found) ── */
-  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    const controller = new AbortController();
-    _get('/api/product/all?limit=100', { signal: controller.signal })
-      .then((res) => {
-        const images: Record<string, string> = {};
-        for (const p of unwrapList(res)) {
-          const category = String(p.category ?? '');
-          if (!category || images[category]) continue;
-          const raw = p.product_image ?? p.images ?? [];
-          const first = Array.isArray(raw)
-            ? raw.map((img: any) => (typeof img === 'string' ? img : img?.url ?? img?.secure_url ?? '')).find(Boolean)
-            : null;
-          if (first) images[category] = first;
-        }
-        setCategoryImages(images);
-      })
-      .catch(() => {
-        // decorative — keep the emoji fallback tiles on any failure
-      });
-    return () => controller.abort();
-  }, []);
-
-  const categories = CATEGORIES.map((cat) => ({
-    ...cat,
-    image: categoryImages[cat.name],
-  }));
 
   /* ── Recalculate maxPage on resize ── */
   useEffect(() => {
@@ -235,7 +203,7 @@ export default function CategoriesSection() {
               go(target);
             }}
           >
-            {categories.map((cat, i) => (
+            {CATEGORIES.map((cat, i) => (
               <motion.div
                 key={cat.name}
                 className={styles.card}
@@ -248,33 +216,25 @@ export default function CategoriesSection() {
                   className={styles.cardLink}
                   aria-label={`Shop ${cat.name}`}
                 >
-                  {/* Bleed image */}
-                  {cat.image ? (
-                    <div className={styles.productWrap}>
+                  <div className={styles.cardFrame}>
+                    {cat.image ? (
                       <Image
                         src={cat.image}
                         alt={cat.name}
                         fill
-                        sizes="(max-width:420px) 108px,(max-width:600px) 124px,(max-width:900px) 134px,160px"
-                        className={styles.productImg}
+                        sizes="(max-width:420px) 130px,(max-width:600px) 148px,(max-width:900px) 160px,190px"
+                        className={styles.cardImg}
                         priority={i < 4}
                       />
-                    </div>
-                  ) : (
-                    <div className={styles.emojiWrap} role="img" aria-label={cat.name}>
-                      {cat.emoji}
-                    </div>
-                  )}
-
-                  {/* Coloured body */}
-                  <div
-                    className={styles.cardInner}
-                    style={{ background: cat.bg }}
-                  >
-                    <div className={`${styles.cardBody}${cat.dots ? ` ${styles.cardBodyDots}` : ''}`}>
-                      <p className={styles.cardName} style={{ color: cat.txtclr }}>{cat.name}</p>
-                      
-                      <div className={styles.cardArrow} style={{ color: cat.txtclr }} aria-hidden="true">→</div>
+                    ) : (
+                      <div className={styles.cardTint} style={{ background: cat.bg }}>
+                        <span className={styles.cardEmoji} role="img" aria-label={cat.name}>{cat.emoji}</span>
+                      </div>
+                    )}
+                    <div className={styles.cardScrim} aria-hidden="true" />
+                    <div className={styles.cardFooter}>
+                      <p className={styles.cardName}>{cat.name}</p>
+                      <div className={styles.cardArrow} aria-hidden="true">→</div>
                     </div>
                   </div>
                 </Link>

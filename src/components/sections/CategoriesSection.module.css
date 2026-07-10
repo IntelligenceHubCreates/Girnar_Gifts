@@ -1,11 +1,11 @@
 /* ================================================================
    CategoriesSection.module.css
-   Production-level responsive — 5 breakpoints
-   Card sizes:  ≥900  → 190px
-                ≤900  → 160px
-                ≤600  → 148px
-                ≤420  → 130px
-                ≤360  → 116px
+   Full-bleed photo tiles — 5 breakpoints
+   Card widths: ≥900 → 190px  ≤900 → 160px  ≤600 → 148px
+                ≤420 → 130px  ≤360 → 116px
+   Card frame is a 3:4 portrait photo with a bottom scrim + label,
+   so height always derives from width via aspect-ratio (no manual
+   per-breakpoint height bookkeeping needed).
    Dot sizes:   ≥601  → 6px   active 18px
                 ≤600  → 5px   active 14px
                 ≤420  → 4px   active 11px
@@ -28,7 +28,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1px;
-  margin-bottom: 0;
+  margin-bottom: 24px;
 }
 
 .headingBlock {
@@ -97,197 +97,136 @@
 }
 .viewAllText { line-height: 1; color: var(--gg-primary); }
 
-.viewAllCircle {
-  width: 24px; height: 24px;
-  background: var(--gg-primary); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 12px; flex-shrink: 0;
-  transition: background .18s;
-}
-.viewAll:hover .viewAllCircle { background: rgba(255,255,255,0.28); }
-
 /* ── Outer clip wrapper ──────────────────────────────────── */
 /*
-  overflow:hidden clips the horizontal track.
-  padding-top + negative margin-top creates a "bleed window"
-  so the product images that sit above the card top are visible
-  without affecting document flow.
+  overflow:hidden clips the horizontal track. A small symmetric
+  padding + matching negative margin gives the hover-lift/shadow on
+  each tile room to breathe without shifting surrounding layout.
 */
 .outerWrap {
   overflow: hidden;
-  /* bleed window: must be >= productWrap's upward offset */
-  padding-top: 28px;
-  margin-top:  0;
-  padding-bottom: 0;
+  padding: 14px 4px 20px;
+  margin: -14px -4px -20px;
 }
 
 /* ── Sliding track ───────────────────────────────────────── */
 .track {
   display: flex;
   gap: 14px;
-  /* Space at top so first row of cards isn't hidden by outerWrap clip */
-  padding-top: 108px;
   will-change: transform;
   transition: transform 0.44s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Card shell ──────────────────────────────────────────── */
-/*
-  flex: 0 0 <basis> is the ONLY correct way to lock flex item width.
-  overflow:visible is required — it lets productWrap bleed upward.
-  cardInner gets an explicit pixel width = card basis so it never
-  stretches or shrinks regardless of what's inside.
-*/
 .card {
   flex: 0 0 190px;
   position: relative;
-  isolation: isolate;
   cursor: pointer;
-  /* overflow visible so bleed image shows above card */
-  overflow: visible;
 }
 
 .cardLink {
   display: block;
+  border-radius: 24px;
   text-decoration: none;
   outline-offset: 3px;
 }
 
-.cardInner {
+/* ── Photo frame ─────────────────────────────────────────── */
+/*
+  aspect-ratio derives height from the flex-basis width, so every
+  breakpoint below only needs to change one number instead of
+  keeping a separate height in sync with it.
+*/
+.cardFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
   border-radius: 24px;
   overflow: hidden;
-  position: relative;
-  /* Explicit px — never use 100% when parent has overflow:visible */
-  width: 190px;
+  background: var(--gg-muted-fill);
+  box-shadow: 0 10px 24px rgba(42,18,24,0.14);
   transition:
-    transform  0.36s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.36s ease;
-  transform: perspective(700px) translateZ(0);
+    transform  0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.4s ease;
 }
-.card:hover .cardInner {
-  transform: perspective(700px) translateY(-7px) translateZ(10px) scale(1.018);
-  box-shadow: 0 24px 52px rgba(0,0,0,0.20), 0 6px 16px rgba(0,0,0,0.10);
+.card:hover .cardFrame {
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 26px 44px rgba(42,18,24,0.26), 0 8px 18px rgba(42,18,24,0.14);
 }
 
-/* ── Product image bleed ─────────────────────────────────── */
-/*
-  Positioned absolute relative to .card (overflow:visible).
-  translate(-50%, -50%) centres it horizontally and pushes
-  it above the card top by 50% of its own height.
-  Width is 84% of card basis so it never exceeds card bounds.
-  190 * 0.84 ≈ 160px
-*/
-.productWrap {
+.cardImg {
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card:hover .cardImg { transform: scale(1.09); }
+
+/* Emoji fallback tile — for categories without curated photography yet */
+.cardTint {
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%);
-  width:  160px;
-  height: 160px;
-  padding: 10px;
-  z-index: 10;
-  pointer-events: none;
-    display: flex;
+  inset: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
-  transition:
-    transform 0.40s cubic-bezier(0.34, 1.56, 0.64, 1),
-    filter    0.40s ease;
-  filter: drop-shadow(0 14px 26px rgba(0,0,0,0.30));
-}
-.card:hover .productWrap {
-  transform: translate(-50%, -60%) scale(1.07) rotate(-2deg);
-  filter: drop-shadow(0 24px 40px rgba(0,0,0,0.38));
 }
 
-.productImg {
-   width: 100%;
-  height: 100%;
-  /* contain, not cover: admin-uploaded product photos vary wildly in
-     canvas padding/aspect ratio (e.g. a tall bottle shot on a mostly-
-     transparent canvas) - cover crops to an arbitrary center square and
-     can land entirely on empty space. contain always shows the full
-     product regardless of source composition. */
-  object-fit: contain;
-  object-position: center;
+.cardEmoji {
+  font-size: 88px;
+  line-height: 1;
+  filter: drop-shadow(0 10px 18px rgba(42,18,24,0.22));
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+.card:hover .cardEmoji { transform: scale(1.08) rotate(-3deg); }
 
-/* Emoji fallback — same size as productWrap */
-.emojiWrap {
+/* Bottom scrim — wine-tinted (not flat black) so the gradient reads as
+   part of the brand palette rather than a generic photo darkening. */
+.cardScrim {
   position: absolute;
-  top: 0; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 160px; height: 160px;
-  z-index: 10;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(42,18,24,0.90) 0%,
+    rgba(42,18,24,0.52) 32%,
+    rgba(42,18,24,0) 62%
+  );
   pointer-events: none;
-  display: flex; align-items: flex-end; justify-content: center;
-  font-size: 96px; line-height: 1;
-  filter: drop-shadow(0 12px 22px rgba(0,0,0,0.26));
-  transition:
-    transform 0.40s cubic-bezier(0.34, 1.56, 0.64, 1),
-    filter    0.40s ease;
-}
-.card:hover .emojiWrap {
-  transform: translate(-50%, -60%) scale(1.09) rotate(-3deg);
-  filter: drop-shadow(0 22px 36px rgba(0,0,0,0.36));
+  z-index: 1;
 }
 
-/* ── Card body (coloured portion) ────────────────────────── */
-.cardBody {
-  /* padding-top must accommodate half of productWrap height */
-  padding: 88px 14px 20px;
-  position: relative;
-  /* Fixed height = uniform cards regardless of name length */
-  height: 180px;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-end;
-  box-sizing: border-box;
-  border-radius: 24px;
-}
-
-/* Subtle inner glow behind product */
-.cardBody::before {
-  content: '';
-  position: absolute; top: -20px; left: 50%;
-  transform: translateX(-50%);
-  width: 130px; height: 130px; border-radius: 50%;
-  background: rgba(255,255,255,0.12);
-  pointer-events: none;
-}
-
-/* Polka dot overlay */
-.cardBodyDots::after {
-  content: '';
-  position: absolute; inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.20) 1.5px, transparent 1.5px);
-  background-size: 18px 18px;
-  pointer-events: none; border-radius: 24px;
+.cardFooter {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 2;
+  padding: 16px 14px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .cardName {
-  font-size: 15px; font-weight: 900; color: var(txtclr);
-  text-align: center; line-height: 1.25;
-  letter-spacing: -0.01em; margin: 0 0 3px;
-  text-shadow: 0 1px 5px rgba(0,0,0,0.14);
-  position: relative; z-index: 2;
-}
-
-.cardCount {
-  font-size: 11.5px; font-weight: 600;
-  color: var(txtclr);
-  text-align: center; margin: 0 0 14px;
-  position: relative; z-index: 2;
+  flex: 1;
+  min-width: 0;
+  font-size: 15px; font-weight: 800; color: #fff;
+  line-height: 1.22;
+  letter-spacing: -0.01em; margin: 0;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.30);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .cardArrow {
   width: 32px; height: 32px;
-  background: rgba(255,255,255,0.90);
+  background: rgba(255,255,255,0.92);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; color: var(--gg-ink);
-  position: relative; z-index: 2; flex-shrink: 0;
+  flex-shrink: 0;
   transition: background .2s, transform .2s;
 }
-.card:hover .cardArrow { background: #fff; transform: translateX(2px); }
+.card:hover .cardArrow { background: #fff; transform: translateX(3px); }
 
 /* ── Pagination dots ─────────────────────────────────────── */
 .dots {
@@ -321,11 +260,6 @@
 
 /* ══════════════════════════════════════════════════════════
    BREAKPOINTS
-   Rule: card basis == cardInner width == productWrap max
-         productWrap width ≈ card * 0.84
-         productWrap height == width (square crop looks best)
-         cardBody height = 220px * (card/190) rounded to 4px
-         cardBody padding-top ≈ productWrap height * 0.55
    ══════════════════════════════════════════════════════════ */
 
 /* ── ≤1024px: tighten section padding ── */
@@ -334,100 +268,76 @@
 }
 
 /* ── ≤900px: card 160px ─────────────────────────────────── */
-/* productWrap: 160*0.84 ≈ 134px */
 @media (max-width: 900px) {
   .section        { padding: 28px 20px 36px; }
-  .track          { gap: 12px; padding-top: 90px; }
-  .outerWrap      { padding-top: 90px; margin-top: -90px; }
+  .track          { gap: 12px; }
   .card           { flex: 0 0 160px; }
-  .cardInner      { width: 160px; border-radius: 22px; }
-  .cardBody       { height: 186px; padding: 74px 12px 18px; border-radius: 22px; }
-  .productWrap,
-  .emojiWrap      { width: 134px; height: 134px; }
-  .emojiWrap      { font-size: 80px; }
+  .cardFrame,
+  .cardLink       { border-radius: 22px; }
+  .cardEmoji      { font-size: 74px; }
+  .cardFooter     { padding: 14px 12px 12px; }
   .cardName       { font-size: 14px; }
-  .cardCount      { font-size: 11px; margin-bottom: 12px; }
   .cardArrow      { width: 30px; height: 30px; font-size: 13px; }
-    .navBtns {
-    display: none;
-  }
+  .navBtns { display: none; }
 }
 
 /* ── ≤600px: card 148px ─────────────────────────────────── */
-/* productWrap: 148*0.84 ≈ 124px */
 @media (max-width: 600px) {
   .section        { padding: 20px 14px 24px; }
-  .header         { margin-bottom: 20px; }
+  .header         { margin-bottom: 18px; }
   .heading        { font-size: 17px; }
-  .viewAllText    { font-size: 15px; }          /* show only arrow circle */
+  .viewAllText    { font-size: 15px; }
   .viewAll        { padding: 0; background: transparent; border: none;
                     box-shadow: none; gap: 0; }
-  .viewAllCircle  { width: 34px; height: 34px; font-size: 15px; }
   .viewAll:hover  { background: transparent; color: inherit; }
-  .viewAll:hover .viewAllCircle { background: var(--gg-primary); }
   .btn            { width: 30px; height: 30px; }
-  .track          { gap: 10px; padding-top: 80px; }
-  .outerWrap      { padding-top: 80px; margin-top: -80px; }
+  .track          { gap: 10px; }
   .card           { flex: 0 0 148px; }
-  .cardInner      { width: 148px; border-radius: 20px; }
-  .cardBody       { height: 172px; padding: 68px 12px 16px; border-radius: 20px; }
-  .productWrap,
-  .emojiWrap      { width: 124px; height: 124px; }
-  .emojiWrap      { font-size: 74px; }
+  .cardFrame,
+  .cardLink       { border-radius: 20px; }
+  .cardEmoji      { font-size: 68px; }
+  .cardFooter     { padding: 13px 11px 11px; }
   .cardName       { font-size: 13px; }
-  .cardCount      { font-size: 10.5px; margin-bottom: 10px; }
   .cardArrow      { width: 28px; height: 28px; font-size: 12px; }
   /* dots */
   .dots           { gap: 4px; margin-top: 16px; }
-  .dot            { width: 5px; height: 5px; }
-  .dotOn          { width: 10px; height: 5px; border-radius: 2px; }
-    .navBtns {
-    display: none;
-  }
+  .dot::after     { width: 5px; height: 5px; }
+  .dotOn::after   { width: 14px; height: 5px; }
+  .navBtns { display: none; }
 }
 
 /* ── ≤420px: card 130px ─────────────────────────────────── */
-/* productWrap: 130*0.84 ≈ 110px */
 @media (max-width: 420px) {
   .section        { padding: 16px 10px 24px; }
-  .header         { gap: 10px; margin-bottom: 20px; }
-  .track          { gap: 8px; padding-top: 70px; }
-  .outerWrap      { padding-top: 70px; margin-top: -70px; }
+  .header         { gap: 10px; margin-bottom: 16px; }
+  .track          { gap: 8px; }
   .card           { flex: 0 0 130px; }
-  .cardInner      { width: 130px; border-radius: 18px; }
-  .cardBody       { height: 152px; padding: 60px 10px 14px; border-radius: 18px; }
-  .productWrap,
-  .emojiWrap      { width: 110px; height: 110px; }
-  .emojiWrap      { font-size: 64px; }
+  .cardFrame,
+  .cardLink       { border-radius: 18px; }
+  .cardEmoji      { font-size: 58px; }
+  .cardFooter     { padding: 11px 10px 10px; }
   .cardName       { font-size: 12px; }
-  .cardCount      { font-size: 10px; margin-bottom: 8px; }
   .cardArrow      { width: 26px; height: 26px; font-size: 11px; }
   /* dots */
   .dots           { gap: 3px; margin-top: 14px; }
-  .dot            { width: 4px; height: 4px; }
-  .dotOn          { width: 11px; height: 4px; border-radius: 2px; }
-    .navBtns {
-    display: none;
-  }
+  .dot::after     { width: 4px; height: 4px; }
+  .dotOn::after   { width: 11px; height: 4px; }
+  .navBtns { display: none; }
 }
 
 /* ── ≤360px: card 116px ─────────────────────────────────── */
-/* productWrap: 116*0.84 ≈ 98px */
 @media (max-width: 360px) {
   .section        { padding: 14px 8px 20px; }
-  .track          { gap: 7px; padding-top: 62px; }
-  .outerWrap      { padding-top: 62px; margin-top: -62px; }
+  .track          { gap: 7px; }
   .card           { flex: 0 0 116px; }
-  .cardInner      { width: 116px; border-radius: 16px; }
-  .cardBody       { height: 136px; padding: 52px 8px 12px; border-radius: 16px; }
-  .productWrap,
-  .emojiWrap      { width: 98px; height: 98px; }
-  .emojiWrap      { font-size: 56px; }
+  .cardFrame,
+  .cardLink       { border-radius: 16px; }
+  .cardEmoji      { font-size: 50px; }
+  .cardFooter     { padding: 9px 8px 8px; }
   .cardName       { font-size: 11px; }
-  .cardCount      { font-size: 9.5px; margin-bottom: 6px; }
   .cardArrow      { width: 22px; height: 22px; font-size: 10px; }
   /* dots */
   .dots           { gap: 3px; margin-top: 12px; }
-  .dot            { width: 3px; height: 3px; }
-  .dotOn          { width: 9px;  height: 3px; border-radius: 2px; }
+  .dot::after     { width: 3px; height: 3px; }
+  .dotOn::after   { width: 9px;  height: 3px; }
 }

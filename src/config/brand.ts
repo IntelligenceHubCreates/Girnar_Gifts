@@ -34,6 +34,14 @@ export const brand = {
     favicon: '/brand/favicon.png',
     ogImage: '/brand/og-default.jpeg',
     heroImage: '/brand/girnar-gift-hero.png',
+    categoryImages: {
+      personalised: '/brand/personalised.png',
+      hampers: '/brand/hamper.png',
+      festive: '/brand/festive.png',
+      stationery: '/brand/stationery.png',
+      bags: '/brand/bags.png',
+      bottles: '/brand/bottles.png',
+    },
   },
 } as const;
 
