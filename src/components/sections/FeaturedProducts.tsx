@@ -388,23 +388,34 @@ const addToCart = useCallback(async (product: UiProduct & { colors?: string[] })
         </div>
       )}
 
+      {/* Empty state — no products marked Featured yet (not an error) */}
+      {!loading && !fetchError && products.length === 0 && (
+        <div className={styles.emptyState}>
+          <span className={styles.emptyEmoji} aria-hidden="true">🌟</span>
+          <p className={styles.emptyTitle}>No featured products yet</p>
+          <p className={styles.emptyText}>Mark a product as Featured from the admin Products page to show it here.</p>
+        </div>
+      )}
+
       {/* Product grid */}
-      <div className={styles.productsGrid} ref={gridRef}>
-        {loading
-          ? Array.from({ length: 8 }, (_, i) => <SkeletonCard key={i} />)
-          : products.map((product) => (
-              <FeaturedCard
-                key={product.id}
-                product={product}
-                wishlisted={wishlist.has(product.id)}
-                wishPending={wishPending.has(product.id)}
-                cartState={cartStates[product.id] ?? 'idle'}
-                onWishlist={() => toggleWishlist(product.id)}
-                onAddToCart={() => addToCart(product)}
-                onQuickView={() => openQuickView(product)}
-              />
-            ))}
-      </div>
+      {(loading || products.length > 0) && (
+        <div className={styles.productsGrid} ref={gridRef}>
+          {loading
+            ? Array.from({ length: 8 }, (_, i) => <SkeletonCard key={i} />)
+            : products.map((product) => (
+                <FeaturedCard
+                  key={product.id}
+                  product={product}
+                  wishlisted={wishlist.has(product.id)}
+                  wishPending={wishPending.has(product.id)}
+                  cartState={cartStates[product.id] ?? 'idle'}
+                  onWishlist={() => toggleWishlist(product.id)}
+                  onAddToCart={() => addToCart(product)}
+                  onQuickView={() => openQuickView(product)}
+                />
+              ))}
+        </div>
+      )}
 
       {/* Scroll indicator dots */}
       {!loading && dotCount > 1 && (

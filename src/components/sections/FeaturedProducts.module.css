@@ -493,6 +493,17 @@
 }
 .retryBtn:hover { opacity: 0.85; }
 
+/* ── Empty state (no products marked Featured yet) ────── */
+.emptyState {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; text-align: center;
+  padding: 48px 20px; border-radius: 16px;
+  background: var(--gg-muted-fill); border: 1.5px dashed var(--gg-border);
+}
+.emptyEmoji { font-size: 34px; line-height: 1; margin-bottom: 4px; }
+.emptyTitle { font-family: var(--gg-font-display); font-size: 17px; font-weight: 800; color: var(--gg-ink); margin: 0; }
+.emptyText  { font-family: var(--gg-font-body); font-size: 13.5px; color: var(--gg-body); margin: 0; max-width: 40ch; }
+
 /* ─── Quick View Modal ────────────────────────────────── */
 .qvOverlay {
   position: fixed; inset: 0;

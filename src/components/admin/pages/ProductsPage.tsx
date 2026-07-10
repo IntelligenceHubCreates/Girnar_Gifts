@@ -214,6 +214,7 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
     return raw.map((cv: any) => ({ name: cv.name ?? '', hex: cv.hex ?? '#ffffff', images: Array.isArray(cv.images) ? cv.images : [], files: [] }))
   }
   const [colorVariants, setColorVariants] = useState<ColorVariantEntry[]>(parseExistingVariants)
+  const [isFeatured, setIsFeatured] = useState<boolean>((product as any)?.is_featured ?? false)
 
   const existingImages = product?.product_image ?? []
   const [keptImages, setKeptImages] = useState<any[]>(existingImages)
@@ -387,6 +388,7 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
         return { name: cv.name.trim(), hex: cv.hex, images: [...existingUrls, ...uploadedUrlsByVariant[i]] }
       })
       form.append('productColorVariants', JSON.stringify(finalVariants))
+      form.append('productFeatured', String(isFeatured))
 
       if (isEdit) await updateProduct(product!.id, form)
       else        await createProduct(form)
@@ -513,6 +515,28 @@ function ProductForm({ product, categoryTree, onClose, onSaved }: ProductFormPro
                   <span style={{ fontSize: '.72rem', fontWeight: 800, color: '#15803d', background: '#dcfce7', padding: '2px 8px', borderRadius: 20 }}>{derivedPct}% off</span>
                 </>
               )}
+            </div>
+
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div
+                onClick={() => setIsFeatured((v) => !v)}
+                style={{
+                  width: 42, height: 24, borderRadius: 12, cursor: 'pointer',
+                  background: isFeatured ? '#1d4ed8' : '#d1d5db',
+                  position: 'relative', transition: 'background .2s', flexShrink: 0,
+                }}
+              >
+                <div style={{
+                  width: 18, height: 18, borderRadius: '50%', background: '#fff',
+                  position: 'absolute', top: 3,
+                  left: isFeatured ? 21 : 3,
+                  transition: 'left .2s',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                }} />
+              </div>
+              <label className="form-label" style={{ margin: 0, cursor: 'pointer' }} onClick={() => setIsFeatured((v) => !v)}>
+                {isFeatured ? '⭐ Featured — shown on the homepage' : 'Not featured'}
+              </label>
             </div>
 
             <div className="form-group">
