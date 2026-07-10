@@ -58,7 +58,11 @@ input, select, textarea { font-family: inherit; }
 
 /* ═══════════════════════════════════════ LAYOUT */
 .admin-layout { display: flex; min-height: 100vh; }
-.admin-main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+/* min-width:0 overrides the flex-item default of min-width:auto, which
+   otherwise sizes this column to its widest content (e.g. a data table)
+   and pushes the whole page wider than the viewport instead of letting
+   .cust-table-wrap's own overflow-x:auto scroll it locally. */
+.admin-main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
 
 /* ═══════════════════════════════════════ SIDEBAR */
 .sidebar {
@@ -331,7 +335,7 @@ input, select, textarea { font-family: inherit; }
 .tb-menu-item.danger:hover { background: var(--coral-light); }
 
 /* ═══════════════════════════════════════ PAGE */
-.page-wrap { padding: 24px 26px 36px; flex: 1; }
+.page-wrap { padding: 24px 26px 36px; flex: 1; min-width: 0; }
 .page-header {
   display: flex; align-items: flex-start;
   justify-content: space-between;
