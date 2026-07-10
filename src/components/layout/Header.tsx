@@ -128,6 +128,7 @@ export default function Header() {
   const [menuOpen,      setMenuOpen]      = useState(false);
   const [openSection,   setOpenSection]   = useState<string | null>(null);
   const [activeDropIdx, setActiveDropIdx] = useState<number | null>(null);
+  const [mobileChipOpen, setMobileChipOpen] = useState<string | null>(null); // ≤768px chip-strip dropdown, keyed by NAV_ITEMS label
   const [scrolled,      setScrolled]      = useState(false);
 
   /* ── Hooks ── */
@@ -140,6 +141,7 @@ export default function Header() {
   const inputRef      = useRef<HTMLInputElement>(null);
   const searchWrapRef = useRef<HTMLDivElement>(null);
   const catBarRef     = useRef<HTMLElement>(null);
+  const catStripRef   = useRef<HTMLDivElement>(null);
   const debounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -186,9 +188,20 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  /* ── Close mobile chip-strip dropdown on outside tap ── */
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (catStripRef.current && !catStripRef.current.contains(e.target as Node))
+        setMobileChipOpen(null);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   /* ── Close dropdowns on route change ── */
   useEffect(() => {
     setActiveDropIdx(null);
+    setMobileChipOpen(null);
     setDropOpen(false);
   }, [pathname]);
 
@@ -462,34 +475,90 @@ export default function Header() {
       </header>
 
       {/* ── Mobile category chip strip (≤768px only) ── */}
-      <nav className={styles.catStripMobile} aria-label="Browse categories">
-        <Link
-          href="/products"
-          className={`${styles.catChip} ${pathname === '/products' ? styles.catChipActive : ''}`}
-        >
-          <span className={styles.catChipEmoji} aria-hidden="true">🛍️</span>
-          All
-        </Link>
-
-        {NAV_ITEMS.filter((item) => item.href !== '/').map((item) => (
+      <div className={styles.catStripWrap} ref={catStripRef}>
+        <nav className={styles.catStripMobile} aria-label="Browse categories">
           <Link
-            key={item.label}
-            href={item.href}
-            className={`${styles.catChip} ${isActive(item.href) ? styles.catChipActive : ''}`}
+            href="/products"
+            className={`${styles.catChip} ${pathname === '/products' ? styles.catChipActive : ''}`}
           >
-            <span className={styles.catChipEmoji} aria-hidden="true">{item.emoji}</span>
-            {item.label}
+            <span className={styles.catChipEmoji} aria-hidden="true">🛍️</span>
+            All
           </Link>
-        ))}
 
-        <Link
-          href="/products?sort=newest"
-          className={styles.catChip}
-        >
-          <span className={styles.catChipEmoji} aria-hidden="true">✦</span>
-          New Arrivals
-        </Link>
-      </nav>
+          {NAV_ITEMS.filter((item) => item.href !== '/').map((item) => (
+            item.subItems ? (
+              <button
+                key={item.label}
+                type="button"
+                className={`${styles.catChip} ${isActive(item.href) ? styles.catChipActive : ''}`}
+                onClick={() => setMobileChipOpen((p) => (p === item.label ? null : item.label))}
+                aria-haspopup="true"
+                aria-expanded={mobileChipOpen === item.label}
+              >
+                <span className={styles.catChipEmoji} aria-hidden="true">{item.emoji}</span>
+                {item.label}
+                <IconChevron open={mobileChipOpen === item.label} />
+              </button>
+            ) : (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`${styles.catChip} ${isActive(item.href) ? styles.catChipActive : ''}`}
+              >
+                <span className={styles.catChipEmoji} aria-hidden="true">{item.emoji}</span>
+                {item.label}
+              </Link>
+            )
+          ))}
+
+          <Link
+            href="/products?sort=newest"
+            className={styles.catChip}
+          >
+            <span className={styles.catChipEmoji} aria-hidden="true">✦</span>
+            New Arrivals
+          </Link>
+        </nav>
+
+        {/* Tap-triggered dropdown for chips with subItems (e.g. Personalised
+            Gifts → Build Your Own Hamper) - mirrors the desktop hover
+            dropdown's content, adapted to tap since the chip strip has no
+            hover state on touch devices. */}
+        {mobileChipOpen && NAV_ITEMS.find((i) => i.label === mobileChipOpen)?.subItems && (
+          <div className={styles.mobileChipDropdown} role="menu">
+            {(() => {
+              const openItem = NAV_ITEMS.find((i) => i.label === mobileChipOpen)!;
+              return (
+                <>
+                  <div className={styles.mobileChipDropdownHeader}>
+                    <span className={styles.dropdownTitle}>{openItem.label}</span>
+                    <Link href={openItem.href} className={styles.dropdownViewAllInline} onClick={() => setMobileChipOpen(null)}>
+                      View all →
+                    </Link>
+                  </div>
+                  <div className={styles.dropdownList}>
+                    {openItem.subItems!.map((sub) => (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        className={styles.dropdownLink}
+                        role="menuitem"
+                        onClick={() => setMobileChipOpen(null)}
+                      >
+                        <span className={styles.dropdownEmoji} aria-hidden="true">{sub.emoji}</span>
+                        <span className={styles.dropdownText}>
+                          <span className={styles.dropdownLabel}>{sub.label}</span>
+                          <span className={styles.dropdownSub}>{sub.sub}</span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
+      </div>
 
       {/* ── ROW 3: CATEGORY NAV BAR ────────────────────────────────── */}
       <nav

@@ -836,6 +836,7 @@
    hover .categoryBar, so this stays hidden ≥769px.
    ════════════════════════════════════════════════════════════════ */
 .catStripMobile { display: none; }
+.catStripWrap { position: relative; }
 
 @media (max-width: 768px) {
   .catStripMobile {
@@ -881,11 +882,40 @@
     transition: background 0.15s, border-color 0.15s, color 0.15s;
   }
   .catChip:active { background: var(--gg-muted-fill); border-color: var(--gg-primary); }
+  .catChip { cursor: pointer; margin: 0; }  /* button-element reset, harmless on <a> */
   .catChipEmoji { font-size: 15px; line-height: 1; }
 
   .catChipActive {
     background: var(--gg-primary);
     border-color: var(--gg-primary);
     color: var(--gg-primary-foreground);
+  }
+
+  /* Tap-triggered dropdown for chips with subItems (e.g. Personalised
+     Gifts → Build Your Own Hamper). Anchored to .catStripWrap (not an
+     individual chip) so it isn't clipped by the strip's own
+     overflow-x:auto and sits flush below the whole sticky strip. */
+  .mobileChipDropdown {
+    position: absolute;
+    top: 100%;
+    left: 12px;
+    right: 12px;
+    margin-top: 6px;
+    background: var(--gg-surface);
+    border: 1.5px solid var(--gg-border);
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(42,18,24,0.16);
+    padding: 10px;
+    z-index: 191;
+    animation: mobileChipDropIn 0.16s ease;
+  }
+  @keyframes mobileChipDropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .mobileChipDropdownHeader {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 8px 8px; margin-bottom: 4px;
+    border-bottom: 1px solid var(--gg-border);
   }
 }
