@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { _get, _post } from '@/shared/fetchwrapper';
 import { normaliseProduct, unwrapList, fmtINR, PLACEHOLDER } from '@/lib/normalise';
@@ -36,6 +37,8 @@ interface PickProduct {
 export default function HamperBuilderPage() {
   const router = useRouter();
   const { addItem } = useCart();
+  const { data: session } = useSession();
+  const token = (session as any)?.backendToken as string | undefined;
 
   const [products, setProducts] = useState<PickProduct[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -115,7 +118,7 @@ export default function HamperBuilderPage() {
       const res: any = await _post('/api/hampers', {
         name: hamperName.trim() || undefined,
         items: pickedList.map((p) => ({ product_id: p.id, quantity: picks[p.id] })),
-      });
+      }, { token });
       const result = await addItem({
         id: res.id,
         name: res.name,
