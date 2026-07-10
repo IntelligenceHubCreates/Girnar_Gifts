@@ -146,10 +146,15 @@
 }
 @media (max-width: 900px) { .viewTag { display: none; } }
 
-.imgDots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: none; gap: 5px; z-index: 3; }
+.imgDots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: none; align-items: center; gap: 2px; z-index: 3; }
 @media (max-width: 900px) { .imgDots { display: flex; } }
-.imgDot  { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.65); border: none; padding: 0; cursor: pointer; transition: background .2s, width .25s; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
-.imgDotOn { background: var(--gg-primary); width: 18px; border-radius: 3px; }
+/* Button carries the tap target (the global mobile min 44px rule in
+   globals.css applies to every button/a, this one included); the visible
+   dot is drawn via ::after, decoupled from the button's own box, so that
+   rule inflating the hit area can't also inflate what's actually painted. */
+.imgDot  { width: 24px; height: 24px; min-width: 24px; min-height: 24px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; padding: 0; cursor: pointer; }
+.imgDot::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.65); transition: background .2s, width .25s; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.imgDotOn::after { background: var(--gg-primary); width: 18px; border-radius: 3px; }
 
 /* ═══════════════════════════════════════════════
    VIDEO PLAYER
@@ -458,10 +463,13 @@
 .carVP:active { cursor: grabbing; }
 .carTrack { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 14px; will-change: transform; user-select: none; -webkit-user-select: none; width: max-content; }
 .carDrag  { cursor: grabbing; pointer-events: none; }
-.carDots  { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
-.dot   { width: 7px; height: 7px; border-radius: 50%; background: var(--gg-muted-fill); border: none; padding: 0; cursor: pointer; transition: background .2s, width .25s; }
+.carDots  { display: flex; justify-content: center; align-items: center; gap: 2px; margin-top: 16px; }
+/* Button carries the tap target, the visible dot is a decoupled ::after -
+   see .imgDot above for why. */
+.dot   { width: 24px; height: 24px; min-width: 24px; min-height: 24px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; padding: 0; cursor: pointer; }
+.dot::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--gg-muted-fill); transition: background .2s, width .25s; }
 .dot:focus-visible { outline: 2px solid var(--gg-primary); outline-offset: 2px; }
-.dotOn { background: var(--gg-primary); width: 22px; border-radius: 4px; }
+.dotOn::after { background: var(--gg-primary); width: 22px; border-radius: 4px; }
 
 /* Card */
 .rc {

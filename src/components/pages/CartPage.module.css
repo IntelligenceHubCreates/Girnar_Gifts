@@ -1081,11 +1081,13 @@
 .carouselNavBtn:active { transform: scale(.92); }
 @media (max-width: 399px) { .carouselNavBtn { display: none; } }
 
-/* Dots — matches .dot / .dotOn */
-.carouselDots      { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
-.carouselDot       { width: 7px; height: 7px; border-radius: 50%; background: var(--gg-muted)5c9; border: none; padding: 0; cursor: pointer; transition: background .2s, width .25s; }
-.carouselDotActive { background: var(--gg-primary); width: 22px; border-radius: 4px; }
-@media (max-width: 480px) { .carouselDot { width: 7px; height: 7px; } .carouselDotActive { width: 22px; } }
+/* Dots — matches .dot / .dotOn. Button carries the tap target (the
+   global mobile min 44px rule in globals.css applies here), the visible
+   dot is a decoupled ::after so that rule can't inflate what's painted. */
+.carouselDots      { display: flex; justify-content: center; align-items: center; gap: 2px; margin-top: 16px; }
+.carouselDot       { width: 24px; height: 24px; min-width: 24px; min-height: 24px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; padding: 0; cursor: pointer; }
+.carouselDot::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--gg-muted-fill); transition: background .2s, width .25s; }
+.carouselDotActive::after { background: var(--gg-primary); width: 22px; border-radius: 4px; }
 
 /* Section heading — coral tick accent, matches .relTitle */
 .relatedSection { margin-top: 40px; padding-bottom: 32px; }

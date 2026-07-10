@@ -127,20 +127,34 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
   margin-top: 18px;
 }
+/* Button carries the tap target (the global mobile min 44px rule in
+   globals.css applies here); the visible dot is a decoupled ::after so
+   that rule inflating the hit area can't also inflate what's painted. */
 .dot {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.dot::after {
+  content: '';
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--gg-border);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s, transform 0.2s, width 0.2s;
 }
-.dotActive {
+.dotActive::after {
   background: var(--gg-primary);
   transform: scale(1.15);
 }
@@ -148,16 +162,16 @@
 /* Mobile */
 @media (max-width: 480px) {
   .scrollDots {
-    gap: 5px;
+    gap: 1px;
     margin-top: 14px;
   }
 
-  .dot {
+  .dot::after {
     width: 6px;
     height: 6px;
   }
 
-  .dotActive {
+  .dotActive::after {
     width: 18px;
     height: 6px;
     border-radius: 50px;
