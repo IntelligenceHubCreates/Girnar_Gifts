@@ -9,27 +9,24 @@ import { brand } from '@/config/brand';
 import styles from './CategoriesSection.module.css';
 
 interface Category {
-  image?: string;
-  emoji?: string;
+  image: string;
   name: string;
-  bg: string;
   href: string;
 }
 
 // Girnar's real seeded gift categories (see MANUAL_STEPS.md). Each tile is a
-// full-bleed curated lifestyle photo; categories without one yet (Toys) fall
-// back to a tinted glyph tile until real photography exists for them.
+// full-bleed curated lifestyle photo.
 const catHref = (name: string) => `/products?category=${encodeURIComponent(name)}`;
 const cImg = brand.assets.categoryImages;
 
 const CATEGORIES: Category[] = [
-  { image: cImg.personalised, name: 'Personalised Gifts', bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-blush-deep) 100%)', href: catHref('Personalised Gifts') },
-  { image: cImg.hampers,      name: 'Gift Hampers',       bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-petal) 100%)', href: catHref('Gift Hampers') },
-  { image: cImg.festive,      name: 'Festive & Occasion', bg: 'linear-gradient(160deg, var(--gg-petal) 0%, var(--gg-accent) 100%)',      href: catHref('Festive & Occasion') },
-  { image: cImg.stationery,   name: 'Stationery',         bg: 'linear-gradient(160deg, var(--gg-muted-fill) 0%, var(--gg-border) 100%)', href: catHref('Stationery') },
-  { image: cImg.bags,         name: 'Bags & Pouches',     bg: 'linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-border) 100%)',      href: catHref('Bags & Pouches') },
-  { image: cImg.bottles,      name: 'Bottles',            bg: 'linear-gradient(160deg, var(--gg-blush-deep) 0%, var(--gg-rose) 100%)',   href: catHref('Bottles') },
-  { emoji: '🧸', name: 'Toys', bg: 'linear-gradient(160deg, var(--gg-petal) 0%, var(--gg-blush) 100%)', href: catHref('Toys') },
+  { image: cImg.personalised, name: 'Personalised Gifts', href: catHref('Personalised Gifts') },
+  { image: cImg.hampers,      name: 'Gift Hampers',       href: catHref('Gift Hampers') },
+  { image: cImg.festive,      name: 'Festive & Occasion', href: catHref('Festive & Occasion') },
+  { image: cImg.stationery,   name: 'Stationery',         href: catHref('Stationery') },
+  { image: cImg.bags,         name: 'Bags & Pouches',     href: catHref('Bags & Pouches') },
+  { image: cImg.bottles,      name: 'Bottles',            href: catHref('Bottles') },
+  { image: cImg.toys,         name: 'Toys',               href: catHref('Toys') },
 ];
 
 const DOTS_COUNT    = 3;
@@ -217,20 +214,14 @@ export default function CategoriesSection() {
                   aria-label={`Shop ${cat.name}`}
                 >
                   <div className={styles.cardFrame}>
-                    {cat.image ? (
-                      <Image
-                        src={cat.image}
-                        alt={cat.name}
-                        fill
-                        sizes="(max-width:420px) 130px,(max-width:600px) 148px,(max-width:900px) 160px,190px"
-                        className={styles.cardImg}
-                        priority={i < 4}
-                      />
-                    ) : (
-                      <div className={styles.cardTint} style={{ background: cat.bg }}>
-                        <span className={styles.cardEmoji} role="img" aria-label={cat.name}>{cat.emoji}</span>
-                      </div>
-                    )}
+                    <Image
+                      src={cat.image}
+                      alt={cat.name}
+                      fill
+                      sizes="(max-width:420px) 130px,(max-width:600px) 148px,(max-width:900px) 160px,190px"
+                      className={styles.cardImg}
+                      priority={i < 4}
+                    />
                     <div className={styles.cardScrim} aria-hidden="true" />
                     <div className={styles.cardFooter}>
                       <p className={styles.cardName}>{cat.name}</p>

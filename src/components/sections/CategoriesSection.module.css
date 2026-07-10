@@ -161,23 +161,6 @@
 }
 .card:hover .cardImg { transform: scale(1.09); }
 
-/* Emoji fallback tile — for categories without curated photography yet */
-.cardTint {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cardEmoji {
-  font-size: 88px;
-  line-height: 1;
-  filter: drop-shadow(0 10px 18px rgba(42,18,24,0.22));
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.card:hover .cardEmoji { transform: scale(1.08) rotate(-3deg); }
-
 /* Bottom scrim — wine-tinted (not flat black) so the gradient reads as
    part of the brand palette rather than a generic photo darkening. */
 .cardScrim {
@@ -274,7 +257,6 @@
   .card           { flex: 0 0 160px; }
   .cardFrame,
   .cardLink       { border-radius: 22px; }
-  .cardEmoji      { font-size: 74px; }
   .cardFooter     { padding: 14px 12px 12px; }
   .cardName       { font-size: 14px; }
   .cardArrow      { width: 30px; height: 30px; font-size: 13px; }
@@ -295,7 +277,6 @@
   .card           { flex: 0 0 148px; }
   .cardFrame,
   .cardLink       { border-radius: 20px; }
-  .cardEmoji      { font-size: 68px; }
   .cardFooter     { padding: 13px 11px 11px; }
   .cardName       { font-size: 13px; }
   .cardArrow      { width: 28px; height: 28px; font-size: 12px; }
@@ -314,7 +295,6 @@
   .card           { flex: 0 0 130px; }
   .cardFrame,
   .cardLink       { border-radius: 18px; }
-  .cardEmoji      { font-size: 58px; }
   .cardFooter     { padding: 11px 10px 10px; }
   .cardName       { font-size: 12px; }
   .cardArrow      { width: 26px; height: 26px; font-size: 11px; }
@@ -332,7 +312,6 @@
   .card           { flex: 0 0 116px; }
   .cardFrame,
   .cardLink       { border-radius: 16px; }
-  .cardEmoji      { font-size: 50px; }
   .cardFooter     { padding: 9px 8px 8px; }
   .cardName       { font-size: 11px; }
   .cardArrow      { width: 22px; height: 22px; font-size: 10px; }

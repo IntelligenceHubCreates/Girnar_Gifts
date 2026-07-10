@@ -41,6 +41,7 @@ export const brand = {
       stationery: '/brand/stationery.png',
       bags: '/brand/bags.png',
       bottles: '/brand/bottles.png',
+      toys: '/brand/toys.png',
     },
   },
 } as const;
