@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { brand } from '@/config/brand';
 import { scaleIn, fadeUp, revealViewport } from '@/lib/motion';
@@ -16,8 +17,13 @@ export default function EditorialStory() {
           viewport={revealViewport}
           variants={scaleIn}
         >
-          <div className={styles.visualGlow} aria-hidden="true" />
-          <span className={styles.visualEmoji} aria-hidden="true">🎁</span>
+          <Image
+            src={brand.assets.posterImage}
+            alt="Kids joyfully unwrapping Girnar Gifts hampers and toys"
+            fill
+            sizes="(max-width:900px) 320px, 44vw"
+            className={styles.visualImg}
+          />
         </motion.div>
 
         <motion.div

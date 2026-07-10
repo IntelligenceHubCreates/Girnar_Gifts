@@ -12,29 +12,23 @@
   gap: var(--gg-space-16);
 }
 
+/* width:100% is required, not cosmetic - the image inside uses next/image
+   "fill" (position:absolute), so .visual has no in-flow content left to
+   size itself against. Without an explicit width, margin:auto's shrink-
+   to-fit sizing (mobile breakpoint) collapses the box to 0x0. */
 .visual {
   position: relative;
+  width: 100%;
   aspect-ratio: 4 / 5;
   border-radius: var(--gg-radius-xl);
-  background: linear-gradient(160deg, var(--gg-blush) 0%, var(--gg-blush-deep) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: var(--gg-blush);
   overflow: hidden;
+  box-shadow: 0 24px 48px rgba(42, 18, 24, 0.16);
 }
 
-.visualGlow {
-  position: absolute;
-  inset: -20%;
-  background: var(--gg-gradient-signature);
-  opacity: 0.28;
-  filter: blur(60px);
-}
-
-.visualEmoji {
-  position: relative;
-  font-size: 96px;
-  filter: drop-shadow(0 12px 24px rgba(122, 30, 51, 0.18));
+.visualImg {
+  object-fit: cover;
+  object-position: center;
 }
 
 .eyebrow {
