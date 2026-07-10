@@ -188,24 +188,30 @@
   position: relative;
   display: flex;
   align-items: center;
-  /* Biased right of dead-center: padding-left shrinks the box the
-     centered .stage sizes against, nudging it toward the right edge
-     (can't use a plain transform here - framer-motion's cursor-parallax
-     sets an inline transform on .stage that would just override one). */
   justify-content: center;
-  padding-left: 64px;
   height: 100%;
-  min-height: 800px;
+  /* Matches .copy's real content height (headline+subhead+CTAs+cards),
+     measured ~615px at 1440px viewport - NOT an arbitrary large number.
+     .inner's align-items:stretch means whatever this is becomes the
+     whole row's height, so oversizing it here was what pushed the
+     mini-cards row below the fold instead of actually growing the image. */
+  min-height: 660px;
   touch-action: pan-y;
 }
 
-/* Organic blob (not a plain circle) bleeding off the top-right corner */
+/* Organic blob (not a plain circle) bleeding off the top-right corner.
+   Deliberately sized larger than .stage's max-width (620px) at every
+   clamp point so it always fully backs the photo - the photo's own
+   rectangular edges are opaque right to the frame (no transparent
+   margin left/right), so if the blob were ever smaller than the image
+   at some viewport width, a hard rectangular edge would visibly poke
+   out past the organic shape instead of blending into it. */
 .blob {
   position: absolute;
   top: -8%;
   right: -10%;
-  width: clamp(400px, 48vw, 620px);
-  height: clamp(400px, 48vw, 620px);
+  width: clamp(460px, 50vw, 700px);
+  height: clamp(460px, 50vw, 700px);
   border-radius: 42% 58% 63% 37% / 45% 42% 58% 55%;
   background: var(--gg-blush-deep);
   z-index: 0;
@@ -215,8 +221,8 @@
   position: absolute;
   bottom: -2%;
   left: 4%;
-  width: clamp(230px, 27vw, 340px);
-  height: clamp(230px, 27vw, 340px);
+  width: clamp(200px, 24vw, 300px);
+  height: clamp(200px, 24vw, 300px);
   border-radius: 50%;
   background: var(--gg-muted-fill);
   z-index: 0;
@@ -257,7 +263,7 @@
   z-index: 3;
   width: 100%;
   height: 100%;
-  max-width: 840px;
+  max-width: 620px;
   margin: 0 auto;
   perspective: 1100px;
   display: flex;
@@ -314,6 +320,17 @@
   filter: drop-shadow(0 22px 28px rgba(122, 30, 51, 0.24));
 }
 
+/* Short desktop windows (e.g. 1366x768 laptops): 92dvh plus the row's
+   660px min-height can exceed the viewport, pushing the mini-cards
+   row just past the fold. Trim padding and the row height specifically
+   here rather than shrinking the image on every screen just to cover
+   this one shorter case. */
+@media (min-width: 1025px) and (max-height: 820px) {
+  .hero { padding: var(--gg-space-8) var(--gg-space-8); }
+  .visual { min-height: 560px; }
+  .stage { max-width: 520px; }
+}
+
 /* ── responsive ── */
 @media (max-width: 1024px) {
   .hero { min-height: 0; }
@@ -322,9 +339,9 @@
     gap: var(--gg-space-10);
   }
   .copy { max-width: none; }
-  .visual { order: -1; min-height: 620px; }
-  .stage { max-width: 520px; margin: 0 auto; }
-  .stageImg { height: 600px; }
+  .visual { order: -1; min-height: 500px; }
+  .stage { max-width: 460px; margin: 0 auto; }
+  .stageImg { height: 460px; }
   .script { right: 12%; }
 }
 
@@ -332,8 +349,8 @@
   .hero { padding: var(--gg-space-10) var(--gg-space-5); }
   .ctaRow { gap: 10px; }
   .btnPrimary, .btnSecondary { padding: 12px 22px; font-size: 0.88rem; }
-  .visual { min-height: 500px; }
-  .stageImg { height: 480px; }
+  .visual { min-height: 420px; }
+  .stageImg { height: 400px; }
   /* overflow-x:auto implicitly makes overflow-y auto too, which would clip
      miniCardImgWrap's upward bleed (top:-22px) at the row's own box edge -
      padding-top reserves room for it, margin-top cancels the resulting
