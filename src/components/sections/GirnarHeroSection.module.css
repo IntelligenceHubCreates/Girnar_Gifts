@@ -190,7 +190,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  min-height: 620px;
+  min-height: 700px;
   touch-action: pan-y;
 }
 
@@ -199,8 +199,8 @@
   position: absolute;
   top: -8%;
   right: -10%;
-  width: clamp(320px, 40vw, 500px);
-  height: clamp(320px, 40vw, 500px);
+  width: clamp(360px, 44vw, 560px);
+  height: clamp(360px, 44vw, 560px);
   border-radius: 42% 58% 63% 37% / 45% 42% 58% 55%;
   background: var(--gg-blush-deep);
   z-index: 0;
@@ -210,8 +210,8 @@
   position: absolute;
   bottom: -2%;
   left: 4%;
-  width: clamp(190px, 23vw, 280px);
-  height: clamp(190px, 23vw, 280px);
+  width: clamp(210px, 25vw, 310px);
+  height: clamp(210px, 25vw, 310px);
   border-radius: 50%;
   background: var(--gg-muted-fill);
   z-index: 0;
@@ -252,7 +252,7 @@
   z-index: 3;
   width: 100%;
   height: 100%;
-  max-width: 600px;
+  max-width: 720px;
   margin: 0 auto;
   perspective: 1100px;
   display: flex;
@@ -314,9 +314,9 @@
     gap: var(--gg-space-10);
   }
   .copy { max-width: none; }
-  .visual { order: -1; min-height: 460px; }
-  .stage { max-width: 360px; margin: 0 auto; }
-  .stageImg { height: 440px; }
+  .visual { order: -1; min-height: 540px; }
+  .stage { max-width: 440px; margin: 0 auto; }
+  .stageImg { height: 520px; }
   .script { right: 12%; }
 }
 
@@ -324,8 +324,8 @@
   .hero { padding: var(--gg-space-10) var(--gg-space-5); }
   .ctaRow { gap: 10px; }
   .btnPrimary, .btnSecondary { padding: 12px 22px; font-size: 0.88rem; }
-  .visual { min-height: 380px; }
-  .stageImg { height: 360px; }
+  .visual { min-height: 440px; }
+  .stageImg { height: 420px; }
   /* overflow-x:auto implicitly makes overflow-y auto too, which would clip
      miniCardImgWrap's upward bleed (top:-22px) at the row's own box edge -
      padding-top reserves room for it, margin-top cancels the resulting
