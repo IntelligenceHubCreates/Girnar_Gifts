@@ -231,7 +231,7 @@ export default function FeaturedProducts() {
   const [cartStates,  setCartStates]  = useState<Record<string, CartState>>({});
   const [activeDot,   setActiveDot]   = useState(0);
   const gridRef = useRef<HTMLDivElement>(null);
-  const { dispatch } = useCart();
+  const { addItem } = useCart();
 
   const [quickViewProduct, setQuickViewProduct] = useState<(UiProduct & { colors?: string[] }) | null>(null);
   const [qvActiveImg, setQvActiveImg] = useState(0);
@@ -331,35 +331,35 @@ const toggleWishlist = useCallback(async (id: string) => {
 }, [wishlist, wishPending]);
 
   // ── Add to cart ───────────────────────────────────────────────
+  // Goes through CartContext's addItem, which attaches the auth token and
+  // redirects to /login only when the user is genuinely logged out — a
+  // hand-rolled _post() here previously sent no Authorization header at
+  // all, so it 401'd for every user, logged in or not.
 const addToCart = useCallback(async (product: UiProduct & { colors?: string[] }) => {
   if (cartStates[product.id] === 'loading') return;
   setCartStates((prev) => ({ ...prev, [product.id]: 'loading' }));
 
-  // optimistic — badge updates instantly
-  dispatch({
-    type: 'ADD_ITEM',
-    payload: {
-      id: product.id, name: product.name, price: product.price,
-      originalPrice: product.originalPrice, quantity: 1,
-      image: product.images[0] ?? '', emoji: product.emoji || '🎁',
-      category: product.category, color: '', product_count: 0,
-      is_available: product.inStock,
-    },
+  const result = await addItem({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    originalPrice: product.originalPrice,
+    quantity: 1,
+    image: product.images[0] || undefined,
+    emoji: product.emoji || '🎁',
+    category: product.category,
+    is_available: product.inStock,
   });
 
-  try {
-    await _post('/api/cart/items', { product_id: product.id, quantity: 1 });
+  if (result.ok) {
     setCartStates((prev) => ({ ...prev, [product.id]: 'added' }));
     setTimeout(() => setCartStates((prev) => ({ ...prev, [product.id]: 'idle' })), 2000);
-  } catch {
-    // ROLLBACK the optimistic add so the badge matches the server cart.
-    // Use whatever your CartContext exposes — 'REMOVE_ITEM' or a
-    // quantity-decrement action. Adjust the type/payload to match.
-    dispatch({ type: 'REMOVE_ITEM', payload: { id: product.id } });
+  } else if (result.error !== 'login_required') {
     setCartStates((prev) => ({ ...prev, [product.id]: 'error' }));
     setTimeout(() => setCartStates((prev) => ({ ...prev, [product.id]: 'idle' })), 2500);
   }
-}, [cartStates, dispatch]);
+  // login_required: addItem already redirected to /login, nothing left to do here
+}, [cartStates, addItem]);
 
   const dotCount = Math.max(1, Math.ceil(products.length / 4));
 
